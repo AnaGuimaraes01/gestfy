@@ -6,7 +6,6 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- ✅ Spring Boot estável e totalmente compatível -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -21,40 +20,38 @@
     <name>gestfy</name>
     <description>Backend do sistema Gestfy</description>
 
-    <!-- ✅ Java 17 declarado corretamente -->
+   
     <properties>
         <java.version>17</java.version>
     </properties>
 
     <dependencies>
 
-        <!-- 🌐 Web / REST -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
-        <!-- 🗄️ JPA / Hibernate -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- 🐘 PostgreSQL -->
+       
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 🧠 Lombok -->
+       
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- 🔁 Hot reload -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -62,7 +59,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- 🧪 Testes -->
+      
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -74,7 +71,7 @@
     <build>
         <plugins>
 
-            <!-- ✅ Compiler explícito para Java 17 -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -86,7 +83,7 @@
                 </configuration>
             </plugin>
 
-            <!-- ✅ Plugin do Spring Boot -->
+         
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -1,5 +1,7 @@
 package com.empresa.gestfy.repositories;
 
-public class ProdutoRepository {
-    
+import com.empresa.gestfy.models.Produto;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 }
