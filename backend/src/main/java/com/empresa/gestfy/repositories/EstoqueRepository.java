@@ -1,5 +1,7 @@
 package com.empresa.gestfy.repositories;
 
-public class EstoqueRepository {
-    
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.empresa.gestfy.models.Estoque;
+
+public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
 }
