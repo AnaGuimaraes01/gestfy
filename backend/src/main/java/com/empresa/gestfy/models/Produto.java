@@ -13,8 +13,10 @@ public class Produto {
     private String nome;
     private String descricao;
     private Double preco;
+    private Integer quantidade;
 
-    public Produto() {}
+    public Produto() {
+    }
 
     public Long getId() {
         return id;
@@ -46,5 +48,13 @@ public class Produto {
 
     public void setPreco(Double preco) {
         this.preco = preco;
+    }
+
+    public Integer getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(Integer quantidade) {
+        this.quantidade = quantidade;
     }
 }
