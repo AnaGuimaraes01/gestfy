@@ -12,14 +12,17 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+    private String nomeCliente;
 
-    private Double total;
+    private String telefone;
+
+    private String formaRecebimento;
+
     private String status;
 
-    private LocalDateTime criadoEm;
+    private LocalDateTime data;
+
+    private Double total;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<PedidoItem> itens;
@@ -30,24 +33,32 @@ public class Pedido {
         return id;
     }
 
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Double getTotal() {
-        return total;
+    public String getNomeCliente() {
+        return nomeCliente;
     }
 
-    public void setTotal(Double total) {
-        this.total = total;
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public String getFormaRecebimento() {
+        return formaRecebimento;
+    }
+
+    public void setFormaRecebimento(String formaRecebimento) {
+        this.formaRecebimento = formaRecebimento;
     }
 
     public String getStatus() {
@@ -58,19 +69,26 @@ public class Pedido {
         this.status = status;
     }
 
-    public LocalDateTime getCriadoEm() {
-        return criadoEm;
+    public LocalDateTime getData() {
+        return data;
     }
 
-    public void setCriadoEm(LocalDateTime criadoEm) {
-        this.criadoEm = criadoEm;
+    public void setData(LocalDateTime data) {
+        this.data = data;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
     public List<PedidoItem> getItens() {
         return itens;
     }
-
-    public void setItens(List<PedidoItem> itens) {
-        this.itens = itens;
-    }
+public void setItens(List<PedidoItem> itens) {
+    this.itens = itens;
+}
 }

@@ -1,57 +1,75 @@
 package com.empresa.gestfy.controllers;
 
+import com.empresa.gestfy.models.Estoque;
 import com.empresa.gestfy.models.Produto;
-import com.empresa.gestfy.services.ProdutoService;
-import org.springframework.http.ResponseEntity;
+import com.empresa.gestfy.repositories.EstoqueRepository;
+import com.empresa.gestfy.repositories.ProdutoRepository;
+
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/produtos")
-@CrossOrigin(origins = "http://localhost:3000") // permita o frontend local (ajuste se necessário)
+@CrossOrigin("*")
 public class ProdutoController {
 
-    private final ProdutoService service;
+    private final ProdutoRepository produtoRepository;
+    private final EstoqueRepository estoqueRepository;
 
-    public ProdutoController(ProdutoService service) {
-        this.service = service;
+    public ProdutoController(
+            ProdutoRepository produtoRepository,
+            EstoqueRepository estoqueRepository
+    ) {
+        this.produtoRepository = produtoRepository;
+        this.estoqueRepository = estoqueRepository;
     }
 
+    // ✅ LISTAR PRODUTOS
     @GetMapping
     public List<Produto> listar() {
-        return service.listarTodos();
+        return produtoRepository.findAll();
     }
 
+    // ✅ BUSCAR POR ID
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscar(@PathVariable Long id) {
-        return service.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Produto buscar(@PathVariable Long id) {
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
     }
 
+    // ✅ CRIAR PRODUTO + ESTOQUE INICIAL
     @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody Produto p) {
-        Produto salvo = service.salvar(p);
-        return ResponseEntity.created(URI.create("/api/produtos/" + salvo.getId())).body(salvo);
+    public Produto criar(@RequestBody Produto produto) {
+
+        Produto salvo = produtoRepository.save(produto);
+
+        Estoque estoque = new Estoque();
+        estoque.setProdutoId(salvo.getId());
+        estoque.setQuantidade(0);
+        estoqueRepository.save(estoque);
+
+        return salvo;
     }
 
+    // ✅ ATUALIZAR PRODUTO
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody Produto p) {
-        return service.buscarPorId(id).map(existing -> {
-            existing.setNome(p.getNome());
-            existing.setDescricao(p.getDescricao());
-            existing.setPreco(p.getPreco());
-            existing.setQuantidade(p.getQuantidade());
-            Produto atualizado = service.salvar(existing);
-            return ResponseEntity.ok(atualizado);
-        }).orElse(ResponseEntity.notFound().build());
+    public Produto atualizar(@PathVariable Long id, @RequestBody Produto dados) {
+
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        produto.setNome(dados.getNome());
+        produto.setDescricao(dados.getDescricao());
+        produto.setPreco(dados.getPreco());
+
+        return produtoRepository.save(produto);
     }
 
+    // ✅ DELETAR PRODUTO + ESTOQUE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        service.deletar(id);
-        return ResponseEntity.noContent().build();
+    public void deletar(@PathVariable Long id) {
+        estoqueRepository.deleteById(id);
+        produtoRepository.deleteById(id);
     }
 }
