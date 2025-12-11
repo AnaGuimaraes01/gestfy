@@ -58,6 +58,12 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+        <!-- Validações de DTOs (Jakarta Validation) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+
 
       
         <dependency>
