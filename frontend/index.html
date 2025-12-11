@@ -3,11 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Gestfy - Frontend Simples</title>
+
+  <title>Gestfy - Produtos</title>
+
+  <!-- FAVICON -->
+  <link rel="icon" type="imagens/png" href="images/favicon.png" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
+
+    <!-- LOGO NO TOPO DO SITE -->
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="imagens/logo.jpeg" alt="Logo Gestfy" style="width: 300px; border-radius: 8px;">
+    </div>
+
     <h1>Gestfy — Produtos</h1>
 
     <section class="form-section">
@@ -16,14 +27,22 @@
         <label>Nome
           <input type="text" id="nome" required />
         </label>
+
+        <label>Descrição
+          <input type="text" id="descricao" required />
+        </label>
+
         <label>Preço (ex: 12.50)
           <input type="text" id="preco" required />
         </label>
-        <label>Quantidade
-          <input type="number" id="quantidade" value="1" min="0" required />
+
+        <label>URL da foto (opcional)
+          <input type="text" id="urlFoto" placeholder="https://..." />
         </label>
+
         <button type="submit">Adicionar</button>
       </form>
+
       <div id="msg" class="msg"></div>
     </section>
 
@@ -32,10 +51,6 @@
       <button id="btn-refresh">Atualizar lista</button>
       <ul id="produtosList"></ul>
     </section>
-
-    <footer>
-      <small>Backend: http://localhost:8080/api/produtos</small>
-    </footer>
   </div>
 
   <script src="app.js"></script>

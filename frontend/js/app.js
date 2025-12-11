@@ -1,6 +1,7 @@
-const API = "http://localhost:8080/api/produtos"; // ajuste se backend estiver noutra porta
+const API_URL = "http://localhost:8080/api/produtos";
 
 document.addEventListener("DOMContentLoaded", () => {
+
   const form = document.getElementById("produtoForm");
   const lista = document.getElementById("produtosList");
   const msg = document.getElementById("msg");
@@ -8,26 +9,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchProdutos() {
     try {
-      const res = await fetch(API);
-      if (!res.ok) throw new Error("Erro ao buscar produtos: " + res.status);
+      const res = await fetch(API_URL);
       const data = await res.json();
       renderList(data);
     } catch (err) {
       console.error(err);
-      msg.textContent = "Erro ao carregar produtos. Veja console.";
+      msg.textContent = "Erro ao carregar produtos.";
       msg.style.color = "red";
     }
   }
 
   function renderList(produtos) {
     lista.innerHTML = "";
-    if (!produtos || produtos.length === 0) {
-      lista.innerHTML = "<li>(nenhum produto)</li>";
+
+    if (!produtos.length) {
+      lista.innerHTML = "<li>Nenhum produto encontrado.</li>";
       return;
     }
+
     produtos.forEach(p => {
       const li = document.createElement("li");
-      li.innerHTML = `<strong>${escapeHtml(p.nome)}</strong> — R$ ${p.preco} — Qt: ${p.quantidade}`;
+      li.innerHTML = `
+        <strong>${p.nome}</strong> — R$ ${p.preco} <br>
+        <em>${p.descricao}</em>
+      `;
       lista.appendChild(li);
     });
   }
@@ -35,52 +40,43 @@ document.addEventListener("DOMContentLoaded", () => {
   async function criarProduto(event) {
     event.preventDefault();
     msg.textContent = "";
-    const nome = document.getElementById("nome").value.trim();
-    const preco = document.getElementById("preco").value.trim();
-    const quantidade = parseInt(document.getElementById("quantidade").value, 10);
 
-    if (!nome || !preco || Number.isNaN(quantidade)) {
-      msg.textContent = "Preencha todos os campos corretamente.";
-      msg.style.color = "red";
-      return;
-    }
+    const nome = document.getElementById("nome").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const preco = document.getElementById("preco").value.trim();
+    const urlFoto = document.getElementById("urlFoto").value.trim();
 
     const body = {
       nome,
-      descricao: "",
+      descricao,
       preco: parseFloat(preco),
-      quantidade
+      urlFoto
     };
 
     try {
-      const res = await fetch(API, {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error("Erro ao criar: " + res.status + " - " + txt);
-      }
-      const criado = await res.json();
-      msg.textContent = `Criado: ${criado.nome} (id ${criado.id})`;
+
+      if (!res.ok) throw new Error(await res.text());
+
+      msg.textContent = "Produto cadastrado!";
       msg.style.color = "green";
+
       form.reset();
       fetchProdutos();
+
     } catch (err) {
       console.error(err);
-      msg.textContent = "Erro ao criar produto. Veja console.";
+      msg.textContent = "Erro ao criar produto.";
       msg.style.color = "red";
     }
-  }
-
-  function escapeHtml(text) {
-    return text ? text.replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]) }) : "";
   }
 
   form.addEventListener("submit", criarProduto);
   btnRefresh.addEventListener("click", fetchProdutos);
 
-  // primeira carga
   fetchProdutos();
 });
