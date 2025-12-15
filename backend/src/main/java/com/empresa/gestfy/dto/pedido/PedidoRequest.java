@@ -1,46 +1,24 @@
 package com.empresa.gestfy.dto.pedido;
 
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-public class PedidoRequest {
+public record PedidoRequest(
 
-    private String nomeCliente;
-    private String telefone;
-    private String formaRecebimento;
-    private List<PedidoItemRequest> itens;
+        @NotBlank
+        String nomeCliente,
 
-    public PedidoRequest() {}
+        @NotBlank
+        String telefone,
 
-    public String getNomeCliente() {
-        return nomeCliente;
-    }
+        @NotBlank
+        String formaPagamento,
 
-    public void setNomeCliente(String nomeCliente) {
-        this.nomeCliente = nomeCliente;
-    }
+        @NotBlank
+        String status,
 
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public String getFormaRecebimento() {
-        return formaRecebimento;
-    }
-
-    public void setFormaRecebimento(String formaRecebimento) {
-        this.formaRecebimento = formaRecebimento;
-    }
-
-    public List<PedidoItemRequest> getItens() {
-        return itens;
-    }
-
-    public void setItens(List<PedidoItemRequest> itens) {
-        this.itens = itens;
-    }
-
-}
+        @NotNull
+        @Positive
+        Double total
+) {}
