@@ -1,60 +1,73 @@
 package com.empresa.gestfy.controllers;
 
-import com.empresa.gestfy.dto.pedido.PedidoDTO;
+import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
 import com.empresa.gestfy.dto.pedido.PedidoRequest;
 import com.empresa.gestfy.models.Pedido;
+import com.empresa.gestfy.models.PedidoItem;
+import com.empresa.gestfy.models.Produto;
+import com.empresa.gestfy.repositories.PedidoItemRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
+import com.empresa.gestfy.repositories.ProdutoRepository;
 
-import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
 
-    private final PedidoRepository repository;
+    private final PedidoRepository pedidoRepository;
+    private final PedidoItemRepository pedidoItemRepository;
+    private final ProdutoRepository produtoRepository;
 
-    public PedidoController(PedidoRepository repository) {
-        this.repository = repository;
+    public PedidoController(
+            PedidoRepository pedidoRepository,
+            PedidoItemRepository pedidoItemRepository,
+            ProdutoRepository produtoRepository) {
+
+        this.pedidoRepository = pedidoRepository;
+        this.pedidoItemRepository = pedidoItemRepository;
+        this.produtoRepository = produtoRepository;
     }
 
+    // CLIENTE FINAL → CRIAR PEDIDO
     @PostMapping
-    public PedidoDTO criar(@Valid @RequestBody PedidoRequest request) {
-        Pedido pedido = new Pedido(
-                request.nomeCliente(),
-                request.telefone(),
-                request.formaPagamento(),
-                request.status(),
-                request.total()
-        );
+    public ResponseEntity<Pedido> criarPedido(@RequestBody PedidoRequest request) {
 
-        Pedido salvo = repository.save(pedido);
+        Pedido pedido = new Pedido();
+        pedido.setData(LocalDateTime.now());
+        pedido.setStatus("NOVO");
 
-        return new PedidoDTO(
-                salvo.getId(),
-                salvo.getNomeCliente(),
-                salvo.getTelefone(),
-                salvo.getFormaPagamento(),
-                salvo.getStatus(),
-                salvo.getTotal(),
-                salvo.getData()
-        );
-    }
+        List<PedidoItem> itens = new ArrayList<>();
+        double total = 0.0;
 
-    @GetMapping
-    public List<PedidoDTO> listar() {
-        return repository.findAll().stream().map(p ->
-                new PedidoDTO(
-                        p.getId(),
-                        p.getNomeCliente(),
-                        p.getTelefone(),
-                        p.getFormaPagamento(),
-                        p.getStatus(),
-                        p.getTotal(),
-                        p.getData()
-                )
-        ).toList();
+        for (PedidoItemRequest itemReq : request.getItens()) {
+
+            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+            PedidoItem item = new PedidoItem();
+            item.setProduto(produto);
+            item.setQuantidade(itemReq.getQuantidade());
+            item.setPedido(pedido);
+
+            double subtotal = produto.getPreco().doubleValue() * itemReq.getQuantidade();
+            total += subtotal;
+
+            itens.add(item);
+        }
+
+        pedido.setTotal(total);
+        pedido.setItens(itens);
+
+        pedidoRepository.save(pedido);
+        pedidoItemRepository.saveAll(itens);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
 }
