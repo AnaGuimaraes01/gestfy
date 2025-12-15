@@ -5,9 +5,11 @@ import com.empresa.gestfy.dto.pedido.PedidoRequest;
 import com.empresa.gestfy.models.Pedido;
 import com.empresa.gestfy.models.PedidoItem;
 import com.empresa.gestfy.models.Produto;
+import com.empresa.gestfy.models.Cliente;
 import com.empresa.gestfy.repositories.PedidoItemRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
 import com.empresa.gestfy.repositories.ProdutoRepository;
+import com.empresa.gestfy.repositories.ClienteRepository;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,15 +27,18 @@ public class PedidoController {
     private final PedidoRepository pedidoRepository;
     private final PedidoItemRepository pedidoItemRepository;
     private final ProdutoRepository produtoRepository;
+    private final ClienteRepository clienteRepository;
 
     public PedidoController(
             PedidoRepository pedidoRepository,
             PedidoItemRepository pedidoItemRepository,
-            ProdutoRepository produtoRepository
+            ProdutoRepository produtoRepository,
+            ClienteRepository clienteRepository
     ) {
         this.pedidoRepository = pedidoRepository;
         this.pedidoItemRepository = pedidoItemRepository;
         this.produtoRepository = produtoRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     // =========================
@@ -44,13 +49,15 @@ public class PedidoController {
             @RequestBody @Valid PedidoRequest request
     ) {
 
-        // 1️⃣ Cria o pedido
-        Pedido pedido = new Pedido();
-        pedido.setNomeCliente(request.nomeCliente());
-        pedido.setTelefone(request.telefone());
-        pedido.setFormaPagamento(request.formaPagamento());
+        // 1️⃣ Busca o cliente
+        Cliente cliente = clienteRepository.findById(request.clienteId())
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
-        pedido.setStatus("ABERTO"); // backend controla
+        // 2️⃣ Cria o pedido
+        Pedido pedido = new Pedido();
+        pedido.setCliente(cliente);
+        pedido.setFormaPagamento(request.formaPagamento());
+        pedido.setStatus("ABERTO");
         pedido.setData(LocalDateTime.now());
 
         pedido = pedidoRepository.save(pedido);
@@ -58,7 +65,7 @@ public class PedidoController {
         double total = 0.0;
         List<PedidoItem> itens = new ArrayList<>();
 
-        // 2️⃣ Cria os itens
+        // 3️⃣ Cria os itens do pedido
         for (PedidoItemRequest itemReq : request.itens()) {
 
             Produto produto = produtoRepository.findById(itemReq.getProdutoId())
@@ -76,7 +83,7 @@ public class PedidoController {
             itens.add(item);
         }
 
-        // 3️⃣ Salva itens e atualiza pedido
+        // 4️⃣ Salva os itens e atualiza o pedido
         pedidoItemRepository.saveAll(itens);
 
         pedido.setTotal(total);

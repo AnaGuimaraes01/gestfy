@@ -2,8 +2,8 @@ package com.empresa.gestfy.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "pedido")
@@ -13,33 +13,38 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nomeCliente;
-    private String telefone;
+    // 🔹 Relacionamento com Cliente
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
+
     private String formaPagamento;
     private String status;
     private Double total;
-
     private LocalDateTime data;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    // 🔹 Relacionamento com itens do pedido
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoItem> itens = new ArrayList<>();
 
-    // 🔹 construtor vazio (obrigatório para JPA)
+    // 🔹 Construtor vazio obrigatório para JPA
     public Pedido() {
         this.data = LocalDateTime.now();
     }
 
-    // 🔹 construtor usado no controller
-    public Pedido(String nomeCliente, String telefone, String formaPagamento, String status, Double total) {
-        this.nomeCliente = nomeCliente;
-        this.telefone = telefone;
+    // 🔹 Construtor com parâmetros (opcional)
+    public Pedido(Cliente cliente, String formaPagamento, String status, Double total) {
+        this.cliente = cliente;
         this.formaPagamento = formaPagamento;
         this.status = status;
         this.total = total;
         this.data = LocalDateTime.now();
     }
 
-    // 🔹 getters e setters
+    // ====================
+    // Getters e Setters
+    // ====================
+
     public Long getId() {
         return id;
     }
@@ -48,20 +53,12 @@ public class Pedido {
         this.id = id;
     }
 
-    public String getNomeCliente() {
-        return nomeCliente;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setNomeCliente(String nomeCliente) {
-        this.nomeCliente = nomeCliente;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
     public String getFormaPagamento() {
@@ -102,5 +99,23 @@ public class Pedido {
 
     public void setItens(List<PedidoItem> itens) {
         this.itens = itens;
+        // garante que cada item sabe que pertence a este pedido
+        for (PedidoItem item : itens) {
+            item.setPedido(this);
+        }
+    }
+
+    // ====================
+    // Métodos auxiliares
+    // ====================
+
+    public void addItem(PedidoItem item) {
+        item.setPedido(this);
+        itens.add(item);
+    }
+
+    public void removeItem(PedidoItem item) {
+        itens.remove(item);
+        item.setPedido(null);
     }
 }

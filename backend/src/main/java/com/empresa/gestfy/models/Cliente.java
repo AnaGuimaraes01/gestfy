@@ -1,5 +1,7 @@
 package com.empresa.gestfy.models;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -8,6 +10,9 @@ public class Cliente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @OneToMany(mappedBy = "cliente")
+private List<Pedido> pedidos;
+
     private Long id;
 
     private String nome;
