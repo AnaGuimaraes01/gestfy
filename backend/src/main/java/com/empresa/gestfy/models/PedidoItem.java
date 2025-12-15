@@ -1,5 +1,6 @@
 package com.empresa.gestfy.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,6 +13,7 @@ public class PedidoItem {
 
     @ManyToOne
     @JoinColumn(name = "pedido_id")
+    @JsonBackReference
     private Pedido pedido;
 
     @ManyToOne
@@ -25,6 +27,10 @@ public class PedidoItem {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Pedido getPedido() {
@@ -41,10 +47,6 @@ public class PedidoItem {
 
     public void setProduto(Produto produto) {
         this.produto = produto;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Integer getQuantidade() {

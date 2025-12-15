@@ -1,5 +1,6 @@
 package com.empresa.gestfy.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +23,8 @@ public class Pedido {
     private Double total;
     private LocalDateTime data;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<PedidoItem> itens = new ArrayList<>();
 
     public Pedido() {
