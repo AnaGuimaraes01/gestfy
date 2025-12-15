@@ -1,171 +1,331 @@
-/* RESET */
+/* =====================================================
+   VARIÁVEIS
+===================================================== */
+:root {
+  --rosa: #b03060;
+  --rosa-escuro: #7a0c35;
+  --preto: #111;
+  --cinza-fundo: #1f1f1f;
+  --cinza-header: #181818;
+  --cinza-card: #2b2b2b;
+  --cinza-texto: #bdbdbd;
+  --branco: #ffffff;
+}
+
+/* =====================================================
+   RESET
+===================================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* BASE */
+/* =====================================================
+   BASE
+===================================================== */
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #f4f4f4;
-  color: #333;
+  background: var(--cinza-fundo);
+  color: var(--branco);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* HEADER */
+/* =====================================================
+   HEADER
+===================================================== */
 .admin-header {
+  background: linear-gradient(135deg, var(--cinza-header), var(--preto));
+  padding: 24px 20px 28px;
   text-align: center;
-  padding: 30px 20px;
-  background: linear-gradient(135deg, #2b2b2b, #4a4a4a);
-  color: white;
+  border-bottom: 3px solid var(--rosa);
 }
 
 .logo {
-  width: 350px;
-  margin-bottom: 15px;
+  max-width: 150px; /* LOGO AJUSTADA */
+  width: 100%;
+  height: auto;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.admin-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .subtitle {
-  color: #f2b5c4;
-  font-size: 14px;
+  font-size: 13px;
+  color: #d8a7b8;
 }
 
-/* DASHBOARD */
-.dashboard {
-  max-width: 1100px;
-  margin: 40px auto;
+/* =====================================================
+   CONTAINER
+===================================================== */
+.container {
+  max-width: 1200px;
+  margin: 35px auto;
   padding: 0 20px;
-
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  width: 100%;
 }
 
-/* CARDS */
+/* =====================================================
+   DASHBOARD
+===================================================== */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px;
+}
+
+/* =====================================================
+   CARDS
+===================================================== */
 .card {
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  text-align: center;
+  background: var(--cinza-card);
+  border-radius: 14px;
+  padding: 26px 24px;
   cursor: pointer;
+  border: 1px solid #3a3a3a;
 
-  border-top: 6px solid #b03060;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.45);
 }
 
 .card .icon {
-  font-size: 40px;
-  margin-bottom: 10px;
+  font-size: 34px;
+  margin-bottom: 12px;
 }
 
 .card h2 {
-  color: #b03060;
-  margin-bottom: 8px;
+  font-size: 18px;
+  margin-bottom: 6px;
+  color: var(--branco);
 }
 
 .card p {
   font-size: 14px;
-  color: #666;
+  color: var(--cinza-texto);
 }
 
-/* FORMULÁRIOS (PRODUTOS) */
-.form-section,
-.list-section {
-  max-width: 800px;
-  margin: 30px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+/* =====================================================
+   RODAPÉ
+===================================================== */
+footer {
+  margin-top: auto;
+  background: var(--cinza-header);
+  border-top: 1px solid #333;
+  text-align: center;
+  padding: 18px;
+  font-size: 13px;
+  color: var(--cinza-texto);
 }
 
-input {
+footer span {
+  color: var(--rosa);
+  font-weight: 500;
+}
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+@media (max-width: 768px) {
+  .logo {
+    max-width: 130px;
+  }
+
+  .admin-header h1 {
+    font-size: 20px;
+  }
+
+  .dashboard {
+    gap: 18px;
+  }
+
+  .card {
+    padding: 22px;
+  }
+}
+.card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* linha decorativa lateral */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.card:hover::before {
+  background: var(--rosa);
+}
+
+/* badge */
+.badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(176, 48, 96, 0.15);
+  color: var(--rosa);
+  border: 1px solid var(--rosa);
+}
+
+/* destaque principal */
+.card-destaque {
+  border: 1px solid var(--rosa);
+}
+
+.card-destaque::before {
+  background: var(--rosa);
+}
+
+/* caixa com leve destaque financeiro */
+.card-caixa {
+  background: linear-gradient(145deg, #2b2b2b, #242424);
+}
+
+/* animação leve */
+.card:hover .icon {
+  transform: scale(1.08);
+}
+
+.card .icon {
+  transition: transform 0.3s ease;
+}
+
+/* =====================================================
+   AJUSTES PÁGINAS INTERNAS (PEDIDOS / PRODUTOS)
+===================================================== */
+
+.card-full {
+  grid-column: 1 / -1;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: var(--branco);
+  border-left: 4px solid var(--rosa);
+  padding-left: 10px;
+}
+
+/* =====================
+   TABELA
+===================== */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.tabela-pedidos {
   width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  border-collapse: collapse;
+  background: var(--cinza-card);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-button {
-  background: #b03060;
-  color: white;
-  border: none;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
-  cursor: pointer;
+.tabela-pedidos th {
+  background: var(--cinza-header);
+  color: var(--branco);
+  font-size: 13px;
+  padding: 14px;
+  text-align: left;
 }
 
-button:hover {
-  background: #d16b9a;
+.tabela-pedidos td {
+  padding: 14px;
+  font-size: 14px;
+  color: var(--cinza-texto);
+  border-bottom: 1px solid #3a3a3a;
 }
 
-/* LISTA */
-ul {
-  list-style: none;
+.tabela-pedidos tr:hover {
+  background: #333;
 }
 
-ul li {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
+/* =====================
+   FORMULÁRIO PRODUTOS
+===================== */
 
-/* VOLTAR */
-.voltar {
-  display: block;
-  text-align: center;
-  margin: 20px;
-  color: #b03060;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-
-  padding: 30px 20px;
+.form-card {
   margin-bottom: 30px;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 20px;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
 
-.tabela {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+.form-grid input {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  padding: 12px;
+  border-radius: 8px;
+  color: var(--branco);
 }
 
-.tabela th,
-.tabela td {
+.form-grid input::placeholder {
+  color: #888;
+}
+
+.form-grid button {
+  grid-column: 1 / -1;
+  background: var(--rosa);
+  border: none;
   padding: 14px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
+  border-radius: 10px;
+  font-weight: 500;
 }
 
-.tabela th {
-  background: #2b2b2b;
-  color: white;
+.form-grid button:hover {
+  background: var(--rosa-escuro);
 }
 
-.tabela select {
-  padding: 6px;
-  border-radius: 6px;
+/* =====================
+   LISTA PRODUTOS
+===================== */
+
+.lista-produtos {
+  list-style: none;
+}
+
+.lista-produtos li {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px;
+  border-bottom: 1px solid #3a3a3a;
+  color: var(--cinza-texto);
+}
+
+.lista-produtos li strong {
+  color: var(--branco);
+}
+
+/* =====================
+   MENSAGEM
+===================== */
+
+.msg {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--rosa);
 }

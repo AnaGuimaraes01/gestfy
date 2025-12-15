@@ -1,47 +1,64 @@
 const API_URL = "http://localhost:8080/api/pedidos";
-const tabela = document.getElementById("listaPedidos");
+const listaPedidos = document.getElementById("listaPedidos");
 
 async function carregarPedidos() {
-  try {
-    const res = await fetch(API_URL);
-    const pedidos = await res.json();
+    const response = await fetch(API_URL);
+    const pedidos = await response.json();
 
-    tabela.innerHTML = "";
+    listaPedidos.innerHTML = "";
 
-    pedidos.forEach(p => {
-      const tr = document.createElement("tr");
+    pedidos.forEach(pedido => {
+        const tr = document.createElement("tr");
 
-      tr.innerHTML = `
-        <td>${p.nomeCliente}</td>
-        <td>${p.formaPagamento}</td>
-        <td>R$ ${p.total.toFixed(2)}</td>
-        <td>${p.status}</td>
-        <td>
-          <select onchange="alterarStatus(${p.id}, this.value)">
-            <option ${p.status === 'RECEBIDO' ? 'selected' : ''}>RECEBIDO</option>
-            <option ${p.status === 'EM_PREPARO' ? 'selected' : ''}>EM_PREPARO</option>
-            <option ${p.status === 'FINALIZADO' ? 'selected' : ''}>FINALIZADO</option>
-            <option ${p.status === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
-          </select>
-        </td>
-      `;
+        tr.innerHTML = `
+            <td>${pedido.id}</td>
+            <td>
+                <strong>${pedido.nomeCliente}</strong><br>
+                <small>${pedido.telefone}</small>
+            </td>
+            <td>${pedido.formaPagamento}</td>
+            <td>R$ ${pedido.total.toFixed(2)}</td>
+            <td>
+                <select onchange="atualizarStatus(${pedido.id}, this.value)">
+                    ${gerarOptionsStatus(pedido.status)}
+                </select>
+            </td>
+            <td>
+                <button onclick="verDetalhes(${pedido.id})">Detalhes</button>
+            </td>
+        `;
 
-      tabela.appendChild(tr);
+        listaPedidos.appendChild(tr);
     });
-
-  } catch (e) {
-    alert("Erro ao carregar pedidos");
-  }
 }
 
-async function alterarStatus(id, status) {
-  await fetch(`${API_URL}/${id}/status`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status })
-  });
+function gerarOptionsStatus(statusAtual) {
+    const status = ["ABERTO", "EM_PREPARO", "FINALIZADO", "CANCELADO"];
+    return status.map(s =>
+        `<option value="${s}" ${s === statusAtual ? "selected" : ""}>${s}</option>`
+    ).join("");
+}
 
-  carregarPedidos();
+async function atualizarStatus(id, status) {
+    await fetch(`${API_URL}/${id}/status?status=${status}`, {
+        method: "PUT"
+    });
+}
+
+async function verDetalhes(id) {
+    const response = await fetch(`${API_URL}/${id}`);
+    const pedido = await response.json();
+
+    let itens = pedido.itens.map(item =>
+        `• ${item.produto.nome} (x${item.quantidade})`
+    ).join("\n");
+
+    alert(
+        `Pedido #${pedido.id}\n\n` +
+        `Cliente: ${pedido.nomeCliente}\n` +
+        `Total: R$ ${pedido.total}\n\n` +
+        `Itens:\n${itens}`
+    );
 }
 
 carregarPedidos();

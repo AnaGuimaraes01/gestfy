@@ -2,37 +2,47 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gestfy - Produtos</title>
+  <title>Gestfy • Produtos</title>
   <link rel="icon" href="../images/logo.png">
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
 
-<header class="header">
-  <img src="../images/logo.png" class="logo">
-  <h1>Produtos</h1>
+<body class="admin-body">
+
+<header class="admin-header">
+  <img src="../images/logo.png" class="logo" alt="Gestfy">
+  <h1>Gestão de Produtos</h1>
+  <p class="subtitle">Cadastro e manutenção de produtos</p>
 </header>
 
-<section class="form-section">
-  <h2>Cadastrar Produto</h2>
+<main class="container">
 
-  <form id="produtoForm">
-    <input id="nome" placeholder="Nome" required>
-    <input id="descricao" placeholder="Descrição" required>
-    <input id="preco" placeholder="Preço" required>
-    <input id="urlFoto" placeholder="URL da imagem">
-    <button type="submit">Salvar</button>
-  </form>
+  <!-- FORMULÁRIO -->
+  <div class="card form-card">
+    <h2 class="section-title">Cadastrar Produto</h2>
 
-  <p id="msg"></p>
-</section>
+    <form id="produtoForm" class="form-grid">
+      <input id="nome" placeholder="Nome do produto" required>
+      <input id="descricao" placeholder="Descrição" required>
+      <input id="preco" placeholder="Preço" required>
+      <input id="urlFoto" placeholder="URL da imagem">
+      <button type="submit">Salvar Produto</button>
+    </form>
 
-<section class="list-section">
-  <h2>Produtos Cadastrados</h2>
-  <ul id="produtosList"></ul>
-</section>
+    <p id="msg" class="msg"></p>
+  </div>
 
-<a href="index.html" class="voltar">⬅ Voltar</a>
+  <!-- LISTA -->
+  <div class="card card-full">
+    <h2 class="section-title">Produtos Cadastrados</h2>
+    <ul id="produtosList" class="lista-produtos"></ul>
+  </div>
+
+</main>
+
+<footer>
+  <p>© 2025 <span>Gestfy</span> • Módulo de Produtos</p>
+</footer>
 
 <script src="../js/produtos.js"></script>
 </body>

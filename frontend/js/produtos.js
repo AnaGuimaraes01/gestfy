@@ -1,47 +1,75 @@
-const API = "http://localhost:8080/api/produtos";
+const API_URL = "http://localhost:8080/api/produtos";
 
-document.addEventListener("DOMContentLoaded", () => {
-  listar();
+const produtosList = document.getElementById("produtosList");
+const form = document.getElementById("produtoForm");
+const msg = document.getElementById("msg");
 
-  document.getElementById("produtoForm").addEventListener("submit", salvar);
-});
+/* =========================
+   LISTAR PRODUTOS
+========================= */
+async function listarProdutos() {
+  try {
+    const response = await fetch(API_URL);
 
-async function salvar(e) {
+    if (!response.ok) {
+      throw new Error("Erro ao buscar produtos");
+    }
+
+    const produtos = await response.json();
+    produtosList.innerHTML = "";
+
+    produtos.forEach(produto => {
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        <strong>${produto.nome}</strong>
+        <span>R$ ${produto.preco.toFixed(2)}</span>
+      `;
+
+      produtosList.appendChild(li);
+    });
+
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "Erro ao carregar produtos";
+  }
+}
+
+/* =========================
+   CADASTRAR PRODUTO
+========================= */
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const body = {
+  const produto = {
     nome: nome.value,
     descricao: descricao.value,
     preco: parseFloat(preco.value),
     urlFoto: urlFoto.value
   };
 
-  const res = await fetch(API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(produto)
+    });
 
-  if (res.ok) {
-    msg.textContent = "Produto salvo com sucesso!";
-    produtoForm.reset();
-    listar();
-  } else {
-    msg.textContent = "Erro ao salvar produto.";
+    if (!response.ok) {
+      throw new Error("Erro ao cadastrar produto");
+    }
+
+    msg.textContent = "Produto cadastrado com sucesso!";
+    form.reset();
+    listarProdutos(); // 🔥 ATUALIZA A LISTA
+
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "Erro ao cadastrar produto";
   }
-}
+});
 
-async function listar() {
-  const res = await fetch(API);
-  const produtos = await res.json();
-
-  produtosList.innerHTML = "";
-  produtos.forEach(p => {
-    produtosList.innerHTML += `
-      <li>
-        <strong>${p.nome}</strong> - R$ ${p.preco}<br>
-        ${p.descricao}
-      </li>
-    `;
-  });
-}
+/* =========================
+   CARREGAR AO ABRIR A PÁGINA
+========================= */
+listarProdutos();

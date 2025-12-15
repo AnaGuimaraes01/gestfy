@@ -1,41 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gestfy | Pedidos</title>
-
-  <link rel="icon" href="../images/logo.png">
+  <title>Gestfy • Pedidos</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body>
+
+<body class="admin-body">
 
 <header class="admin-header">
-  <img src="../images/logo.png" class="logo">
-  <h1>Pedidos</h1>
-  <p class="subtitle">Pedidos realizados pelos clientes</p>
+  <img src="../images/logo.png" class="logo" alt="Gestfy">
+  <h1>Gestão de Pedidos</h1>
+  <p class="subtitle">Visualização e atualização de pedidos</p>
 </header>
 
 <main class="container">
 
-  <table class="tabela">
-    <thead>
-      <tr>
-        <th>Cliente</th>
-        <th>Pagamento</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th>Ação</th>
-      </tr>
-    </thead>
-    <tbody id="listaPedidos">
-      <!-- pedidos via JS -->
-    </tbody>
-  </table>
+  <div class="card card-full">
+    <h2 class="section-title">Pedidos Registrados</h2>
 
-  <a href="index.html" class="voltar">⬅ Voltar ao menu</a>
+    <div class="table-wrapper">
+      <table class="tabela-pedidos">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Pagamento</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaPedidos">
+          <!-- carregado via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </main>
 
-<script src="js/pedidos.js"></script>
+<footer>
+  <p>© 2025 <span>Gestfy</span> • Módulo de Pedidos</p>
+</footer>
+
+<script src="../js/pedidos.js"></script>
 </body>
 </html>
