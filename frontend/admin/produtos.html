@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestfy - Produtos</title>
+  <link rel="icon" href="../images/logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <img src="../images/logo.png" class="logo">
+  <h1>Produtos</h1>
+</header>
+
+<section class="form-section">
+  <h2>Cadastrar Produto</h2>
+
+  <form id="produtoForm">
+    <input id="nome" placeholder="Nome" required>
+    <input id="descricao" placeholder="Descrição" required>
+    <input id="preco" placeholder="Preço" required>
+    <input id="urlFoto" placeholder="URL da imagem">
+    <button type="submit">Salvar</button>
+  </form>
+
+  <p id="msg"></p>
+</section>
+
+<section class="list-section">
+  <h2>Produtos Cadastrados</h2>
+  <ul id="produtosList"></ul>
+</section>
+
+<a href="index.html" class="voltar">⬅ Voltar</a>
+
+<script src="../js/produtos.js"></script>
+</body>
+</html>

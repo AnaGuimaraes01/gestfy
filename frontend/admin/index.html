@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestfy | Administração</title>
+  <link rel="icon" href="../images/logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="admin-header">
+  <img src="../images/logo.png" alt="Gestfy" class="logo">
+  <h1>Gestfy</h1>
+  <p class="subtitle">Painel Administrativo</p>
+</header>
+
+<main class="dashboard">
+
+  <div class="card" onclick="irPara('produtos.html')">
+    <span class="icon">📦</span>
+    <h2>Produtos</h2>
+    <p>Gerenciar o catálogo de produtos</p>
+  </div>
+
+  <div class="card" onclick="irPara('estoque.html')">
+    <span class="icon">🏬</span>
+    <h2>Estoque</h2>
+    <p>Controle de entradas e saídas</p>
+  </div>
+
+  <div class="card" onclick="irPara('caixa.html')">
+    <span class="icon">💰</span>
+    <h2>Caixa</h2>
+    <p>Movimentações financeiras</p>
+  </div>
+
+  <div class="card" onclick="irPara('pedidos.html')">
+    <span class="icon">🧾</span>
+    <h2>Pedidos</h2>
+    <p>Vendas realizadas</p>
+  </div>
+
+  <div class="card" onclick="irPara('relatorios.html')">
+    <span class="icon">📊</span>
+    <h2>Relatórios</h2>
+    <p>Análises e resultados</p>
+  </div>
+
+</main>
+
+<script src="../js/admin-menu.js"></script>
+</body>
+</html>
