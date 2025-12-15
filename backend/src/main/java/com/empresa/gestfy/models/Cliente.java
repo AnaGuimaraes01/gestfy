@@ -11,7 +11,7 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @OneToMany(mappedBy = "cliente")
-private List<Pedido> pedidos;
+    private List<Pedido> pedidos;
 
     private Long id;
 
