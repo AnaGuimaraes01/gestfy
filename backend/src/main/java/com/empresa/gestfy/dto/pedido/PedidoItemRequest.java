@@ -1,11 +1,19 @@
 package com.empresa.gestfy.dto.pedido;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class PedidoItemRequest {
 
-    private Long idProduto; // alterado de produtoId para idProduto
+    @NotNull(message = "ID do produto é obrigatório")
+    private Long idProduto;
+
+    @NotNull(message = "Quantidade é obrigatória")
+    @Positive(message = "Quantidade deve ser maior que zero")
     private Integer quantidade;
 
-    public PedidoItemRequest() {}
+    public PedidoItemRequest() {
+    }
 
     public Long getIdProduto() {
         return idProduto;

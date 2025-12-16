@@ -9,7 +9,18 @@ public class PedidoItemDTO {
     private Integer quantidade;
     private Double subtotal;
 
-    public PedidoItemDTO() {}
+    public PedidoItemDTO() {
+    }
+
+    public PedidoItemDTO(Long id, Long produtoId, String nomeProduto, Double precoUnitario, Integer quantidade,
+            Double subtotal) {
+        this.id = id;
+        this.produtoId = produtoId;
+        this.nomeProduto = nomeProduto;
+        this.precoUnitario = precoUnitario;
+        this.quantidade = quantidade;
+        this.subtotal = subtotal;
+    }
 
     public Long getId() {
         return id;

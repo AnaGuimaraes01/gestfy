@@ -1,13 +1,15 @@
 package com.empresa.gestfy.dto.pedido;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record PedidoDTO(
-        Long id,
-        String nomeCliente,
-        String telefone,
-        String formaPagamento,
-        String status,
-        Double total,
-        LocalDateTime data
-) {}
+                Long id,
+                String nomeCliente,
+                String telefone,
+                String formaPagamento,
+                String status,
+                Double total,
+                LocalDateTime data,
+                List<PedidoItemDTO> itens) {
+}

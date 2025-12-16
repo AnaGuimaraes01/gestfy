@@ -1,5 +1,7 @@
 package com.empresa.gestfy.controllers;
 
+import com.empresa.gestfy.dto.pedido.PedidoDTO;
+import com.empresa.gestfy.dto.pedido.PedidoItemDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
 import com.empresa.gestfy.dto.pedido.PedidoRequest;
 import com.empresa.gestfy.models.Cliente;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -30,8 +33,7 @@ public class PedidoController {
     public PedidoController(
             PedidoRepository pedidoRepository,
             ProdutoRepository produtoRepository,
-            ClienteRepository clienteRepository
-    ) {
+            ClienteRepository clienteRepository) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
         this.clienteRepository = clienteRepository;
@@ -41,7 +43,7 @@ public class PedidoController {
     // CRIAR PEDIDO
     // =========================
     @PostMapping
-    public ResponseEntity<Pedido> criarPedido(@RequestBody @Valid PedidoRequest request) {
+    public ResponseEntity<PedidoDTO> criarPedido(@RequestBody @Valid PedidoRequest request) {
 
         // 1️⃣ Busca o cliente
         Cliente cliente = clienteRepository.findById(request.clienteId())
@@ -69,31 +71,41 @@ public class PedidoController {
             itens.add(item);
         }
 
-        // 4️⃣ Adiciona os itens ao pedido e calcula total
+        // 4️⃣ Adiciona os itens ao pedido
         pedido.setItens(itens);
-        pedido.setTotal(itens.stream().mapToDouble(i -> i.getPrecoUnitario() * i.getQuantidade()).sum());
 
-        // 5️⃣ Salva o pedido (JPA salva os itens automaticamente)
+        // 5️⃣ Calcula e define o total
+        Double totalCalculado = itens.stream()
+                .mapToDouble(i -> i.getPrecoUnitario() * i.getQuantidade())
+                .sum();
+        pedido.setTotal(totalCalculado > 0 ? totalCalculado : 0.0);
+
+        // 6️⃣ Salva o pedido (JPA salva os itens automaticamente)
         pedido = pedidoRepository.save(pedido);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(pedido));
     }
 
     // =========================
     // LISTAR TODOS
     // =========================
     @GetMapping
-    public ResponseEntity<List<Pedido>> listarPedidos() {
-        return ResponseEntity.ok(pedidoRepository.findAll());
+    public ResponseEntity<List<PedidoDTO>> listarPedidos() {
+        List<PedidoDTO> pedidos = pedidoRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(pedidos);
     }
 
     // =========================
     // BUSCAR POR ID
     // =========================
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<PedidoDTO> buscarPorId(@PathVariable Long id) {
         return pedidoRepository.findById(id)
-                .map(ResponseEntity::ok)
+                .map(p -> ResponseEntity.ok(mapToDTO(p)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -101,17 +113,16 @@ public class PedidoController {
     // ATUALIZAR STATUS
     // =========================
     @PutMapping("/{id}/status")
-    public ResponseEntity<Pedido> atualizarStatus(
+    public ResponseEntity<PedidoDTO> atualizarStatus(
             @PathVariable Long id,
-            @RequestParam String status
-    ) {
+            @RequestParam String status) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: ID " + id));
 
         pedido.setStatus(status);
         pedidoRepository.save(pedido);
 
-        return ResponseEntity.ok(pedido);
+        return ResponseEntity.ok(mapToDTO(pedido));
     }
 
     // =========================
@@ -126,5 +137,39 @@ public class PedidoController {
 
         pedidoRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // =========================
+    // HELPER: MAPEAR PARA DTO
+    // =========================
+    private PedidoDTO mapToDTO(Pedido pedido) {
+        List<PedidoItemDTO> itensDTO = pedido.getItens().stream()
+                .map(item -> new PedidoItemDTO(
+                        item.getId(),
+                        item.getProduto().getId(),
+                        item.getProduto().getNome(),
+                        item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0,
+                        item.getQuantidade() != null ? item.getQuantidade() : 0,
+                        (item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0) *
+                                (item.getQuantidade() != null ? item.getQuantidade() : 0)))
+                .collect(Collectors.toList());
+
+        // Garante que total nunca seja null
+        Double totalFinal = pedido.getTotal();
+        if (totalFinal == null) {
+            totalFinal = itensDTO.stream()
+                    .mapToDouble(PedidoItemDTO::getSubtotal)
+                    .sum();
+        }
+
+        return new PedidoDTO(
+                pedido.getId(),
+                pedido.getCliente().getNome(),
+                pedido.getCliente().getTelefone(),
+                pedido.getFormaPagamento(),
+                pedido.getStatus(),
+                totalFinal > 0 ? totalFinal : 0.0,
+                pedido.getData(),
+                itensDTO);
     }
 }
