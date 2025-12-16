@@ -1,30 +1,60 @@
 <!DOCTYPE html>
-    <main style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:90vh;background:#fff;">
-      <img src="../images/logo.png" alt="Gestfy" style="width:220px;max-width:90vw;margin-bottom:40px;">
-      <button onclick="window.location.href='catalogo.html'" style="padding:22px 60px;font-size:1.5rem;border-radius:10px;background:#e91e63;color:#fff;border:none;margin-bottom:10px;cursor:pointer;box-shadow:0 2px 8px #0001;">Ir para o Catálogo</button>
-    </main>
-                    <li style="padding: 12px; border-left: 4px solid var(--rosa); color: #bdbdbd;">
-                        <p style="font-weight: 600; color: white; margin-bottom: 4px;">🔒 Seguro</p>
-                        <p style="font-size: 12px;">Seus dados são protegidos</p>
-                    </li>
-                    <li style="padding: 12px; border-left: 4px solid var(--rosa); color: #bdbdbd;">
-                        <p style="font-weight: 600; color: white; margin-bottom: 4px;">📱 Responsivo</p>
-                        <p style="font-size: 12px;">Funciona em qualquer dispositivo</p>
-                    </li>
-                </ul>
-            </div>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestfy • Sistema de Gestão</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
 
-            <div style="margin-top: 60px; padding: 30px; background: rgba(176, 48, 96, 0.1); border-radius: 12px; border: 1px solid rgba(176, 48, 96, 0.2);">
-                <p style="font-size: 14px; color: #bdbdbd; margin-bottom: 16px;">
-                    Pronto para começar? Acesse o nosso catálogo de produtos!
-                </p>
-                <a href="catalogo.html" class="btn" style="font-size: 16px; padding: 14px 32px;">🛍️ Ir para o Catálogo</a>
-            </div>
-        </div>
-    </main>
+<body class="admin-body">
 
-    <footer>
-        <p>&copy; 2025 <span>Gestfy</span> - Seu sistema de gestão integrado</p>
-    </footer>
+<main class="container" style="
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+">
+
+    <section style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 24px;
+    ">
+
+        <!-- LOGO GRANDE -->
+        <img
+            src="../images/logo.png"
+            alt="Gestfy"
+            style="
+                width: 480px;
+                max-width: 90%;
+            "
+        >
+
+       
+
+        <!-- BOTÃO -->
+        <button
+            onclick="window.location.href='catalogo.html'"
+            class="btn btn-principal"
+            style="
+                font-size: 1.4rem;
+                padding: 18px 60px;
+                margin-top: 24px;
+            "
+        >
+            🛍️ Ir para o Catálogo
+        </button>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2025 <span>Gestfy</span> • Seu sistema de gestão integrado</p>
+</footer>
+
 </body>
 </html>
