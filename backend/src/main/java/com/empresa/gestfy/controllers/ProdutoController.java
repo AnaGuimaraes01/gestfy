@@ -4,6 +4,9 @@ import com.empresa.gestfy.dto.produto.ProdutoDTO;
 import com.empresa.gestfy.dto.produto.ProdutoRequest;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.ProdutoRepository;
+import com.empresa.gestfy.models.Estoque;
+import com.empresa.gestfy.repositories.EstoqueRepository;
+import java.time.LocalDateTime;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,23 +20,33 @@ import java.util.List;
 public class ProdutoController {
 
     private final ProdutoRepository produtoRepository;
+    private final EstoqueRepository estoqueRepository;
 
-    public ProdutoController(ProdutoRepository produtoRepository) {
+    public ProdutoController(ProdutoRepository produtoRepository, EstoqueRepository estoqueRepository) {
         this.produtoRepository = produtoRepository;
+        this.estoqueRepository = estoqueRepository;
     }
 
     // CREATE
     @PostMapping
     public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoRequest request) {
-
         Produto produto = new Produto(
                 request.nome(),
                 request.descricao(),
                 request.preco(),
-                request.urlFoto()
+                request.urlFoto(),
+                request.quantidade()
         );
-
         Produto salvo = produtoRepository.save(produto);
+
+        // Cria movimentação ENTRADA no estoque automaticamente
+        Estoque entrada = new Estoque();
+        entrada.setProdutoId(salvo.getId());
+        entrada.setTipoMovimento("ENTRADA");
+        entrada.setQuantidade(salvo.getQuantidade());
+        entrada.setDataMovimento(LocalDateTime.now());
+        estoqueRepository.save(entrada);
+
         return ResponseEntity.ok(toDTO(salvo));
     }
 
@@ -71,22 +84,19 @@ public class ProdutoController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutoDTO> atualizar(
+        public ResponseEntity<ProdutoDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProdutoRequest request) {
-
         Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
+            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
         produto.setNome(request.nome());
         produto.setDescricao(request.descricao());
         produto.setPreco(request.preco());
         produto.setUrlFoto(request.urlFoto());
-
+        produto.setQuantidade(request.quantidade());
         Produto atualizado = produtoRepository.save(produto);
-
         return ResponseEntity.ok(toDTO(atualizado));
-    }
+        }
 
     // DELETE
     @DeleteMapping("/{id}")
@@ -106,7 +116,8 @@ public class ProdutoController {
                 produto.getNome(),
                 produto.getDescricao(),
                 produto.getPreco(),
-                produto.getUrlFoto()
+                produto.getUrlFoto(),
+                produto.getQuantidade()
         );
     }
 }

@@ -15,18 +15,23 @@ public class Produto {
     private String descricao;
     private Double preco;
     private String urlFoto;
-    
+    private Integer quantidade;
 
     public Produto() {
     }
-      public Produto(String nome, String descricao, Double preco, String urlFoto) {
-        this.nome = nome;
-        this.descricao = descricao;
-        this.preco = preco;
-        this.urlFoto = urlFoto;
-
-        
-    }
+        public Produto(String nome, String descricao, Double preco, String urlFoto, Integer quantidade) {
+                this.nome = nome;
+                this.descricao = descricao;
+                this.preco = preco;
+                this.urlFoto = urlFoto;
+                this.quantidade = quantidade;
+        }
+        public Integer getQuantidade() {
+            return quantidade;
+        }
+        public void setQuantidade(Integer quantidade) {
+            this.quantidade = quantidade;
+        }
       public Long getId() {
           return id;
       }

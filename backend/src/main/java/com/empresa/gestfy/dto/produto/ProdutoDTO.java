@@ -5,5 +5,6 @@ public record ProdutoDTO(
         String nome,
         String descricao,
         Double preco,
-        String urlFoto
+        String urlFoto,
+        Integer quantidade
 ) {}

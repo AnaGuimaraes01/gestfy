@@ -44,6 +44,7 @@ async function listarProdutos() {
           <strong>${produto.nome}</strong>
           <p class="descricao-small">${produto.descricao || "Sem descrição"}</p>
           <span class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</span>
+          <span class="quantidade">Qtd: ${produto.quantidade ?? 0}</span>
           <small style="color: #999; display: block; margin-top: 5px;">ID: ${produto.id}</small>
         </div>
         <div class="produto-actions">
@@ -76,12 +77,17 @@ form.addEventListener("submit", async (e) => {
     msg.textContent = "❌ Preço deve ser maior que 0";
     return;
   }
+  if (!quantidade.value || parseInt(quantidade.value) <= 0) {
+    msg.textContent = "❌ Quantidade deve ser maior que 0";
+    return;
+  }
 
   const produto = {
     nome: nome.value.trim(),
     descricao: descricao.value.trim(),
     preco: parseFloat(preco.value),
-    urlFoto: urlFoto.value.trim() || null
+    urlFoto: urlFoto.value.trim() || null,
+    quantidade: parseInt(quantidade.value)
   };
 
   try {

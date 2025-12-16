@@ -16,5 +16,9 @@ public record ProdutoRequest(
         @Positive(message = "O preço deve ser maior que zero")
         Double preco,
 
-        String urlFoto
+        String urlFoto,
+
+        @NotNull(message = "A quantidade é obrigatória")
+        @Positive(message = "A quantidade deve ser maior que zero")
+        Integer quantidade
 ) {}

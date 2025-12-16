@@ -33,9 +33,17 @@ async function carregarPedidos() {
 }
 
 function gerarOptionsStatus(statusAtual) {
-    const status = ["ABERTO", "EM_PREPARO", "FINALIZADO", "CANCELADO"];
+    // Status compatíveis com backend
+    const status = [
+        "RECEBIDO",
+        "EM_PREPARO",
+        "PRONTO_RETIRADA",
+        "SAIU_ENTREGA",
+        "FINALIZADO",
+        "CANCELADO"
+    ];
     return status.map(s =>
-        `<option value="${s}" ${s === statusAtual ? "selected" : ""}>${s}</option>`
+        `<option value="${s}" ${s === statusAtual ? "selected" : ""}>${s.replace('_', ' ')}</option>`
     ).join("");
 }
 
@@ -43,20 +51,26 @@ async function atualizarStatus(id, status) {
     await fetch(`${API_URL}/${id}/status?status=${status}`, {
         method: "PUT"
     });
+    // Recarrega lista após atualizar
+    carregarPedidos();
 }
 
 async function verDetalhes(id) {
     const response = await fetch(`${API_URL}/${id}`);
+    if (!response.ok) {
+        alert("Erro ao buscar detalhes do pedido.");
+        return;
+    }
     const pedido = await response.json();
-
-    let itens = pedido.itens.map(item =>
-        `• ${item.produto.nome} (x${item.quantidade})`
+    let itens = (pedido.itens || []).map(item =>
+        `• ${item.produto?.nome || 'Produto'} (x${item.quantidade})`
     ).join("\n");
-
     alert(
         `Pedido #${pedido.id}\n\n` +
-        `Cliente: ${pedido.nomeCliente}\n` +
-        `Total: R$ ${pedido.total}\n\n` +
+        `Cliente: ${pedido.nomeCliente || ''}\n` +
+        `Total: R$ ${pedido.total || 0}\n` +
+        `Status: ${pedido.status || ''}\n` +
+        `Pagamento: ${pedido.formaPagamento || ''}\n\n` +
         `Itens:\n${itens}`
     );
 }
