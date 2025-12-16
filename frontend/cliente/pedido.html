@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Pedido - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>🍦 Gestfy</h1>
+        <p>Finalizar Pedido</p>
+    </header>
+
+    <main>
+        <div class="container" style="max-width: 600px;">
+            <div style="margin-bottom: 20px;">
+                <a href="carrinho.html" class="btn">← Voltar ao Carrinho</a>
+            </div>
+
+            <div id="mensagem" class="msg" style="display: none;"></div>
+
+            <div style="background: var(--cinza-card); border-radius: 12px; padding: 24px; border: 1px solid #3a3a3a;">
+                <h2 class="section-title">Informações do Pedido</h2>
+
+                <form id="formPedido">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="nome" required placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="telefone" required placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="email" placeholder="seu.email@exemplo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Forma de Recebimento *</label>
+                        <select id="formaRecebimento" required>
+                            <option value="">-- Selecione --</option>
+                            <option value="RETIRADA">Retirar no Local</option>
+                            <option value="ENTREGA">Entrega</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Forma de Pagamento *</label>
+                        <select id="formaPagamento" required>
+                            <option value="">-- Selecione --</option>
+                            <option value="DINHEIRO">Dinheiro (na retirada/entrega)</option>
+                            <option value="PIX">PIX (na retirada/entrega)</option>
+                        </select>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-bottom: 12px; color: var(--rosa);">Resumo do Pedido</h3>
+                        <div id="resumoPedido">
+                            <!-- Será preenchido via JavaScript -->
+                        </div>
+                        <div style="border-top: 2px solid var(--rosa); padding-top: 12px; margin-top: 12px; display: flex; justify-content: space-between; font-size: 18px; font-weight: 700;">
+                            <span>Total:</span>
+                            <span style="color: var(--rosa);" id="totalFinal">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">✅ Confirmar Pedido</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 <span>Gestfy</span> - Seu sistema de gestão integrado</p>
+    </footer>
+
+    <script>
+        const API_URL = "http://localhost:8080/api/clientes";
+        const API_PEDIDOS = "http://localhost:8080/api/pedidos";
+        const form = document.getElementById("formPedido");
+        const msg = document.getElementById("mensagem");
+        const resumoPedido = document.getElementById("resumoPedido");
+        const totalFinal = document.getElementById("totalFinal");
+
+        let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+        let clienteId = null;
+
+        // Carregar resumo do carrinho
+        function carregarResumoPedido() {
+            if (carrinho.length === 0) {
+                window.location.href = "catalogo.html";
+                return;
+            }
+
+            resumoPedido.innerHTML = "";
+            let total = 0;
+
+            carrinho.forEach(item => {
+                const subtotal = item.preco * item.quantidade;
+                total += subtotal;
+
+                const div = document.createElement("div");
+                div.style.cssText = "display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;";
+                div.innerHTML = `
+                    <span>${item.nome} x ${item.quantidade}</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
+                `;
+                resumoPedido.appendChild(div);
+            });
+
+            totalFinal.textContent = `R$ ${total.toFixed(2)}`;
+        }
+
+        // Submeter pedido
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById("nome").value.trim();
+            const telefone = document.getElementById("telefone").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const formaRecebimento = document.getElementById("formaRecebimento").value;
+            const formaPagamento = document.getElementById("formaPagamento").value;
+
+            if (!nome || !telefone || !formaRecebimento || !formaPagamento) {
+                msg.textContent = "⚠️ Preencha todos os campos obrigatórios";
+                msg.style.display = "block";
+                return;
+            }
+
+            try {
+                // 1. Criar cliente
+                const clienteReq = {
+                    nome: nome,
+                    telefone: telefone,
+                    email: email || ""
+                };
+
+                const resCliente = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(clienteReq)
+                });
+
+                if (!resCliente.ok) throw new Error("Erro ao criar cliente");
+                const cliente = await resCliente.json();
+                clienteId = cliente.id;
+
+                // 2. Criar pedido
+                const itens = carrinho.map(item => ({
+                    idProduto: item.id,
+                    quantidade: item.quantidade
+                }));
+
+                const pedidoReq = {
+                    clienteId: clienteId,
+                    formaPagamento: formaPagamento,
+                    formaRecebimento: formaRecebimento,
+                    itens: itens
+                };
+
+                const resPedido = await fetch(API_PEDIDOS, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(pedidoReq)
+                });
+
+                if (!resPedido.ok) throw new Error("Erro ao criar pedido");
+                const pedido = await resPedido.json();
+
+                // 3. Sucesso
+                localStorage.removeItem("carrinho");
+                msg.textContent = `✅ Pedido ${pedido.id} criado com sucesso!`;
+                msg.style.display = "block";
+                msg.style.background = "rgba(52, 168, 83, 0.1)";
+                msg.style.color = "#34a853";
+                msg.style.borderLeftColor = "#34a853";
+
+                setTimeout(() => {
+                    window.location.href = `acompanhamento.html?id=${pedido.id}`;
+                }, 2000);
+
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "❌ Erro ao processar pedido: " + error.message;
+                msg.style.display = "block";
+            }
+        });
+
+        // Carregar na página
+        carregarResumoPedido();
+    </script>
+</body>
+</html>

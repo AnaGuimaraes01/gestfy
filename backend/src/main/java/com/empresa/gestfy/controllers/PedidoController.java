@@ -4,11 +4,15 @@ import com.empresa.gestfy.dto.pedido.PedidoDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
 import com.empresa.gestfy.dto.pedido.PedidoRequest;
+import com.empresa.gestfy.models.Caixa;
 import com.empresa.gestfy.models.Cliente;
+import com.empresa.gestfy.models.Estoque;
 import com.empresa.gestfy.models.Pedido;
 import com.empresa.gestfy.models.PedidoItem;
 import com.empresa.gestfy.models.Produto;
+import com.empresa.gestfy.repositories.CaixaRepository;
 import com.empresa.gestfy.repositories.ClienteRepository;
+import com.empresa.gestfy.repositories.EstoqueRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
 import com.empresa.gestfy.repositories.ProdutoRepository;
 
@@ -17,8 +21,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,14 +36,20 @@ public class PedidoController {
     private final PedidoRepository pedidoRepository;
     private final ProdutoRepository produtoRepository;
     private final ClienteRepository clienteRepository;
+    private final EstoqueRepository estoqueRepository;
+    private final CaixaRepository caixaRepository;
 
     public PedidoController(
             PedidoRepository pedidoRepository,
             ProdutoRepository produtoRepository,
-            ClienteRepository clienteRepository) {
+            ClienteRepository clienteRepository,
+            EstoqueRepository estoqueRepository,
+            CaixaRepository caixaRepository) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
         this.clienteRepository = clienteRepository;
+        this.estoqueRepository = estoqueRepository;
+        this.caixaRepository = caixaRepository;
     }
 
     // =========================
@@ -85,6 +97,16 @@ public class PedidoController {
         // 6️⃣ Salva o pedido (JPA salva os itens automaticamente)
         pedido = pedidoRepository.save(pedido);
 
+        // 7️⃣ NOVO: Registra movimento de SAIDA no estoque para cada item
+        for (PedidoItem item : pedido.getItens()) {
+            Estoque movimento = new Estoque();
+            movimento.setProdutoId(item.getProduto().getId());
+            movimento.setTipoMovimento("SAIDA");
+            movimento.setQuantidade(item.getQuantidade());
+            movimento.setDataMovimento(LocalDateTime.now());
+            estoqueRepository.save(movimento);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(pedido));
     }
 
@@ -121,10 +143,68 @@ public class PedidoController {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: ID " + id));
 
+        // Validar transição de status
+        validarTransicaoStatus(pedido.getStatus(), status);
+
         pedido.setStatus(status);
         pedidoRepository.save(pedido);
 
+        // 🔥 NOVO: Se o pedido foi FINALIZADO, registra automaticamente no CAIXA
+        if (status.equals("FINALIZADO")) {
+            registrarVendaNoCaixa(pedido);
+        }
+
         return ResponseEntity.ok(mapToDTO(pedido));
+    }
+
+    // =========================
+    // REGISTRAR VENDA NO CAIXA (automático)
+    // =========================
+    private void registrarVendaNoCaixa(Pedido pedido) {
+        try {
+            Caixa caixa = new Caixa();
+            caixa.setSaldo(pedido.getTotal() != null ? pedido.getTotal() : 0.0);
+            caixa.setDescricao("Venda #" + pedido.getId() + " - Cliente: " + pedido.getCliente().getNome());
+            caixa.setData(LocalDate.now());
+
+            caixaRepository.save(caixa);
+            System.out.println("✅ Venda registrada no caixa: Pedido #" + pedido.getId());
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao registrar venda no caixa: " + e.getMessage());
+            // Não interrompe o fluxo se falhar no registro do caixa
+        }
+    }
+
+    // =========================
+    // VALIDAR TRANSIÇÃO DE STATUS
+    // =========================
+    private void validarTransicaoStatus(String statusAtual, String novoStatus) {
+        List<String> statusValidos = Arrays.asList("RECEBIDO", "EM_PREPARO", "PRONTO_RETIRADA", "SAIU_ENTREGA", "FINALIZADO");
+
+        if (!statusValidos.contains(novoStatus)) {
+            throw new RuntimeException("Status inválido: " + novoStatus);
+        }
+
+        // Mapa de transições válidas
+        if (statusAtual.equals("RECEBIDO")) {
+            if (!novoStatus.equals("EM_PREPARO")) {
+                throw new RuntimeException("De RECEBIDO só é possível ir para EM_PREPARO");
+            }
+        } else if (statusAtual.equals("EM_PREPARO")) {
+            if (!novoStatus.equals("PRONTO_RETIRADA") && !novoStatus.equals("SAIU_ENTREGA")) {
+                throw new RuntimeException("De EM_PREPARO só é possível ir para PRONTO_RETIRADA ou SAIU_ENTREGA");
+            }
+        } else if (statusAtual.equals("PRONTO_RETIRADA")) {
+            if (!novoStatus.equals("FINALIZADO")) {
+                throw new RuntimeException("De PRONTO_RETIRADA só é possível ir para FINALIZADO");
+            }
+        } else if (statusAtual.equals("SAIU_ENTREGA")) {
+            if (!novoStatus.equals("FINALIZADO")) {
+                throw new RuntimeException("De SAIU_ENTREGA só é possível ir para FINALIZADO");
+            }
+        } else if (statusAtual.equals("FINALIZADO")) {
+            throw new RuntimeException("Pedido já foi finalizado, não pode ser alterado");
+        }
     }
 
     // =========================

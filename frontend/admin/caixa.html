@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caixa Diário | Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .caixa-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .header-caixa {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--rosa);
+        }
+
+        .header-caixa h1 {
+            margin: 0;
+            color: var(--rosa);
+            font-size: 28px;
+        }
+
+        .data-info {
+            color: var(--texto-secundario);
+            font-size: 14px;
+        }
+
+        .total-arrecadado {
+            background: linear-gradient(135deg, var(--rosa), #d63a6f);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(176, 48, 96, 0.3);
+        }
+
+        .total-arrecadado h2 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-valor {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--cinza-fundo);
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--rosa);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: var(--texto-secundario);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--rosa);
+            margin: 0;
+        }
+
+        .acoes-caixa {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .acoes-caixa button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-fechar {
+            background: var(--rosa);
+            color: white;
+        }
+
+        .btn-fechar:hover {
+            background: #d63a6f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(176, 48, 96, 0.3);
+        }
+
+        .btn-relatorio {
+            background: transparent;
+            color: var(--rosa);
+            border: 1px solid var(--rosa);
+        }
+
+        .btn-relatorio:hover {
+            background: rgba(176, 48, 96, 0.05);
+        }
+
+        .filtro-data {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-data input {
+            padding: 10px;
+            border: 1px solid var(--bordas);
+            border-radius: 4px;
+            background: var(--cinza-fundo);
+            color: var(--texto);
+            font-size: 14px;
+        }
+
+        .filtro-data button {
+            padding: 10px 20px;
+            background: var(--rosa);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filtro-data button:hover {
+            background: #d63a6f;
+            transform: translateY(-2px);
+        }
+
+        .tabela-vendas {
+            background: var(--cinza-fundo);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .tabela-vendas table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabela-vendas thead tr {
+            background: rgba(176, 48, 96, 0.1);
+            border-bottom: 2px solid var(--bordas);
+        }
+
+        .tabela-vendas th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--rosa);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabela-vendas td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--bordas);
+            color: var(--texto);
+            font-size: 14px;
+        }
+
+        .tabela-vendas tbody tr:hover {
+            background: rgba(176, 48, 96, 0.05);
+        }
+
+        .tabela-vendas tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .valor-positivo {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .valor-negativo {
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        .valor-neutro {
+            color: var(--texto);
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--texto-secundario);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.ativo {
+            display: flex;
+        }
+
+        .modal-conteudo {
+            background: var(--bg);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-conteudo h2 {
+            color: var(--rosa);
+            margin-top: 0;
+        }
+
+        .modal-conteudo p {
+            color: var(--texto-secundario);
+            margin-bottom: 30px;
+        }
+
+        .modal-acoes {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-acoes button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancelar {
+            background: var(--bordas);
+            color: var(--texto);
+        }
+
+        .btn-cancelar:hover {
+            background: #555;
+        }
+
+        .btn-confirmar {
+            background: var(--rosa);
+            color: white;
+        }
+
+        .btn-confirmar:hover {
+            background: #d63a6f;
+        }
+
+        .msg-info {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .msg-sucesso {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+            border-left: 4px solid #4caf50;
+            display: block;
+        }
+
+        .msg-erro {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border-left: 4px solid #f44336;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .caixa-container {
+                padding: 15px;
+            }
+
+            .header-caixa {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .total-valor {
+                font-size: 36px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .tabela-vendas {
+                overflow-x: auto;
+            }
+
+            .acoes-caixa {
+                flex-direction: column;
+            }
+
+            .acoes-caixa button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="admin-menu"></div>
+
+    <div class="caixa-container">
+        <!-- HEADER -->
+        <div class="header-caixa">
+            <div>
+                <h1>💰 Caixa Diário</h1>
+                <div class="data-info">
+                    Data: <span id="data-atual">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENSAGENS -->
+        <div id="msg" class="msg-info"></div>
+
+        <!-- TOTAL ARRECADADO -->
+        <div class="total-arrecadado">
+            <h2>Total Arrecadado</h2>
+            <p class="total-valor" id="total-arrecadado">R$ 0,00</p>
+        </div>
+
+        <!-- ESTATÍSTICAS RÁPIDAS -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Entradas</h3>
+                <p class="stat-valor valor-positivo" id="total-entradas">R$ 0,00</p>
+            </div>
+            <div class="stat-card">
+                <h3>Saídas</h3>
+                <p class="stat-valor valor-negativo" id="total-saidas">R$ 0,00</p>
+            </div>
+            <div class="stat-card">
+                <h3>Quantidade de Transações</h3>
+                <p class="stat-valor" id="qtd-transacoes">0</p>
+            </div>
+        </div>
+
+        <!-- AÇÕES -->
+        <div class="acoes-caixa">
+            <button class="btn-fechar" id="btn-fechar-caixa">🔒 Fechar Caixa do Dia</button>
+            <button class="btn-relatorio" id="btn-relatorio">📊 Ver Relatório Completo</button>
+            <button class="btn-relatorio" id="btn-recarregar">🔄 Recarregar</button>
+        </div>
+
+        <!-- FILTRO POR DATA -->
+        <div class="filtro-data">
+            <input type="date" id="filtro-data">
+            <button id="btn-filtrar">Consultar Data</button>
+            <button class="btn-relatorio" id="btn-hoje">Voltar para Hoje</button>
+        </div>
+
+        <!-- TABELA DE VENDAS -->
+        <div class="tabela-vendas">
+            <table id="tabela-vendas">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data/Hora</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela">
+                    <tr>
+                        <td colspan="4" class="empty-state">Carregando dados...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL DE FECHAMENTO -->
+    <div id="modal-fechamento" class="modal">
+        <div class="modal-conteudo">
+            <h2>Fechar Caixa</h2>
+            <p>Deseja realmente fechar o caixa de hoje?</p>
+            <p style="color: var(--texto); font-weight: bold;">Total: <span id="modal-total">R$ 0,00</span></p>
+            <div class="modal-acoes">
+                <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-confirmar" onclick="confirmarFechamento()">Confirmar Fechamento</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/admin-menu.js"></script>
+    <script src="../js/caixa.js"></script>
+</body>
+
+</html>

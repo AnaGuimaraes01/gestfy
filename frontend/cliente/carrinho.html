@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>🍦 Gestfy</h1>
+        <p>Carrinho de Compras</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div style="margin-bottom: 20px;">
+                <a href="catalogo.html" class="btn">← Voltar ao Catálogo</a>
+            </div>
+
+            <div id="mensagem" class="msg" style="display: none;"></div>
+
+            <div class="carrinho-container">
+                <div class="carrinho-itens">
+                    <h2 class="section-title">Itens do Carrinho</h2>
+                    <div id="listaItens">
+                        <!-- Itens serão carregados aqui -->
+                    </div>
+                </div>
+
+                <div class="carrinho-resumo">
+                    <h3 style="margin-bottom: 16px; color: var(--rosa);">Resumo</h3>
+                    <div class="resumo-item">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="resumo-total">
+                        <span>Total:</span>
+                        <span id="total">R$ 0,00</span>
+                    </div>
+                    <button class="btn" onclick="irParaPagamento()" style="width: 100%; margin-top: 20px; text-align: center;">
+                        💳 Finalizar Pedido
+                    </button>
+                    <button class="btn-secondary" onclick="limparCarrinho()" style="width: 100%; margin-top: 10px;">
+                        🗑️ Limpar Carrinho
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 <span>Gestfy</span> - Seu sistema de gestão integrado</p>
+    </footer>
+
+    <script>
+        const listaItens = document.getElementById("listaItens");
+        const msg = document.getElementById("mensagem");
+        const subtotalEl = document.getElementById("subtotal");
+        const totalEl = document.getElementById("total");
+
+        function carregarCarrinho() {
+            const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            
+            if (carrinho.length === 0) {
+                listaItens.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Seu carrinho está vazio</p>';
+                subtotalEl.textContent = "R$ 0,00";
+                totalEl.textContent = "R$ 0,00";
+                return;
+            }
+
+            listaItens.innerHTML = "";
+            let subtotal = 0;
+
+            carrinho.forEach((item, index) => {
+                const subtotalItem = item.preco * item.quantidade;
+                subtotal += subtotalItem;
+
+                const div = document.createElement("div");
+                div.className = "carrinho-item";
+                div.innerHTML = `
+                    <div class="item-info">
+                        <p class="item-nome">${item.nome}</p>
+                        <p class="item-preco">R$ ${parseFloat(item.preco).toFixed(2)} x ${item.quantidade} = R$ ${subtotalItem.toFixed(2)}</p>
+                    </div>
+                    <div class="item-controles">
+                        <button onclick="diminuirQuantidade(${index})">−</button>
+                        <span style="width: 30px; text-align: center;">${item.quantidade}</span>
+                        <button onclick="aumentarQuantidade(${index})">+</button>
+                        <button onclick="removerItem(${index})" style="background: #ea4335;">✕</button>
+                    </div>
+                `;
+                listaItens.appendChild(div);
+            });
+
+            subtotalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
+            totalEl.textContent = `R$ ${subtotal.toFixed(2)}`;
+        }
+
+        function aumentarQuantidade(index) {
+            let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            carrinho[index].quantidade += 1;
+            localStorage.setItem("carrinho", JSON.stringify(carrinho));
+            carregarCarrinho();
+        }
+
+        function diminuirQuantidade(index) {
+            let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            if (carrinho[index].quantidade > 1) {
+                carrinho[index].quantidade -= 1;
+                localStorage.setItem("carrinho", JSON.stringify(carrinho));
+                carregarCarrinho();
+            }
+        }
+
+        function removerItem(index) {
+            let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            carrinho.splice(index, 1);
+            localStorage.setItem("carrinho", JSON.stringify(carrinho));
+            carregarCarrinho();
+        }
+
+        function limparCarrinho() {
+            if (confirm("Tem certeza que deseja limpar o carrinho?")) {
+                localStorage.removeItem("carrinho");
+                carregarCarrinho();
+                msg.textContent = "🗑️ Carrinho limpo";
+                msg.style.display = "block";
+                setTimeout(() => msg.style.display = "none", 2000);
+            }
+        }
+
+        function irParaPagamento() {
+            const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+            if (carrinho.length === 0) {
+                msg.textContent = "⚠️ Adicione itens ao carrinho";
+                msg.style.display = "block";
+                return;
+            }
+            window.location.href = "pedido.html";
+        }
+
+        // Carregar ao abrir
+        carregarCarrinho();
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acompanhar Pedido - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>🍦 Gestfy</h1>
+        <p>Acompanhar Pedido</p>
+    </header>
+
+    <main>
+        <div class="container" style="max-width: 800px;">
+            <div style="margin-bottom: 20px;">
+                <a href="catalogo.html" class="btn">← Fazer Novo Pedido</a>
+            </div>
+
+            <div id="mensagem" class="msg" style="display: none;"></div>
+
+            <div id="pedidoContainer" style="background: var(--cinza-card); border-radius: 12px; padding: 24px; border: 1px solid #3a3a3a;">
+                <!-- Dados do pedido serão preenchidos aqui -->
+            </div>
+
+            <div style="margin-top: 24px; text-align: center;">
+                <p style="color: #888; margin-bottom: 16px;">ID do Pedido salvo no navegador</p>
+                <input type="number" id="pesquisaId" placeholder="Ou digite o ID de outro pedido" style="width: 100%; max-width: 300px; padding: 10px; background: var(--cinza-input); border: 1px solid #444; border-radius: 8px; color: white; margin-bottom: 10px;">
+                <button onclick="pesquisarPedido()" class="btn" style="width: 100%; max-width: 300px;">🔍 Pesquisar</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 <span>Gestfy</span> - Seu sistema de gestão integrado</p>
+    </footer>
+
+    <script>
+        const API_PEDIDOS = "http://localhost:8080/api/pedidos";
+        const container = document.getElementById("pedidoContainer");
+        const msg = document.getElementById("mensagem");
+
+        // Status em português
+        const statusMap = {
+            "RECEBIDO": { label: "Recebido", emoji: "📋", badge: "status-recebido" },
+            "EM_PREPARO": { label: "Em Preparo", emoji: "👨‍🍳", badge: "status-preparacao" },
+            "PRONTO_RETIRADA": { label: "Pronto para Retirada", emoji: "✅", badge: "status-pronto" },
+            "SAIU_ENTREGA": { label: "Saiu para Entrega", emoji: "🚗", badge: "status-entrega" },
+            "FINALIZADO": { label: "Finalizado", emoji: "🎉", badge: "status-finalizado" }
+        };
+
+        // Obter ID da URL ou localStorage
+        function obterIdPedido() {
+            const params = new URLSearchParams(window.location.search);
+            let id = params.get("id");
+            
+            if (!id) {
+                id = localStorage.getItem("ultimoPedidoId");
+            }
+            
+            return id;
+        }
+
+        // Carregar pedido
+        async function carregarPedido(id) {
+            try {
+                const response = await fetch(`${API_PEDIDOS}/${id}`);
+                if (!response.ok) throw new Error("Pedido não encontrado");
+                
+                const pedido = await response.json();
+                localStorage.setItem("ultimoPedidoId", pedido.id);
+                exibirPedido(pedido);
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "❌ Pedido não encontrado";
+                msg.style.display = "block";
+                container.innerHTML = "";
+            }
+        }
+
+        // Exibir pedido
+        function exibirPedido(pedido) {
+            const statusInfo = statusMap[pedido.status] || { label: pedido.status, emoji: "❓", badge: "status-recebido" };
+
+            let itensHTML = pedido.itens.map(item => `
+                <tr>
+                    <td>${item.produtoNome}</td>
+                    <td style="text-align: center;">${item.quantidade}</td>
+                    <td style="text-align: right;">R$ ${parseFloat(item.precoUnitario).toFixed(2)}</td>
+                    <td style="text-align: right;">R$ ${parseFloat(item.subtotal).toFixed(2)}</td>
+                </tr>
+            `).join("");
+
+            container.innerHTML = `
+                <div style="margin-bottom: 24px;">
+                    <h2 class="section-title">Pedido #${pedido.id}</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                            <p style="font-size: 12px; color: #888; margin-bottom: 4px;">CLIENTE</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.clienteNome}</p>
+                            <p style="font-size: 13px; color: #bdbdbd;">📞 ${pedido.clienteTelefone}</p>
+                        </div>
+                        <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                            <p style="font-size: 12px; color: #888; margin-bottom: 4px;">FORMA DE RECEBIMENTO</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.formaRecebimento === 'RETIRADA' ? '🏪 Retirada' : '🚗 Entrega'}</p>
+                        </div>
+                        <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                            <p style="font-size: 12px; color: #888; margin-bottom: 4px;">FORMA DE PAGAMENTO</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.formaPagamento}</p>
+                        </div>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 12px; color: #888; margin-bottom: 12px;">STATUS DO PEDIDO</p>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 40px;">${statusInfo.emoji}</span>
+                            <div>
+                                <p style="font-size: 18px; font-weight: 700; color: white;">${statusInfo.label}</p>
+                                <span class="${statusInfo.badge}" style="display: inline-block;">${statusInfo.label.toUpperCase()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Itens do Pedido</h3>
+                <div class="table-wrapper">
+                    <table class="tabela-geral">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th style="text-align: center;">Qtd</th>
+                                <th style="text-align: right;">Preço Unit.</th>
+                                <th style="text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itensHTML}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #2b2b2b, #1a1a1a); padding: 20px; border-radius: 8px; margin-top: 16px; text-align: right; border: 1px solid #3a3a3a;">
+                    <p style="font-size: 16px; margin-bottom: 8px;"><strong>Total do Pedido:</strong></p>
+                    <p style="font-size: 28px; font-weight: 700; color: var(--rosa);">R$ ${parseFloat(pedido.total).toFixed(2)}</p>
+                </div>
+
+                <div style="margin-top: 24px; padding: 16px; background: rgba(176, 48, 96, 0.1); border-left: 4px solid var(--rosa); border-radius: 8px;">
+                    <p style="color: #888; font-size: 12px; margin-bottom: 8px;">💡 DICA</p>
+                    <p style="color: #bdbdbd;">Seu pedido está sendo preparado. Acompanhe o status acima e volte aqui para atualizar. Obrigado pela compra!</p>
+                </div>
+            `;
+        }
+
+        // Pesquisar pedido por ID
+        function pesquisarPedido() {
+            const id = document.getElementById("pesquisaId").value.trim();
+            if (!id) {
+                msg.textContent = "⚠️ Digite um ID válido";
+                msg.style.display = "block";
+                return;
+            }
+            carregarPedido(id);
+        }
+
+        // Carregar na página
+        const idPedido = obterIdPedido();
+        if (idPedido) {
+            carregarPedido(idPedido);
+        } else {
+            msg.textContent = "⚠️ Nenhum pedido encontrado. Faça um novo pedido!";
+            msg.style.display = "block";
+            container.innerHTML = "";
+        }
+
+        // Atualizar pedido a cada 5 segundos
+        setInterval(() => {
+            const id = obterIdPedido();
+            if (id) carregarPedido(id);
+        }, 5000);
+    </script>
+</body>
+</html>

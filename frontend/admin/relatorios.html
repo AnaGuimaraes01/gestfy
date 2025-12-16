@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestfy • Relatórios</title>
+  <link rel="icon" href="../images/logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="admin-body">
+
+<header class="admin-header">
+  <img src="../images/logo.png" class="logo" alt="Gestfy">
+  <h1>Relatórios e Análises</h1>
+  <p class="subtitle">Vendas, estoque e dados financeiros</p>
+</header>
+
+<main class="container">
+
+  <!-- ESTATÍSTICAS GERAIS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Total Vendido (Hoje)</h3>
+      <p class="stat-value" id="totalVendido">R$ 0,00</p>
+    </div>
+    <div class="stat-card">
+      <h3>Quantidade de Vendas</h3>
+      <p class="stat-value" id="qtdVendas">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Ticket Médio</h3>
+      <p class="stat-value" id="ticketMedio">R$ 0,00</p>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card">
+    <h2 class="section-title">Período</h2>
+    <div class="filter-grid">
+      <input type="date" id="dataInicio" class="select-filter">
+      <input type="date" id="dataFim" class="select-filter">
+      <button class="btn" onclick="gerarRelatorio()">📊 Gerar Relatório</button>
+      <button class="btn" style="background: #34a853;" onclick="exportarCSV()">💾 Exportar CSV</button>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO DE VENDAS POR DIA -->
+  <div class="card card-full">
+    <h2 class="section-title">Vendas por Dia</h2>
+    <div style="overflow-x: auto;">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Quantidade de Vendas</th>
+            <th>Total (R$)</th>
+            <th>Ticket Médio</th>
+          </tr>
+        </thead>
+        <tbody id="relatorioList">
+          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO DE ESTOQUE -->
+  <div class="card card-full">
+    <h2 class="section-title">Status do Estoque</h2>
+    <div style="overflow-x: auto;">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Últimas Entradas</th>
+            <th>Últimas Saídas</th>
+            <th>Data Última Movimentação</th>
+          </tr>
+        </thead>
+        <tbody id="estoqueList">
+          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p id="msg" class="msg"></p>
+
+</main>
+
+<footer>
+  <p>© 2025 <span>Gestfy</span> • Módulo de Relatórios</p>
+</footer>
+
+<script>
+  const API_URL_RELATORIOS = "http://localhost:8080/api/relatorios";
+  const API_URL_ESTOQUE = "http://localhost:8080/api/estoque";
+  const msg = document.getElementById("msg");
+
+  // Definir datas padrão (hoje)
+  function definirDatas() {
+    const hoje = new Date().toISOString().split("T")[0];
+    document.getElementById("dataInicio").value = hoje;
+    document.getElementById("dataFim").value = hoje;
+  }
+
+  // Gerar relatório
+  async function gerarRelatorio() {
+    try {
+      const dataInicio = document.getElementById("dataInicio").value;
+      const dataFim = document.getElementById("dataFim").value;
+
+      if (!dataInicio || !dataFim) {
+        msg.textContent = "⚠️ Selecione as datas";
+        msg.style.display = "block";
+        return;
+      }
+
+      // Carregar vendas por dia
+      await carregarVendasPorDia(dataInicio, dataFim);
+      
+      // Carregar estoque
+      await carregarStatusEstoque();
+
+      msg.textContent = "✅ Relatório gerado com sucesso";
+      msg.style.display = "block";
+      setTimeout(() => msg.style.display = "none", 3000);
+    } catch (error) {
+      console.error(error);
+      msg.textContent = "❌ " + error.message;
+      msg.style.display = "block";
+    }
+  }
+
+  async function carregarVendasPorDia(dataInicio, dataFim) {
+    try {
+      const response = await fetch(`${API_URL_RELATORIOS}/vendas-por-dia?dataInicio=${dataInicio}&dataFim=${dataFim}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
+          return;
+        }
+        throw new Error("Erro ao buscar vendas");
+      }
+
+      const vendas = await response.json();
+      
+      if (!Array.isArray(vendas) || vendas.length === 0) {
+        document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
+        atualizarEstatisticas([]);
+        return;
+      }
+
+      document.getElementById("relatorioList").innerHTML = "";
+      let totalVendido = 0;
+      let totalVendas = 0;
+
+      vendas.forEach(venda => {
+        const row = document.createElement("tr");
+        const total = parseFloat(venda.total) || 0;
+        const qtd = venda.quantidade || 1;
+        const ticketMedio = total / qtd;
+
+        totalVendido += total;
+        totalVendas += qtd;
+
+        row.innerHTML = `
+          <td>${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
+          <td>${qtd}</td>
+          <td>R$ ${total.toFixed(2)}</td>
+          <td>R$ ${ticketMedio.toFixed(2)}</td>
+        `;
+        document.getElementById("relatorioList").appendChild(row);
+      });
+
+      // Atualizar estatísticas
+      const ticketMedio = totalVendas > 0 ? totalVendido / totalVendas : 0;
+      document.getElementById("totalVendido").textContent = "R$ " + totalVendido.toFixed(2);
+      document.getElementById("qtdVendas").textContent = totalVendas;
+      document.getElementById("ticketMedio").textContent = "R$ " + ticketMedio.toFixed(2);
+
+    } catch (error) {
+      console.error(error);
+      document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+    }
+  }
+
+  async function carregarStatusEstoque() {
+    try {
+      const response = await fetch(API_URL_ESTOQUE);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+          return;
+        }
+        throw new Error("Erro ao buscar estoque");
+      }
+
+      const movimentacoes = await response.json();
+      
+      if (!Array.isArray(movimentacoes) || movimentacoes.length === 0) {
+        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+        return;
+      }
+
+      // Agrupar por produto
+      const porProduto = {};
+      movimentacoes.forEach(mov => {
+        const produtoNome = mov.produtoNome || mov.produto?.nome || "Produto " + mov.produtoId;
+        if (!porProduto[produtoNome]) {
+          porProduto[produtoNome] = { entradas: 0, saidas: 0, ultima: null };
+        }
+        
+        const tipo = mov.tipoMovimento || mov.tipo;
+        if (tipo === "ENTRADA") porProduto[produtoNome].entradas += mov.quantidade || 1;
+        if (tipo === "SAIDA") porProduto[produtoNome].saidas += mov.quantidade || 1;
+        
+        porProduto[produtoNome].ultima = new Date(mov.dataMovimento);
+      });
+
+      document.getElementById("estoqueList").innerHTML = "";
+      Object.entries(porProduto).forEach(([nome, dados]) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${nome}</td>
+          <td>✅ ${dados.entradas}</td>
+          <td>❌ ${dados.saidas}</td>
+          <td>${dados.ultima ? dados.ultima.toLocaleString("pt-BR") : "---"}</td>
+        `;
+        document.getElementById("estoqueList").appendChild(row);
+      });
+
+    } catch (error) {
+      console.error(error);
+      document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+    }
+  }
+
+  // Exportar para CSV
+  function exportarCSV() {
+    const dataInicio = document.getElementById("dataInicio").value;
+    const dataFim = document.getElementById("dataFim").value;
+
+    if (!dataInicio || !dataFim) {
+      alert("⚠️ Selecione as datas primeiro");
+      return;
+    }
+
+    const tabela = document.getElementById("relatorioList");
+    let csv = "Data,Quantidade,Total (R$),Ticket Médio\n";
+
+    tabela.querySelectorAll("tr").forEach(tr => {
+      const cells = [];
+      tr.querySelectorAll("td").forEach(td => {
+        cells.push(td.textContent);
+      });
+      csv += cells.join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio_vendas_${dataInicio}_${dataFim}.csv`;
+    a.click();
+  }
+
+  // Inicializar
+  definirDatas();
+  gerarRelatorio();
+
+  // Auto-refresh a cada 30 segundos
+  setInterval(() => {
+    gerarRelatorio();
+  }, 30000);
+</script>
+
+</body>
+</html>

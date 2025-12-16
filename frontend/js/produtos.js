@@ -18,12 +18,38 @@ async function listarProdutos() {
     const produtos = await response.json();
     produtosList.innerHTML = "";
 
+    if (produtos.length === 0) {
+      produtosList.innerHTML = "<li style='text-align: center; color: #999;'>Nenhum produto cadastrado</li>";
+      return;
+    }
+
     produtos.forEach(produto => {
       const li = document.createElement("li");
+      const imageUrl = produto.urlFoto || "🍦";
+      
+      // Se é URL, tenta carregar imagem; senão mostra emoji
+      let imagemHtml = "";
+      if (produto.urlFoto && produto.urlFoto.startsWith("http")) {
+        imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='🍦'">`;
+      } else {
+        imagemHtml = `<div class="produto-thumb-emoji">🍦</div>`;
+      }
 
+      li.className = "produto-item";
       li.innerHTML = `
-        <strong>${produto.nome}</strong>
-        <span>R$ ${produto.preco.toFixed(2)}</span>
+        <div class="produto-thumb-container">
+          ${imagemHtml}
+        </div>
+        <div class="produto-details">
+          <strong>${produto.nome}</strong>
+          <p class="descricao-small">${produto.descricao || "Sem descrição"}</p>
+          <span class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</span>
+          <small style="color: #999; display: block; margin-top: 5px;">ID: ${produto.id}</small>
+        </div>
+        <div class="produto-actions">
+          <button class="btn-small" onclick="editarProduto(${produto.id})">✏️ Editar</button>
+          <button class="btn-small btn-danger" onclick="deletarProduto(${produto.id})">🗑️ Deletar</button>
+        </div>
       `;
 
       produtosList.appendChild(li);
@@ -31,7 +57,7 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "Erro ao carregar produtos";
+    msg.textContent = "❌ Erro ao carregar produtos";
   }
 }
 
@@ -41,11 +67,21 @@ async function listarProdutos() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  // Validar campos
+  if (!nome.value.trim()) {
+    msg.textContent = "❌ Nome do produto é obrigatório";
+    return;
+  }
+  if (!preco.value || parseFloat(preco.value) <= 0) {
+    msg.textContent = "❌ Preço deve ser maior que 0";
+    return;
+  }
+
   const produto = {
-    nome: nome.value,
-    descricao: descricao.value,
+    nome: nome.value.trim(),
+    descricao: descricao.value.trim(),
     preco: parseFloat(preco.value),
-    urlFoto: urlFoto.value
+    urlFoto: urlFoto.value.trim() || null
   };
 
   try {
@@ -56,18 +92,58 @@ form.addEventListener("submit", async (e) => {
     });
 
     if (!response.ok) {
-      throw new Error("Erro ao cadastrar produto");
+      const erro = await response.json();
+      throw new Error(erro.message || "Erro ao cadastrar produto");
     }
 
-    msg.textContent = "Produto cadastrado com sucesso!";
+    msg.textContent = "✅ Produto cadastrado com sucesso!";
+    msg.style.color = "#34a853";
     form.reset();
-    listarProdutos(); // 🔥 ATUALIZA A LISTA
+    listarProdutos();
+    setTimeout(() => msg.textContent = "", 3000);
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "Erro ao cadastrar produto";
+    msg.textContent = "❌ " + error.message;
+    msg.style.color = "#f44";
   }
 });
+
+/* =========================
+   DELETAR PRODUTO
+========================= */
+async function deletarProduto(id) {
+  if (!confirm("Tem certeza que deseja deletar este produto?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE"
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao deletar produto");
+    }
+
+    msg.textContent = "✅ Produto deletado com sucesso!";
+    msg.style.color = "#34a853";
+    listarProdutos();
+    setTimeout(() => msg.textContent = "", 3000);
+
+  } catch (error) {
+    console.error(error);
+    msg.textContent = "❌ " + error.message;
+    msg.style.color = "#f44";
+  }
+}
+
+/* =========================
+   EDITAR PRODUTO
+========================= */
+async function editarProduto(id) {
+  alert("⚠️ Edição em desenvolvimento.\nPor enquanto, delete e crie novamente.");
+}
 
 /* =========================
    CARREGAR AO ABRIR A PÁGINA

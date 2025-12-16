@@ -48,6 +48,18 @@ public class ProdutoController {
         return ResponseEntity.ok(lista);
     }
 
+    // BUSCAR POR NOME
+    @GetMapping("/buscar")
+    public ResponseEntity<List<ProdutoDTO>> buscarPorNome(@RequestParam String nome) {
+        List<ProdutoDTO> lista = produtoRepository.findAll()
+                .stream()
+                .filter(p -> p.getNome().toLowerCase().contains(nome.toLowerCase()))
+                .map(this::toDTO)
+                .toList();
+
+        return ResponseEntity.ok(lista);
+    }
+
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {

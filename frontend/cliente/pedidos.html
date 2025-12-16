@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Pedidos - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>🍦 Gestfy</h1>
+        <p>Meus Pedidos</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <div style="margin-bottom: 20px;">
+                <a href="catalogo.html" class="btn">← Fazer Novo Pedido</a>
+            </div>
+
+            <div id="mensagem" class="msg" style="display: none;"></div>
+
+            <h2 class="section-title">Histórico de Pedidos</h2>
+
+            <div class="table-wrapper">
+                <table class="tabela-geral">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaPedidos">
+                        <!-- Pedidos serão carregados aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 <span>Gestfy</span> - Seu sistema de gestão integrado</p>
+    </footer>
+
+    <script>
+        const API_PEDIDOS = "http://localhost:8080/api/pedidos";
+        const tabelaPedidos = document.getElementById("tabelaPedidos");
+        const msg = document.getElementById("mensagem");
+
+        const statusMap = {
+            "RECEBIDO": { label: "Recebido", badge: "status-recebido" },
+            "EM_PREPARO": { label: "Em Preparo", badge: "status-preparacao" },
+            "PRONTO_RETIRADA": { label: "Pronto", badge: "status-pronto" },
+            "SAIU_ENTREGA": { label: "Entrega", badge: "status-entrega" },
+            "FINALIZADO": { label: "Finalizado", badge: "status-finalizado" }
+        };
+
+        async function carregarPedidos() {
+            try {
+                const response = await fetch(API_PEDIDOS);
+                if (!response.ok) throw new Error("Erro ao buscar pedidos");
+                
+                const pedidos = await response.json();
+
+                if (pedidos.length === 0) {
+                    tabelaPedidos.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #888;">Nenhum pedido encontrado</td></tr>';
+                    return;
+                }
+
+                tabelaPedidos.innerHTML = "";
+                pedidos.forEach(pedido => {
+                    const statusInfo = statusMap[pedido.status] || { label: pedido.status, badge: "status-recebido" };
+                    const data = new Date(pedido.data);
+                    const dataFormatada = data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td style="font-weight: 600;">#${pedido.id}</td>
+                        <td>${pedido.clienteNome}</td>
+                        <td style="font-weight: 600; color: var(--rosa);">R$ ${parseFloat(pedido.total).toFixed(2)}</td>
+                        <td><span class="${statusInfo.badge}" style="padding: 4px 8px; border-radius: 4px; font-size: 11px;">${statusInfo.label}</span></td>
+                        <td style="font-size: 12px; color: #888;">${dataFormatada}</td>
+                        <td>
+                            <button onclick="acompanharPedido(${pedido.id})" class="btn-small" style="background: var(--rosa);">Ver</button>
+                        </td>
+                    `;
+                    tabelaPedidos.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "❌ Erro ao carregar pedidos";
+                msg.style.display = "block";
+            }
+        }
+
+        function acompanharPedido(id) {
+            window.location.href = `acompanhamento.html?id=${id}`;
+        }
+
+        carregarPedidos();
+        setInterval(carregarPedidos, 10000);
+    </script>
+</body>
+</html>
