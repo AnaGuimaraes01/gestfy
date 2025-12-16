@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
@@ -53,7 +54,8 @@ public class PedidoController {
         Pedido pedido = new Pedido();
         pedido.setCliente(cliente);
         pedido.setFormaPagamento(request.formaPagamento());
-        pedido.setStatus("ABERTO");
+        pedido.setFormaRecebimento(request.formaRecebimento());
+        pedido.setStatus("RECEBIDO");
         pedido.setData(LocalDateTime.now());
 
         // 3️⃣ Cria os itens do pedido
@@ -167,6 +169,7 @@ public class PedidoController {
                 pedido.getCliente().getNome(),
                 pedido.getCliente().getTelefone(),
                 pedido.getFormaPagamento(),
+                pedido.getFormaRecebimento(),
                 pedido.getStatus(),
                 totalFinal > 0 ? totalFinal : 0.0,
                 pedido.getData(),

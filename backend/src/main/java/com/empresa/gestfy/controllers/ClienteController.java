@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
@@ -80,7 +81,8 @@ public class ClienteController {
 
         cliente = clienteRepository.save(cliente);
 
-        return ResponseEntity.ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
+        return ResponseEntity
+                .ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
     }
 
     // =========================

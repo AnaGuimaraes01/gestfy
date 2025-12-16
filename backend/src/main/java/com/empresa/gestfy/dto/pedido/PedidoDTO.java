@@ -4,12 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record PedidoDTO(
-                Long id,
-                String nomeCliente,
-                String telefone,
-                String formaPagamento,
-                String status,
-                Double total,
-                LocalDateTime data,
-                List<PedidoItemDTO> itens) {
+        Long id,
+        String nomeCliente,
+        String telefone,
+        String formaPagamento,
+        String formaRecebimento,
+        String status,
+        Double total,
+        LocalDateTime data,
+        List<PedidoItemDTO> itens) {
 }
