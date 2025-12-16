@@ -2,14 +2,13 @@ package com.empresa.gestfy.controllers;
 
 import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
 import com.empresa.gestfy.dto.pedido.PedidoRequest;
+import com.empresa.gestfy.models.Cliente;
 import com.empresa.gestfy.models.Pedido;
 import com.empresa.gestfy.models.PedidoItem;
 import com.empresa.gestfy.models.Produto;
-import com.empresa.gestfy.models.Cliente;
-import com.empresa.gestfy.repositories.PedidoItemRepository;
+import com.empresa.gestfy.repositories.ClienteRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
 import com.empresa.gestfy.repositories.ProdutoRepository;
-import com.empresa.gestfy.repositories.ClienteRepository;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,18 +24,15 @@ import java.util.List;
 public class PedidoController {
 
     private final PedidoRepository pedidoRepository;
-    private final PedidoItemRepository pedidoItemRepository;
     private final ProdutoRepository produtoRepository;
     private final ClienteRepository clienteRepository;
 
     public PedidoController(
             PedidoRepository pedidoRepository,
-            PedidoItemRepository pedidoItemRepository,
             ProdutoRepository produtoRepository,
             ClienteRepository clienteRepository
     ) {
         this.pedidoRepository = pedidoRepository;
-        this.pedidoItemRepository = pedidoItemRepository;
         this.produtoRepository = produtoRepository;
         this.clienteRepository = clienteRepository;
     }
@@ -45,13 +41,11 @@ public class PedidoController {
     // CRIAR PEDIDO
     // =========================
     @PostMapping
-    public ResponseEntity<Pedido> criarPedido(
-            @RequestBody @Valid PedidoRequest request
-    ) {
+    public ResponseEntity<Pedido> criarPedido(@RequestBody @Valid PedidoRequest request) {
 
         // 1️⃣ Busca o cliente
         Cliente cliente = clienteRepository.findById(request.clienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado: ID " + request.clienteId()));
 
         // 2️⃣ Cria o pedido
         Pedido pedido = new Pedido();
@@ -60,36 +54,27 @@ public class PedidoController {
         pedido.setStatus("ABERTO");
         pedido.setData(LocalDateTime.now());
 
-        pedido = pedidoRepository.save(pedido);
-
-        double total = 0.0;
-        List<PedidoItem> itens = new ArrayList<>();
-
         // 3️⃣ Cria os itens do pedido
+        List<PedidoItem> itens = new ArrayList<>();
         for (PedidoItemRequest itemReq : request.itens()) {
-
-            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+            Produto produto = produtoRepository.findById(itemReq.getIdProduto())
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + itemReq.getIdProduto()));
 
             PedidoItem item = new PedidoItem();
-            item.setPedido(pedido);
-            item.setProduto(produto);
-            item.setQuantidade(itemReq.getQuantidade());
-            item.setPrecoUnitario(produto.getPreco());
-
-            double subtotal = produto.getPreco() * itemReq.getQuantidade();
-            total += subtotal;
+            item.setPedido(pedido); // importante!
+            item.setProduto(produto); // importante!
+            item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
+            item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
 
             itens.add(item);
         }
 
-        // 4️⃣ Salva os itens e atualiza o pedido
-        pedidoItemRepository.saveAll(itens);
-
-        pedido.setTotal(total);
+        // 4️⃣ Adiciona os itens ao pedido e calcula total
         pedido.setItens(itens);
+        pedido.setTotal(itens.stream().mapToDouble(i -> i.getPrecoUnitario() * i.getQuantidade()).sum());
 
-        pedidoRepository.save(pedido);
+        // 5️⃣ Salva o pedido (JPA salva os itens automaticamente)
+        pedido = pedidoRepository.save(pedido);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
     }
@@ -121,7 +106,7 @@ public class PedidoController {
             @RequestParam String status
     ) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado: ID " + id));
 
         pedido.setStatus(status);
         pedidoRepository.save(pedido);
