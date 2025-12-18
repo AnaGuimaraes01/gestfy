@@ -14,6 +14,7 @@ const dataAtual = document.getElementById("data-atual");
 const modalFechamento = document.getElementById("modal-fechamento");
 
 let dataAtualSelecionada = new Date().toISOString().split("T")[0];
+let caixaFechado = false;
 
 // ==========================================
 // INICIALIZAÇÃO
@@ -165,13 +166,65 @@ async function confirmarFechamento() {
     try {
         // Aqui você poderia fazer uma chamada para marcar o caixa como fechado
         // Por enquanto, apenas mostramos a confirmação
-        mostrarMensagem("Caixa fechado com sucesso! 🎉", "sucesso");
+        caixaFechado = true;
+        mostrarMensagem("✅ Caixa fechado com sucesso!", "sucesso");
         fecharModal();
-        setTimeout(recarregar, 2000);
+        
+        // Desabilitar ações
+        document.getElementById("btn-fechar-caixa").disabled = true;
+        document.getElementById("btn-fechar-caixa").textContent = "🔒 Caixa Fechado";
+        document.getElementById("btn-fechar-caixa").style.opacity = "0.6";
+        
+        // Mostrar estado do caixa fechado
+        const estadoCaixa = document.createElement("div");
+        estadoCaixa.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #34a853, #2e7d32);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 5000;
+            animation: popUp 0.3s ease;
+        `;
+        estadoCaixa.innerHTML = `
+            <p style="font-size: 48px; margin: 0 0 16px 0;">🔒</p>
+            <h2 style="margin: 0 0 10px 0; font-size: 24px;">Caixa Fechado</h2>
+            <p style="margin: 0 0 20px 0; opacity: 0.9;">O caixa foi fechado com sucesso para o dia de hoje.</p>
+            <button onclick="abrirCaixaNovamente()" style="
+                background: white;
+                color: #34a853;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 14px;
+            ">🔓 Abrir Caixa Novamente</button>
+        `;
+        
+        document.body.appendChild(estadoCaixa);
+        
+        setTimeout(() => {
+            estadoCaixa.remove();
+        }, 4000);
+        
     } catch (erro) {
         console.error("Erro:", erro);
         mostrarMensagem("Erro ao fechar caixa", "erro");
     }
+}
+
+function abrirCaixaNovamente() {
+    caixaFechado = false;
+    document.getElementById("btn-fechar-caixa").disabled = false;
+    document.getElementById("btn-fechar-caixa").textContent = "🔒 Fechar Caixa do Dia";
+    document.getElementById("btn-fechar-caixa").style.opacity = "1";
+    mostrarMensagem("✅ Caixa aberto novamente!", "sucesso");
 }
 
 // ==========================================

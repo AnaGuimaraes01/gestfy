@@ -35,10 +35,14 @@ async function listarProdutos() {
         margin-bottom: 20px;
         border-radius: 6px;
       `;
+      
+      const quantidadeTotal = produtosBaixo.reduce((acc, p) => acc + p.quantidade, 0);
+      const nomesProdutos = produtosBaixo.map(p => p.nome).join(', ');
+      
       alertaBaixo.innerHTML = `
-        <p style="color: #fbbc04; font-weight: 600; margin: 0 0 8px 0;">⚠️ ALERTA DE ESTOQUE BAIXO</p>
+        <p style="color: #fbbc04; font-weight: 600; margin: 0 0 8px 0;">⚠️ ${produtosBaixo.length} produto(s) com estoque baixo</p>
         <p style="color: #bdbdbd; font-size: 13px; margin: 0;">
-          ${produtosBaixo.map(p => `<strong>${p.nome}</strong> (${p.quantidade} un.)`).join(', ')}
+          ${nomesProdutos}
         </p>
       `;
       produtosList.appendChild(alertaBaixo);
@@ -75,7 +79,6 @@ async function listarProdutos() {
         </div>
         <div class="produto-actions">
           <button class="btn-small" onclick="editarProduto(${produto.id})">✏️ Editar</button>
-          <button class="btn-small btn-danger" onclick="deletarProduto(${produto.id})">🗑️ Deletar</button>
         </div>
       `;
 
@@ -175,34 +178,6 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-/* =========================
-   DELETAR PRODUTO
-========================= */
-async function deletarProduto(id) {
-  if (!confirm("Tem certeza que deseja deletar este produto?")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE"
-    });
-
-    if (!response.ok) {
-      throw new Error("Erro ao deletar produto");
-    }
-
-    msg.textContent = "✅ Produto deletado com sucesso!";
-    msg.style.color = "#34a853";
-    listarProdutos();
-    setTimeout(() => msg.textContent = "", 3000);
-
-  } catch (error) {
-    console.error(error);
-    msg.textContent = "❌ " + error.message;
-    msg.style.color = "#f44";
-  }
-}
 
 /* =========================
    EDITAR PRODUTO

@@ -31,30 +31,37 @@
 
   <!-- FILTROS -->
   <div class="card">
-    <h2 class="section-title">Período</h2>
-    <div class="filter-grid">
-      <input type="date" id="dataInicio" class="select-filter">
-      <input type="date" id="dataFim" class="select-filter">
-      <button class="btn" onclick="gerarRelatorio()">📊 Gerar Relatório</button>
-      <button class="btn" style="background: #34a853;" onclick="exportarCSV()">💾 Exportar CSV</button>
+    <h2 class="section-title">Período e Filtros</h2>
+    <div class="filter-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: flex-end;">
+      <div>
+        <label style="display: block; font-size: 12px; color: #999; margin-bottom: 6px;">Data Início</label>
+        <input type="date" id="dataInicio" class="select-filter" style="width: 100%; padding: 10px; background: var(--cinza-input); border: 1px solid #3a3a3a; border-radius: 6px; color: white;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; color: #999; margin-bottom: 6px;">Data Fim</label>
+        <input type="date" id="dataFim" class="select-filter" style="width: 100%; padding: 10px; background: var(--cinza-input); border: 1px solid #3a3a3a; border-radius: 6px; color: white;">
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="gerarRelatorio()" style="flex: 1;">📊 Gerar Relatório</button>
+        <button class="btn" style="background: #34a853; flex: 1;" onclick="exportarCSV()">💾 Exportar CSV</button>
+      </div>
     </div>
   </div>
 
   <!-- RELATÓRIO DE VENDAS POR DIA -->
   <div class="card card-full">
-    <h2 class="section-title">Vendas por Dia</h2>
+    <h2 class="section-title">📊 Vendas por Dia</h2>
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
             <th>Data</th>
-            <th>Quantidade de Vendas</th>
+            <th>Qtd. de Vendas</th>
             <th>Total (R$)</th>
-            <th>Ticket Médio</th>
           </tr>
         </thead>
         <tbody id="relatorioList">
-          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
+          <tr><td colspan="3" style="text-align: center; color: #999;">Clique em "Gerar Relatório" para carregar dados</td></tr>
         </tbody>
       </table>
     </div>
@@ -62,19 +69,19 @@
 
   <!-- RELATÓRIO DE ESTOQUE -->
   <div class="card card-full">
-    <h2 class="section-title">Status do Estoque</h2>
+    <h2 class="section-title">📦 Status do Estoque</h2>
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
             <th>Produto</th>
-            <th>Últimas Entradas</th>
-            <th>Últimas Saídas</th>
-            <th>Data Última Movimentação</th>
+            <th style="text-align: center;">Entradas</th>
+            <th style="text-align: center;">Saídas</th>
+            <th>Última Movimentação</th>
           </tr>
         </thead>
         <tbody id="estoqueList">
-          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
+          <tr><td colspan="4" style="text-align: center; color: #999;">Clique em "Gerar Relatório" para carregar dados</td></tr>
         </tbody>
       </table>
     </div>
@@ -134,7 +141,7 @@
       
       if (!response.ok) {
         if (response.status === 404) {
-          document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
+          document.getElementById("relatorioList").innerHTML = '<tr><td colspan="3" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
           return;
         }
         throw new Error("Erro ao buscar vendas");
@@ -143,7 +150,7 @@
       const vendas = await response.json();
       
       if (!Array.isArray(vendas) || vendas.length === 0) {
-        document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
+        document.getElementById("relatorioList").innerHTML = '<tr><td colspan="3" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
         atualizarEstatisticas([]);
         return;
       }
@@ -151,27 +158,22 @@
       document.getElementById("relatorioList").innerHTML = "";
       let totalVendido = 0;
       let totalVendas = 0;
-
-      vendas.forEach(venda => {
         const row = document.createElement("tr");
         const total = parseFloat(venda.total) || 0;
         const qtd = venda.quantidade || 1;
-        const ticketMedio = total / qtd;
 
         totalVendido += total;
         totalVendas += qtd;
 
         row.innerHTML = `
-          <td>${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
-          <td>${qtd}</td>
-          <td>R$ ${total.toFixed(2)}</td>
-          <td>R$ ${ticketMedio.toFixed(2)}</td>
+          <td style="font-weight: 600;">${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
+          <td style="text-align: center; color: #34a853; font-weight: 600;">${qtd} vendas</td>
+          <td style="text-align: right; color: var(--rosa); font-weight: 600;">R$ ${total.toFixed(2)}</td>
         `;
         document.getElementById("relatorioList").appendChild(row);
       });
 
       // Atualizar estatísticas
-      const ticketMedio = totalVendas > 0 ? totalVendido / totalVendas : 0;
       document.getElementById("totalVendido").textContent = "R$ " + totalVendido.toFixed(2);
       document.getElementById("qtdVendas").textContent = totalVendas;
 
@@ -254,7 +256,7 @@
         return;
       }
 
-      let csv = "Data,Quantidade,Total (R$),Ticket Médio\n";
+      let csv = "Data,Quantidade,Total (R$)\n";
 
       rows.forEach(tr => {
         const cells = [];
@@ -287,13 +289,14 @@
     }
   }
 
-  // Inicializar
+      // Inicializar
   definirDatas();
-  gerarRelatorio();
 
-  // Auto-refresh a cada 30 segundos
+  // Auto-refresh a cada 30 segundos (apenas se houver dados)
   setInterval(() => {
-    gerarRelatorio();
+    if (document.getElementById("dataInicio").value && document.getElementById("dataFim").value) {
+      gerarRelatorio();
+    }
   }, 30000);
 </script>
 

@@ -183,35 +183,8 @@ public class PedidoController {
         if (!statusValidos.contains(novoStatus)) {
             throw new RuntimeException("Status inválido: " + novoStatus);
         }
-        if (statusAtual.equals("FINALIZADO")) {
-            throw new RuntimeException("Pedido já foi finalizado, não pode ser alterado");
-        }
-        // Permite finalizar a partir de qualquer status, exceto FINALIZADO
-        if (novoStatus.equals("FINALIZADO")) {
-            return;
-        }
-        // Permite CANCELADO a partir de qualquer status, exceto FINALIZADO
-        if (novoStatus.equals("CANCELADO")) {
-            return;
-        }
-        // Mantém as transições originais para os demais
-        if (statusAtual.equals("RECEBIDO")) {
-            if (!novoStatus.equals("EM_PREPARO")) {
-                throw new RuntimeException("De RECEBIDO só é possível ir para EM_PREPARO ou FINALIZADO/CANCELADO");
-            }
-        } else if (statusAtual.equals("EM_PREPARO")) {
-            if (!novoStatus.equals("PRONTO_RETIRADA") && !novoStatus.equals("SAIU_ENTREGA")) {
-                throw new RuntimeException("De EM_PREPARO só é possível ir para PRONTO_RETIRADA, SAIU_ENTREGA ou FINALIZADO/CANCELADO");
-            }
-        } else if (statusAtual.equals("PRONTO_RETIRADA")) {
-            if (!novoStatus.equals("FINALIZADO")) {
-                throw new RuntimeException("De PRONTO_RETIRADA só é possível ir para FINALIZADO ou CANCELADO");
-            }
-        } else if (statusAtual.equals("SAIU_ENTREGA")) {
-            if (!novoStatus.equals("FINALIZADO")) {
-                throw new RuntimeException("De SAIU_ENTREGA só é possível ir para FINALIZADO ou CANCELADO");
-            }
-        }
+        // Permite mudar de qualquer status para qualquer outro
+        // Sem restrições de transição
     }
 
     // =========================
@@ -257,6 +230,7 @@ public class PedidoController {
                 pedido.getCliente().getTelefone(),
                 pedido.getFormaPagamento(),
                 pedido.getFormaRecebimento(),
+                pedido.getEndereco(),
                 pedido.getStatus(),
                 totalFinal > 0 ? totalFinal : 0.0,
                 pedido.getData(),

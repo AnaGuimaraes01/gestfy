@@ -12,5 +12,7 @@ public record ClienteRequest(
     String telefone,
 
     @Email(message = "E-mail inválido")
-    String email
+    String email,
+
+    String endereco
 ) {}

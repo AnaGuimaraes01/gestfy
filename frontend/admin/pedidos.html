@@ -19,6 +19,46 @@
   <div class="card card-full">
     <h2 class="section-title">Pedidos Registrados</h2>
 
+    <!-- FILTROS -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; padding: 16px; background: #1a1a1a; border-radius: 8px;">
+      <div>
+        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 6px;">🔍 Filtrar por:</label>
+        <select id="tipoFiltro" style="width: 100%; padding: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 13px;">
+          <option value="todos">📋 Todos</option>
+          <option value="id">🆔 Por ID</option>
+          <option value="cliente">👤 Por Cliente</option>
+          <option value="status">⏳ Por Status</option>
+          <option value="pagamento">💳 Por Pagamento</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 6px;">📝 Valor:</label>
+        <input type="text" id="valorFiltro" placeholder="Digite o valor..." style="width: 100%; padding: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 13px;">
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 6px;">⏳ Status (se aplicável):</label>
+        <select id="filtroStatus" style="width: 100%; padding: 8px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 4px; font-size: 13px;">
+          <option value="">-- Selecione --</option>
+          <option value="RECEBIDO">RECEBIDO</option>
+          <option value="EM_PREPARO">EM PREPARO</option>
+          <option value="PRONTO_RETIRADA">PRONTO RETIRADA</option>
+          <option value="SAIU_ENTREGA">SAIU ENTREGA</option>
+          <option value="FINALIZADO">FINALIZADO</option>
+          <option value="CANCELADO">CANCELADO</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 12px; color: #888; margin-bottom: 6px;">&nbsp;</label>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="aplicarFiltro()" style="flex: 1; padding: 8px; background: var(--rosa); color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 13px;">🔍 Filtrar</button>
+          <button onclick="limparFiltro()" style="flex: 1; padding: 8px; background: #444; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 13px;">✕ Limpar</button>
+        </div>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <table class="tabela-pedidos">
         <thead>

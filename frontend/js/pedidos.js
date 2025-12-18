@@ -1,11 +1,22 @@
 const API_URL = "http://localhost:8080/api/pedidos";
 const listaPedidos = document.getElementById("listaPedidos");
+let todosPedidos = [];
 
 async function carregarPedidos() {
     const response = await fetch(API_URL);
-    const pedidos = await response.json();
+    todosPedidos = await response.json();
+    exibirPedidos(todosPedidos);
+}
 
+function exibirPedidos(pedidos) {
     listaPedidos.innerHTML = "";
+
+    if (pedidos.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="6" style="text-align: center; color: #999; padding: 20px;">Nenhum pedido encontrado</td>`;
+        listaPedidos.appendChild(tr);
+        return;
+    }
 
     pedidos.forEach(pedido => {
         const tr = document.createElement("tr");
@@ -122,6 +133,10 @@ async function verDetalhes(id) {
                     <p style="font-size: 11px; color: #888; margin-bottom: 4px;">STATUS</p>
                     <p style="font-weight: 600; font-size: 14px; color: var(--rosa);">${pedido.status?.replace(/_/g, ' ') || 'N/A'}</p>
                 </div>
+                ${pedido.endereco ? `<div style="background: #1a1a1a; padding: 12px; border-radius: 8px; grid-column: 1 / -1;">
+                    <p style="font-size: 11px; color: #888; margin-bottom: 4px;">📍 ENDEREÇO DE ENTREGA</p>
+                    <p style="font-weight: 600; font-size: 14px;">${pedido.endereco}</p>
+                </div>` : ''}
             </div>
         </div>
 
@@ -173,6 +188,38 @@ async function verDetalhes(id) {
             modal.remove();
         }
     });
+}
+
+/* =========================
+   FILTROS
+========================= */
+function aplicarFiltro() {
+    const tipoFiltro = document.getElementById('tipoFiltro').value;
+    const valorFiltro = document.getElementById('valorFiltro').value.toLowerCase().trim();
+    const filtroStatus = document.getElementById('filtroStatus').value;
+
+    let resultados = todosPedidos;
+
+    if (tipoFiltro === 'todos') {
+        resultados = todosPedidos;
+    } else if (tipoFiltro === 'id' && valorFiltro) {
+        resultados = todosPedidos.filter(p => p.id.toString().includes(valorFiltro));
+    } else if (tipoFiltro === 'cliente' && valorFiltro) {
+        resultados = todosPedidos.filter(p => p.nomeCliente.toLowerCase().includes(valorFiltro));
+    } else if (tipoFiltro === 'status' && filtroStatus) {
+        resultados = todosPedidos.filter(p => p.status === filtroStatus);
+    } else if (tipoFiltro === 'pagamento' && valorFiltro) {
+        resultados = todosPedidos.filter(p => p.formaPagamento.toLowerCase().includes(valorFiltro));
+    }
+
+    exibirPedidos(resultados);
+}
+
+function limparFiltro() {
+    document.getElementById('tipoFiltro').value = 'todos';
+    document.getElementById('valorFiltro').value = '';
+    document.getElementById('filtroStatus').value = '';
+    exibirPedidos(todosPedidos);
 }
 
 carregarPedidos();

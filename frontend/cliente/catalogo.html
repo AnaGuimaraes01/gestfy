@@ -96,7 +96,7 @@
             exibirProdutos(filtrados);
         });
 
-        // Adicionar ao carrinho
+        // Adicionar ao carrinho com toast flutuante
         function adicionarCarrinho(id, nome, preco) {
             let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
             
@@ -115,23 +115,45 @@
             
             localStorage.setItem("carrinho", JSON.stringify(carrinho));
             
-            // Mostrar feedback mais visível
-            msg.textContent = `✅ "${nome}" adicionado ao carrinho!`;
-            msg.style.display = "block";
-            msg.style.background = "rgba(52, 168, 83, 0.15)";
-            msg.style.color = "#34a853";
-            msg.style.borderLeftColor = "#34a853";
-            msg.style.borderLeft = "4px solid #34a853";
-            msg.style.padding = "16px";
-            msg.style.borderRadius = "6px";
-            msg.style.marginBottom = "20px";
-            msg.style.fontSize = "15px";
-            msg.style.fontWeight = "600";
+            // Criar toast flutuante
+            const toast = document.createElement("div");
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background: linear-gradient(135deg, #34a853, #2e7d32);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(52, 168, 83, 0.4);
+                font-weight: 600;
+                font-size: 14px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+            `;
+            toast.innerHTML = `✨ ${nome} adicionado ao carrinho!`;
+            document.body.appendChild(toast);
             
             setTimeout(() => {
-                msg.style.display = "none";
-            }, 3000);
+                toast.style.animation = "slideOut 0.3s ease";
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
         }
+        
+        // Adicionar animações
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
 
         // Carregar produtos na página
         carregarProdutos();

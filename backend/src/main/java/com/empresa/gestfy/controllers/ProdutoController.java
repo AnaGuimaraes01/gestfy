@@ -4,6 +4,7 @@ import com.empresa.gestfy.dto.produto.ProdutoDTO;
 import com.empresa.gestfy.dto.produto.ProdutoRequest;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.ProdutoRepository;
+import com.empresa.gestfy.repositories.PedidoItemRepository;
 import com.empresa.gestfy.models.Estoque;
 import com.empresa.gestfy.repositories.EstoqueRepository;
 import java.time.LocalDateTime;
@@ -21,10 +22,12 @@ public class ProdutoController {
 
     private final ProdutoRepository produtoRepository;
     private final EstoqueRepository estoqueRepository;
+    private final PedidoItemRepository pedidoItemRepository;
 
-    public ProdutoController(ProdutoRepository produtoRepository, EstoqueRepository estoqueRepository) {
+    public ProdutoController(ProdutoRepository produtoRepository, EstoqueRepository estoqueRepository, PedidoItemRepository pedidoItemRepository) {
         this.produtoRepository = produtoRepository;
         this.estoqueRepository = estoqueRepository;
+        this.pedidoItemRepository = pedidoItemRepository;
     }
 
     // CREATE
@@ -98,15 +101,29 @@ public class ProdutoController {
         return ResponseEntity.ok(toDTO(atualizado));
         }
 
-    // DELETE
+    // DELETE - Remove itens do pedido primeiro, depois o produto
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!produtoRepository.existsById(id)) {
-            throw new RuntimeException("Produto não encontrado");
-        }
+        try {
+            // Verificar se produto existe
+            Produto produto = produtoRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        produtoRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+            // Encontrar todos os PedidoItems que usam este Produto
+            var itensDoProducto = pedidoItemRepository.findByProdutoId(id);
+            
+            // Deletar os PedidoItems (remove as referências)
+            if (!itensDoProducto.isEmpty()) {
+                pedidoItemRepository.deleteAll(itensDoProducto);
+            }
+
+            // Agora deletar o Produto (sem riscos de FK)
+            produtoRepository.deleteById(id);
+            
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao deletar produto: " + e.getMessage());
+        }
     }
 
     // converter Model → DTO

@@ -35,25 +35,34 @@
 
   <!-- FILTROS -->
   <div class="card">
-    <h2 class="section-title">Filtros</h2>
-    <div class="filter-grid">
-      <select id="filtroTipo" class="select-filter" onchange="carregarEstoque()">
-        <option value="">Todas as movimentações</option>
-        <option value="ENTRADA">Entradas</option>
-        <option value="SAIDA">Saídas</option>
-      </select>
-      <input type="date" id="filtroData" class="select-filter" onchange="carregarEstoque()">
+    <h2 class="section-title">Filtros e Busca</h2>
+    <div class="filter-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-items: flex-end;">
+      <div>
+        <label style="display: block; font-size: 12px; color: #999; margin-bottom: 6px;">🔄 Tipo de Movimentação</label>
+        <select id="filtroTipo" class="select-filter" style="width: 100%; padding: 10px; background: var(--cinza-input); border: 1px solid #3a3a3a; border-radius: 6px; color: white;">
+          <option value="">Todas as movimentações</option>
+          <option value="ENTRADA">✅ Entradas</option>
+          <option value="SAIDA">❌ Saídas</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; font-size: 12px; color: #999; margin-bottom: 6px;">📅 Data</label>
+        <input type="date" id="filtroData" class="select-filter" style="width: 100%; padding: 10px; background: var(--cinza-input); border: 1px solid #3a3a3a; border-radius: 6px; color: white;">
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button onclick="aplicarFiltroEstoque()" style="flex: 1; padding: 10px; background: var(--rosa); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.3s;">🔍 Filtrar</button>
+        <button onclick="limparFiltroEstoque()" style="flex: 1; padding: 10px; background: #444; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.3s;">✕ Limpar</button>
+      </div>
     </div>
   </div>
 
   <!-- TABELA DE MOVIMENTAÇÕES -->
   <div class="card card-full">
-    <h2 class="section-title">Movimentações de Estoque</h2>
+    <h2 class="section-title">Histórico de Movimentações</h2>
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Produto</th>
             <th>Tipo</th>
             <th>Quantidade</th>
@@ -61,7 +70,7 @@
           </tr>
         </thead>
         <tbody id="estoqueList">
-          <tr><td colspan="5" style="text-align: center; color: #999;">Carregando...</td></tr>
+          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -112,7 +121,7 @@
       
       if (!response.ok) {
         if (response.status === 404) {
-          estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+          estoqueList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
           return;
         }
         throw new Error("Erro ao buscar estoque");
@@ -121,7 +130,7 @@
       const movimentacoes = await response.json();
       
       if (!Array.isArray(movimentacoes) || movimentacoes.length === 0) {
-        estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+        estoqueList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
         atualizarEstatisticas([]);
         return;
       }
@@ -133,15 +142,16 @@
         const row = document.createElement("tr");
         const tipo = mov.tipoMovimento || mov.tipo || "---";
         const badge = tipo === "ENTRADA" ? "✅ ENTRADA" : "❌ SAÍDA";
+        const corBg = tipo === "ENTRADA" ? "rgba(52, 168, 83, 0.05)" : "rgba(234, 67, 53, 0.05)";
         
         // Tentar obter nome do produto
         let nomeProduto = mov.produtoNome || mov.produto?.nome || produtosMap[mov.produtoId] || `Produto #${mov.produtoId}`;
         
+        row.style.backgroundColor = corBg;
         row.innerHTML = `
-          <td>#${mov.id}</td>
           <td><strong>${nomeProduto}</strong></td>
-          <td><span class="badge" style="background: ${tipo === 'ENTRADA' ? '#34a853' : '#ea4335'}; padding: 4px 8px; border-radius: 4px; font-size: 11px;">${badge}</span></td>
-          <td>${mov.quantidade} un.</td>
+          <td><span class="badge" style="background: ${tipo === 'ENTRADA' ? '#34a853' : '#ea4335'}; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: white;">${badge}</span></td>
+          <td style="font-weight: 600; ${tipo === 'ENTRADA' ? 'color: #34a853' : 'color: #ea4335'};">${mov.quantidade} un.</td>
           <td>${new Date(mov.dataMovimento).toLocaleString("pt-BR")}</td>
         `;
         estoqueList.appendChild(row);
@@ -150,7 +160,7 @@
       atualizarEstatisticas(movimentacoes);
     } catch (error) {
       console.error(error);
-      estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+      estoqueList.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
       msg.textContent = "❌ " + error.message;
       msg.style.display = "block";
     }
@@ -159,21 +169,22 @@
   function atualizarEstatisticas(movimentacoes) {
     const entradas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "ENTRADA").length;
     const saidas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "SAIDA").length;
+    const produtosUnicos = new Set(movimentacoes.map(m => m.produtoId)).size;
 
-    document.getElementById("totalProdutos").textContent = new Set(movimentacoes.map(m => m.produtoId)).size;
+    document.getElementById("totalProdutos").textContent = produtosUnicos > 0 ? produtosUnicos : "0";
     document.getElementById("entradasHoje").textContent = entradas;
     document.getElementById("saidasHoje").textContent = saidas;
   }
 
-  // Inicializar
+  // Remover campo ID da tabela
   document.addEventListener("DOMContentLoaded", () => {
     carregarProdutos().then(() => carregarEstoque());
+    
+    // Auto-refresh a cada 30 segundos
+    setInterval(() => {
+      carregarEstoque();
+    }, 30000);
   });
-
-  // Auto-refresh a cada 30 segundos
-  setInterval(() => {
-    carregarEstoque();
-  }, 30000);
 </script>
 
 </body>

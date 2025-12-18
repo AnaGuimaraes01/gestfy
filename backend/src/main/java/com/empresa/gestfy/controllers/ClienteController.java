@@ -32,12 +32,13 @@ public class ClienteController {
         cliente.setNome(request.nome());
         cliente.setTelefone(request.telefone());
         cliente.setEmail(request.email());
+        cliente.setEndereco(request.endereco());
 
         cliente = clienteRepository.save(cliente);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
+                .body(ClienteDTO.fromEntity(cliente));
     }
 
     // =========================
@@ -47,7 +48,7 @@ public class ClienteController {
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
         List<ClienteDTO> clientes = clienteRepository.findAll()
                 .stream()
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail()))
+                .map(ClienteDTO::fromEntity)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(clientes);
@@ -59,7 +60,7 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> buscarPorId(@PathVariable Long id) {
         return clienteRepository.findById(id)
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail()))
+                .map(ClienteDTO::fromEntity)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -78,11 +79,11 @@ public class ClienteController {
         cliente.setNome(request.nome());
         cliente.setTelefone(request.telefone());
         cliente.setEmail(request.email());
+        cliente.setEndereco(request.endereco());
 
         cliente = clienteRepository.save(cliente);
 
-        return ResponseEntity
-                .ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
+        return ResponseEntity.ok(ClienteDTO.fromEntity(cliente));
     }
 
     // =========================

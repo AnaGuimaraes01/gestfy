@@ -40,6 +40,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Endereço de Entrega *</label>
+                        <input type="text" id="endereco" placeholder="Rua, número, complemento, bairro" required>
+                    </div>
+
+                    <div class="form-group">
                         <label>Forma de Recebimento *</label>
                         <select id="formaRecebimento" required>
                             <option value="">-- Selecione --</option>
@@ -122,6 +127,7 @@
             const nome = document.getElementById("nome").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
             const email = document.getElementById("email").value.trim();
+            const endereco = document.getElementById("endereco").value.trim();
             const formaRecebimento = document.getElementById("formaRecebimento").value;
             const formaPagamento = document.getElementById("formaPagamento").value;
 
@@ -147,12 +153,21 @@
                 return;
             }
 
+            // Validar endereço se for entrega
+            if (formaRecebimento === "ENTREGA" && !endereco) {
+                msg.textContent = "⚠️ Endereço é obrigatório para entrega";
+                msg.style.display = "block";
+                msg.style.color = "#fbbc04";
+                return;
+            }
+
             try {
                 // 1. Criar cliente
                 const clienteReq = {
                     nome: nome,
                     telefone: telefone,
-                    email: email || ""
+                    email: email || "",
+                    endereco: endereco || ""
                 };
 
                 const resCliente = await fetch(API_URL, {

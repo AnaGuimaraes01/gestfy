@@ -6,14 +6,16 @@ public record ClienteDTO(
     Long id,
     String nome,
     String telefone,
-    String email
+    String email,
+    String endereco
 ) {
     public static ClienteDTO fromEntity(Cliente cliente) {
         return new ClienteDTO(
             cliente.getId(),
             cliente.getNome(),
             cliente.getTelefone(),
-            cliente.getEmail()
+            cliente.getEmail(),
+            cliente.getEndereco()
         );
     }
 }

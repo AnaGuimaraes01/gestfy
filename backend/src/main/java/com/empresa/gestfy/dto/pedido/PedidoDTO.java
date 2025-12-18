@@ -9,6 +9,7 @@ public record PedidoDTO(
         String telefone,
         String formaPagamento,
         String formaRecebimento,
+        String endereco,
         String status,
         Double total,
         LocalDateTime data,
