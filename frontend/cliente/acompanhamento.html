@@ -85,12 +85,15 @@
 
             let itensHTML = pedido.itens.map(item => `
                 <tr>
-                    <td>${item.produtoNome}</td>
+                    <td>${item.nomeProduto}</td>
                     <td style="text-align: center;">${item.quantidade}</td>
                     <td style="text-align: right;">R$ ${parseFloat(item.precoUnitario).toFixed(2)}</td>
                     <td style="text-align: right;">R$ ${parseFloat(item.subtotal).toFixed(2)}</td>
                 </tr>
             `).join("");
+
+            // Mostrar dica apenas se não estiver finalizado
+            const mostrarDica = pedido.status !== "FINALIZADO";
 
             container.innerHTML = `
                 <div style="margin-bottom: 24px;">
@@ -99,8 +102,8 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
                         <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
                             <p style="font-size: 12px; color: #888; margin-bottom: 4px;">CLIENTE</p>
-                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.clienteNome}</p>
-                            <p style="font-size: 13px; color: #bdbdbd;">📞 ${pedido.clienteTelefone}</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.nomeCliente}</p>
+                            <p style="font-size: 13px; color: #bdbdbd;">📞 ${pedido.telefone}</p>
                         </div>
                         <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
                             <p style="font-size: 12px; color: #888; margin-bottom: 4px;">FORMA DE RECEBIMENTO</p>
@@ -146,10 +149,17 @@
                     <p style="font-size: 28px; font-weight: 700; color: var(--rosa);">R$ ${parseFloat(pedido.total).toFixed(2)}</p>
                 </div>
 
+                ${mostrarDica ? `
                 <div style="margin-top: 24px; padding: 16px; background: rgba(176, 48, 96, 0.1); border-left: 4px solid var(--rosa); border-radius: 8px;">
                     <p style="color: #888; font-size: 12px; margin-bottom: 8px;">💡 DICA</p>
-                    <p style="color: #bdbdbd;">Seu pedido está sendo preparado. Acompanhe o status acima e volte aqui para atualizar. Obrigado pela compra!</p>
+                    <p style="color: #bdbdbd;">Seu pedido está sendo preparado. Acompanhe o status acima. Obrigado pela compra!</p>
                 </div>
+                ` : `
+                <div style="margin-top: 24px; padding: 16px; background: rgba(52, 168, 83, 0.1); border-left: 4px solid #34a853; border-radius: 8px;">
+                    <p style="color: #888; font-size: 12px; margin-bottom: 8px;">✅ PEDIDO FINALIZADO</p>
+                    <p style="color: #bdbdbd;">Obrigado pela compra! Aproveite e faça um novo pedido! 🎉</p>
+                </div>
+                `}
             `;
         }
 

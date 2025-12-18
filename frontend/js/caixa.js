@@ -8,7 +8,6 @@ const msg = document.getElementById("msg");
 const filtroData = document.getElementById("filtro-data");
 const btnFiltrar = document.getElementById("btn-filtrar");
 const btnHoje = document.getElementById("btn-hoje");
-const btnRecarregar = document.getElementById("btn-recarregar");
 const btnFecharCaixa = document.getElementById("btn-fechar-caixa");
 const btnRelatorio = document.getElementById("btn-relatorio");
 const dataAtual = document.getElementById("data-atual");
@@ -35,7 +34,6 @@ function inicializar() {
     // Event listeners
     btnFiltrar.addEventListener("click", filtrarPorData);
     btnHoje.addEventListener("click", voltarParaHoje);
-    btnRecarregar.addEventListener("click", recarregar);
     btnFecharCaixa.addEventListener("click", abrirModalFechamento);
     btnRelatorio.addEventListener("click", visualizarRelatorio);
 
@@ -148,17 +146,6 @@ function voltarParaHoje() {
     dataAtualSelecionada = hoje;
     dataAtual.textContent = formatarDataBR(new Date());
     carregarCaixaDoDia();
-}
-
-// ==========================================
-// RECARREGAR
-// ==========================================
-function recarregar() {
-    carregarCaixaDoDia(
-        dataAtualSelecionada === new Date().toISOString().split("T")[0]
-            ? null
-            : dataAtualSelecionada
-    );
 }
 
 // ==========================================

@@ -125,9 +125,25 @@
             const formaRecebimento = document.getElementById("formaRecebimento").value;
             const formaPagamento = document.getElementById("formaPagamento").value;
 
-            if (!nome || !telefone || !formaRecebimento || !formaPagamento) {
+            // Validar nome - sem números
+            if (!nome) {
+                msg.textContent = "⚠️ Nome é obrigatório";
+                msg.style.display = "block";
+                msg.style.color = "#fbbc04";
+                return;
+            }
+            
+            if (!/^[a-záàâãéèêíïóôõöúçñ\s\-]+$/i.test(nome)) {
+                msg.textContent = "⚠️ Nome não pode conter números ou caracteres inválidos";
+                msg.style.display = "block";
+                msg.style.color = "#fbbc04";
+                return;
+            }
+
+            if (!telefone || !formaRecebimento || !formaPagamento) {
                 msg.textContent = "⚠️ Preencha todos os campos obrigatórios";
                 msg.style.display = "block";
+                msg.style.color = "#fbbc04";
                 return;
             }
 
@@ -173,11 +189,13 @@
 
                 // 3. Sucesso
                 localStorage.removeItem("carrinho");
-                msg.textContent = `✅ Pedido ${pedido.id} criado com sucesso!`;
+                msg.textContent = `✅ Pedido #${pedido.id} criado com sucesso! Redirecionando...`;
                 msg.style.display = "block";
                 msg.style.background = "rgba(52, 168, 83, 0.1)";
                 msg.style.color = "#34a853";
                 msg.style.borderLeftColor = "#34a853";
+                form.style.opacity = "0.5";
+                form.style.pointerEvents = "none";
 
                 setTimeout(() => {
                     window.location.href = `acompanhamento.html?id=${pedido.id}`;
@@ -187,6 +205,8 @@
                 console.error(error);
                 msg.textContent = "❌ Erro ao processar pedido: " + error.message;
                 msg.style.display = "block";
+                msg.style.color = "#ea4335";
+                msg.style.borderLeftColor = "#ea4335";
             }
         });
 

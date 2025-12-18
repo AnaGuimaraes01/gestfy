@@ -115,9 +115,22 @@
             
             localStorage.setItem("carrinho", JSON.stringify(carrinho));
             
+            // Mostrar feedback mais visível
             msg.textContent = `✅ "${nome}" adicionado ao carrinho!`;
             msg.style.display = "block";
-            setTimeout(() => msg.style.display = "none", 2000);
+            msg.style.background = "rgba(52, 168, 83, 0.15)";
+            msg.style.color = "#34a853";
+            msg.style.borderLeftColor = "#34a853";
+            msg.style.borderLeft = "4px solid #34a853";
+            msg.style.padding = "16px";
+            msg.style.borderRadius = "6px";
+            msg.style.marginBottom = "20px";
+            msg.style.fontSize = "15px";
+            msg.style.fontWeight = "600";
+            
+            setTimeout(() => {
+                msg.style.display = "none";
+            }, 3000);
         }
 
         // Carregar produtos na página

@@ -27,7 +27,10 @@
       <input id="preco" placeholder="Preço" required>
       <input id="quantidade" placeholder="Quantidade" required type="number" min="1">
       <input id="urlFoto" placeholder="URL da imagem">
-      <button type="submit">Salvar Produto</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button type="submit" style="grid-column: 1;">Salvar Produto</button>
+        <button type="button" onclick="cancelarEdicao()" style="grid-column: 2; background: #444; display: none;" id="btnCancelar">Cancelar</button>
+      </div>
     </form>
 
     <p id="msg" class="msg"></p>

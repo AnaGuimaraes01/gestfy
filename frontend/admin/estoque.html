@@ -37,13 +37,12 @@
   <div class="card">
     <h2 class="section-title">Filtros</h2>
     <div class="filter-grid">
-      <select id="filtroTipo" class="select-filter">
+      <select id="filtroTipo" class="select-filter" onchange="carregarEstoque()">
         <option value="">Todas as movimentações</option>
         <option value="ENTRADA">Entradas</option>
         <option value="SAIDA">Saídas</option>
       </select>
-      <input type="date" id="filtroData" class="select-filter">
-      <button class="btn" onclick="carregarEstoque()">🔄 Recarregar</button>
+      <input type="date" id="filtroData" class="select-filter" onchange="carregarEstoque()">
     </div>
   </div>
 
@@ -78,8 +77,26 @@
 
 <script>
   const API_URL = "http://localhost:8080/api/estoque";
+  const API_PRODUTOS = "http://localhost:8080/api/produtos";
   const estoqueList = document.getElementById("estoqueList");
   const msg = document.getElementById("msg");
+
+  let produtosMap = {}; // Cache de produtos
+
+  // Carregar mapa de produtos
+  async function carregarProdutos() {
+    try {
+      const response = await fetch(API_PRODUTOS);
+      if (response.ok) {
+        const produtos = await response.json();
+        produtos.forEach(p => {
+          produtosMap[p.id] = p.nome;
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error);
+    }
+  }
 
   // Carregar estoque ao abrir página
   async function carregarEstoque() {
@@ -110,15 +127,20 @@
       }
 
       estoqueList.innerHTML = "";
+      let produtosBaixo = [];
+
       movimentacoes.forEach(mov => {
         const row = document.createElement("tr");
         const tipo = mov.tipoMovimento || mov.tipo || "---";
-        const badge = tipo === "ENTRADA" ? "✅" : "❌";
+        const badge = tipo === "ENTRADA" ? "✅ ENTRADA" : "❌ SAÍDA";
+        
+        // Tentar obter nome do produto
+        let nomeProduto = mov.produtoNome || mov.produto?.nome || produtosMap[mov.produtoId] || `Produto #${mov.produtoId}`;
         
         row.innerHTML = `
           <td>#${mov.id}</td>
-          <td>${mov.produtoNome || mov.produto?.nome || "Produto " + mov.produtoId}</td>
-          <td><span class="badge">${badge} ${tipo}</span></td>
+          <td><strong>${nomeProduto}</strong></td>
+          <td><span class="badge" style="background: ${tipo === 'ENTRADA' ? '#34a853' : '#ea4335'}; padding: 4px 8px; border-radius: 4px; font-size: 11px;">${badge}</span></td>
           <td>${mov.quantidade} un.</td>
           <td>${new Date(mov.dataMovimento).toLocaleString("pt-BR")}</td>
         `;
@@ -135,7 +157,6 @@
   }
 
   function atualizarEstatisticas(movimentacoes) {
-    const hoje = new Date().toLocaleDateString("pt-BR");
     const entradas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "ENTRADA").length;
     const saidas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "SAIDA").length;
 
@@ -144,8 +165,10 @@
     document.getElementById("saidasHoje").textContent = saidas;
   }
 
-  // Carregar ao abrir página
-  carregarEstoque();
+  // Inicializar
+  document.addEventListener("DOMContentLoaded", () => {
+    carregarProdutos().then(() => carregarEstoque());
+  });
 
   // Auto-refresh a cada 30 segundos
   setInterval(() => {

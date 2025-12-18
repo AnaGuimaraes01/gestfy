@@ -80,7 +80,7 @@
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td style="font-weight: 600;">#${pedido.id}</td>
-                        <td>${pedido.clienteNome}</td>
+                        <td>${pedido.nomeCliente || 'Cliente'}</td>
                         <td style="font-weight: 600; color: var(--rosa);">R$ ${parseFloat(pedido.total).toFixed(2)}</td>
                         <td><span class="${statusInfo.badge}" style="padding: 4px 8px; border-radius: 4px; font-size: 11px;">${statusInfo.label}</span></td>
                         <td style="font-size: 12px; color: #888;">${dataFormatada}</td>
