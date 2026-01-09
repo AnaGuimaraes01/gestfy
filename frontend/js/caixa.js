@@ -2,7 +2,7 @@
 // CAIXA.JS - Lógica do Caixa Diário
 // ==========================================
 
-const API_URL = "http://localhost:8080/api/caixa";
+const API_URL = "https://gestfy-backend.onrender.com/api/caixa/dia";
 const corpo = document.getElementById("corpo-tabela");
 const msg = document.getElementById("msg");
 const filtroData = document.getElementById("filtro-data");

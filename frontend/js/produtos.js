@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:8080/api/produtos";
+const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
+
 
 const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");
