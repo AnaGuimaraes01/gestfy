@@ -9,6 +9,7 @@ const msg = document.getElementById("msg");
 ========================= */
 async function listarProdutos() {
   try {
+    console.log("Buscando produtos na API: ", API_URL);
     const response = await fetch(API_URL);
 
     if (!response.ok) {
