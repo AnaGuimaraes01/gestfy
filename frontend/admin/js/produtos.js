@@ -58,7 +58,7 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao carregar produtos";
+    msg.textContent = "❌ Erro ao carregar produtos, api url" + API_URL;
   }
 }
 
