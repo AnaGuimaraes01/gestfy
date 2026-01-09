@@ -1,4 +1,4 @@
-const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
+const API_URL = `${BASE_URL}/produtos`;
 
 
 const produtosList = document.getElementById("produtosList");
@@ -13,7 +13,7 @@ async function listarProdutos() {
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error("Erro ao buscar produtos");
+      throw new Error("Erro ao buscar produtos, api url : ", API_URL);
     }
 
     const produtos = await response.json();
@@ -59,7 +59,7 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao carregar produtos";
+    msg.textContent = "❌ Erro ao carregar produtos, api url" + API_URL;
   }
 }
 
