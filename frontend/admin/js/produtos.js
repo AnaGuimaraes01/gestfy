@@ -12,7 +12,7 @@ async function listarProdutos() {
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error("Erro ao buscar produtos");
+      throw new Error("Erro ao buscar produtos, api url : ", API_URL);
     }
 
     const produtos = await response.json();
