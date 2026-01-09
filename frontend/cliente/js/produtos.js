@@ -1,4 +1,4 @@
-const API_URL = `${BASE_URL}/produtos`;
+const API_URL = `https://gestfy-backend.onrender.com/api/produtos`;
 
 
 const produtosList = document.getElementById("produtosList");
