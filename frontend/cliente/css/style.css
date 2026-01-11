@@ -2,20 +2,25 @@
    VARIÁVEIS
 ===================================================== */
 :root {
-  --rosa: #c13b6a;
-  --rosa-escuro: #8a1f45;
-  --rosa-claro: #f0b6c8;
+  --rosa: #d9468d;
+  --rosa-escuro: #b83270;
+  --rosa-claro: #f8cfe1;
+
   --preto: #0f0f0f;
-  --cinza-fundo: #141414;
-  --cinza-header: #101010;
-  --cinza-card: #1e1e1e;
-  --cinza-input: #1a1a1a;
-  --cinza-texto: #c9c9c9;
-  --cinza-texto-claro: #8e8e8e;
+
+  --cinza-fundo: #f4f5f7;
+  --cinza-header: #ffffff;
+  --cinza-card: #ffffff;
+  --cinza-input: #ffffff;
+
+  --cinza-texto: #4a4a4a;
+  --cinza-texto-claro: #7a7a7a;
+
   --branco: #ffffff;
-  --verde: #3ddc84;
-  --vermelho: #ff5c5c;
-  --amarelo: #ffcc33;
+
+  --verde: #22c55e;
+  --vermelho: #ef4444;
+  --amarelo: #f59e0b;
 }
 
 /* =====================================================
@@ -32,8 +37,8 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at top, #1c1c1c, var(--cinza-fundo));
-  color: var(--branco);
+  background: var(--cinza-fundo);
+  color: var(--cinza-texto);
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
   min-height: 100vh;
   display: flex;
@@ -45,11 +50,10 @@ body {
    HEADER / NAVBAR
 ===================================================== */
 .admin-header {
-  background: linear-gradient(135deg, var(--cinza-header), var(--preto));
-  padding: 22px;
+  background: var(--cinza-header);
+  padding: 24px;
   text-align: center;
-  border-bottom: 3px solid var(--rosa);
-  box-shadow: 0 6px 18px rgba(0,0,0,.45);
+  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -57,20 +61,19 @@ body {
 
 .logo {
   max-width: 140px;
-  margin: 0 auto 12px;
+  margin: 0 auto 10px;
   display: block;
-  opacity: .96;
 }
 
 .admin-header h1 {
   font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
+  font-weight: 700;
+  color: #111827;
 }
 
 .admin-header p {
-  font-size: 12px;
-  color: var(--rosa-claro);
+  font-size: 13px;
+  color: var(--cinza-texto-claro);
 }
 
 /* =====================================================
@@ -93,60 +96,40 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
-  animation: fadeIn .5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* =====================================================
    CARDS
 ===================================================== */
 .card {
-  background: linear-gradient(145deg, #222, #1a1a1a);
-  border-radius: 14px;
+  background: var(--cinza-card);
+  border-radius: 16px;
   padding: 26px;
-  border: 1px solid #2f2f2f;
+  border: 1px solid #e5e7eb;
   cursor: pointer;
-  transition: all .35s ease;
-  position: relative;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, transparent, rgba(193,59,106,.15));
-  opacity: 0;
-  transition: opacity .3s;
-}
-
-.card:hover::before {
-  opacity: 1;
+  transition: all .3s ease;
 }
 
 .card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.08);
   border-color: var(--rosa);
-  box-shadow: 0 18px 40px rgba(193,59,106,.25);
 }
 
 .card .icon {
-  font-size: 42px;
-  margin-bottom: 14px;
+  font-size: 36px;
+  margin-bottom: 12px;
 }
 
 .card h2 {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
+  color: #111827;
 }
 
 .card p {
-  font-size: 13px;
-  color: var(--cinza-texto);
+  font-size: 14px;
+  color: var(--cinza-texto-claro);
 }
 
 /* =====================================================
@@ -154,10 +137,11 @@ main {
 ===================================================== */
 .section-title {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   margin: 32px 0 20px;
+  color: #111827;
   border-left: 4px solid var(--rosa);
-  padding-left: 14px;
+  padding-left: 12px;
 }
 
 /* =====================================================
@@ -166,24 +150,24 @@ main {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .form-group label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--rosa-claro);
-  letter-spacing: .6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cinza-texto);
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
-  background: linear-gradient(145deg, #1b1b1b, #151515);
-  border: 1px solid #3a3a3a;
+  background: var(--cinza-input);
+  border: 1px solid #d1d5db;
   padding: 12px;
   border-radius: 10px;
-  color: var(--branco);
+  font-size: 14px;
+  color: #111827;
 }
 
 .form-group input:focus,
@@ -191,7 +175,7 @@ main {
 .form-group select:focus {
   outline: none;
   border-color: var(--rosa);
-  box-shadow: 0 0 0 3px rgba(193,59,106,.15);
+  box-shadow: 0 0 0 3px rgba(217,70,141,.15);
 }
 
 /* =====================================================
@@ -199,25 +183,39 @@ main {
 ===================================================== */
 button,
 .btn {
-  background: linear-gradient(135deg, var(--rosa), var(--rosa-escuro));
+  background: var(--rosa);
   color: var(--branco);
   border: none;
   padding: 12px 24px;
   border-radius: 10px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all .3s ease;
 }
 
 button:hover,
 .btn:hover {
+  background: var(--rosa-escuro);
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(193,59,106,.35);
+  box-shadow: 0 6px 18px rgba(217,70,141,.3);
 }
 
-.btn-secondary { background: #3a3a3a; }
-.btn-danger { background: var(--vermelho); }
-.btn-success { background: var(--verde); }
+.btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.btn-danger {
+  background: var(--vermelho);
+}
+
+.btn-success {
+  background: var(--verde);
+}
 
 /* =====================================================
    TABELAS
@@ -228,19 +226,21 @@ button:hover,
   width: 100%;
   border-collapse: collapse;
   background: var(--cinza-card);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
+  border: 1px solid #e5e7eb;
 }
 
 .tabela th,
 .tabela-pedidos th,
 .tabela-produtos th {
-  background: #121212;
-  color: var(--rosa-claro);
-  padding: 16px;
+  background: #f9fafb;
+  color: #374151;
   font-size: 12px;
+  font-weight: 600;
+  padding: 16px;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--rosa);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .tabela td,
@@ -248,11 +248,12 @@ button:hover,
 .tabela-produtos td {
   padding: 14px;
   font-size: 14px;
-  color: var(--cinza-texto);
+  color: #374151;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .tabela tr:hover {
-  background: #262626;
+  background: #f9fafb;
 }
 
 /* =====================================================
@@ -260,21 +261,21 @@ button:hover,
 ===================================================== */
 .status-badge {
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .status-recebido,
 .status-preparacao {
-  background: rgba(255,204,51,.15);
+  background: rgba(245,158,11,.15);
   color: var(--amarelo);
 }
 
 .status-pronto,
 .status-entrega,
 .status-finalizado {
-  background: rgba(61,220,132,.15);
+  background: rgba(34,197,94,.15);
   color: var(--verde);
 }
 
@@ -288,24 +289,25 @@ button:hover,
 }
 
 .produto-card {
-  background: linear-gradient(145deg, #1f1f1f, #181818);
-  border-radius: 16px;
+  background: var(--cinza-card);
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
   overflow: hidden;
-  border: 1px solid #333;
-  transition: all .35s ease;
+  transition: all .3s ease;
 }
 
 .produto-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 16px 36px rgba(193,59,106,.25);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 26px rgba(0,0,0,.1);
 }
 
 .produto-imagem {
   height: 150px;
+  background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2a2a2a;
+  font-size: 40px;
 }
 
 .produto-info {
@@ -314,7 +316,7 @@ button:hover,
 
 .produto-preco {
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--rosa);
 }
 
@@ -322,10 +324,11 @@ button:hover,
    RODAPÉ
 ===================================================== */
 footer {
-  background: #0f0f0f;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
   padding: 20px;
-  font-size: 12px;
   text-align: center;
+  font-size: 12px;
   color: var(--cinza-texto-claro);
 }
 
