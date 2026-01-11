@@ -13,5 +13,7 @@ public record PedidoRequest(
 
                 @NotBlank(message = "Forma de recebimento é obrigatória (RETIRADA ou ENTREGA)") String formaRecebimento,
 
+                String endereco,
+
                 @NotEmpty(message = "Pedido deve ter pelo menos um item") List<PedidoItemRequest> itens) {
 }

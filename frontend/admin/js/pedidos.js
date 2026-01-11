@@ -3,12 +3,23 @@ const API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
 const listaPedidos = document.getElementById("listaPedidos");
 
 async function carregarPedidos() {
-    const response = await fetch(API_URL);
-    const pedidos = await response.json();
+    try {
+        const response = await fetch(API_URL);
+        
+        if (!response.ok) {
+            throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+        }
+        
+        const pedidos = await response.json();
+        
+        if (!Array.isArray(pedidos) || pedidos.length === 0) {
+            listaPedidos.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Nenhum pedido registrado</td></tr>';
+            return;
+        }
 
-    listaPedidos.innerHTML = "";
+        listaPedidos.innerHTML = "";
 
-    pedidos.forEach(pedido => {
+        pedidos.forEach(pedido => {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -30,7 +41,11 @@ async function carregarPedidos() {
         `;
 
         listaPedidos.appendChild(tr);
-    });
+        });
+    } catch (error) {
+        console.error("Erro ao carregar pedidos:", error);
+        listaPedidos.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f44;">Erro ao carregar pedidos: ${error.message}</td></tr>`;
+    }
 }
 
 function gerarOptionsStatus(statusAtual) {
@@ -49,31 +64,47 @@ function gerarOptionsStatus(statusAtual) {
 }
 
 async function atualizarStatus(id, status) {
-    await fetch(`${API_URL}/${id}/status?status=${status}`, {
-        method: "PUT"
-    });
-    // Recarrega lista após atualizar
-    carregarPedidos();
+    try {
+        const response = await fetch(`${API_URL}/${id}/status?status=${status}`, {
+            method: "PUT"
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro ao atualizar status`);
+        }
+
+        // Recarrega lista após atualizar
+        await carregarPedidos();
+    } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro ao atualizar status do pedido");
+    }
 }
 
 async function verDetalhes(id) {
-    const response = await fetch(`${API_URL}/${id}`);
-    if (!response.ok) {
+    try {
+        const response = await fetch(`${API_URL}/${id}`);
+        if (!response.ok) {
+            alert("Erro ao buscar detalhes do pedido.");
+            return;
+        }
+        const pedido = await response.json();
+        let itens = (pedido.itens || []).map(item =>
+            `• ${item.nomeProduto || 'Produto'} (x${item.quantidade}) - R$ ${(item.precoUnitario * item.quantidade).toFixed(2)}`
+        ).join("\n");
+        alert(
+            `Pedido #${pedido.id}\n\n` +
+            `Cliente: ${pedido.nomeCliente || ''}\n` +
+            `Endereço: ${pedido.endereco || 'Retirada no local'}\n` +
+            `Total: R$ ${(pedido.total || 0).toFixed(2)}\n` +
+            `Status: ${pedido.status || ''}\n` +
+            `Pagamento: ${pedido.formaPagamento || ''}\n\n` +
+            `Itens:\n${itens}`
+        );
+    } catch (error) {
+        console.error("Erro:", error);
         alert("Erro ao buscar detalhes do pedido.");
-        return;
     }
-    const pedido = await response.json();
-    let itens = (pedido.itens || []).map(item =>
-        `• ${item.produto?.nome || 'Produto'} (x${item.quantidade})`
-    ).join("\n");
-    alert(
-        `Pedido #${pedido.id}\n\n` +
-        `Cliente: ${pedido.nomeCliente || ''}\n` +
-        `Total: R$ ${pedido.total || 0}\n` +
-        `Status: ${pedido.status || ''}\n` +
-        `Pagamento: ${pedido.formaPagamento || ''}\n\n` +
-        `Itens:\n${itens}`
-    );
 }
 
 carregarPedidos();

@@ -98,17 +98,6 @@ public class ProdutoController {
         return ResponseEntity.ok(toDTO(atualizado));
         }
 
-    // DELETE
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!produtoRepository.existsById(id)) {
-            throw new RuntimeException("Produto não encontrado");
-        }
-
-        produtoRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
     // converter Model → DTO
     private ProdutoDTO toDTO(Produto produto) {
         return new ProdutoDTO(

@@ -5,6 +5,126 @@
   <title>Gestfy • Estoque</title>
   <link rel="icon" href="../images/logo.png">
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .resumo-estoque {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .card-resumo {
+        background: #1a1a1a;
+        padding: 15px;
+        border-left: 4px solid var(--rosa);
+        border-radius: 4px;
+    }
+
+    .card-resumo h4 {
+        margin: 0 0 10px 0;
+        color: var(--texto-secundario);
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+
+    .card-resumo p {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--rosa);
+    }
+
+    .filtros {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filtros input, .filtros select {
+        padding: 8px 12px;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #1a1a1a;
+        color: #fff;
+    }
+
+    .filtros button {
+        padding: 8px 16px;
+        background: var(--rosa);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .alerta-baixo {
+        color: #ff4444;
+        font-weight: bold;
+    }
+
+    .alerta-normal {
+        color: #34a853;
+    }
+
+    .movimentacao-form {
+        background: #1a1a1a;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #333;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+
+    .form-row input, .form-row select {
+        flex: 1;
+        min-width: 150px;
+        padding: 10px;
+        border: 1px solid #555;
+        border-radius: 4px;
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    .form-row button {
+        padding: 10px 20px;
+        background: var(--rosa);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .tabela {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1a1a1a;
+    }
+
+    .tabela th {
+        background: var(--rosa);
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .tabela td {
+        padding: 12px;
+        border-bottom: 1px solid #333;
+    }
+
+    .tabela tr:hover {
+        background: #252525;
+    }
+  </style>
 </head>
 
 <body class="admin-body">
@@ -17,58 +137,89 @@
 
 <main class="container">
 
-  <!-- ESTATÍSTICAS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <h3>Total de Produtos</h3>
-      <p class="stat-value" id="totalProdutos">0</p>
+  <!-- RESUMO -->
+  <div class="resumo-estoque">
+    <div class="card-resumo">
+      <h4>Total de Produtos</h4>
+      <p id="totalProdutos">0</p>
     </div>
-    <div class="stat-card">
-      <h3>Entradas Hoje</h3>
-      <p class="stat-value" id="entradasHoje">0</p>
+    <div class="card-resumo">
+      <h4>Produtos em Falta</h4>
+      <p id="produtosEmFalta" style="color: #ff4444;">0</p>
     </div>
-    <div class="stat-card">
-      <h3>Saídas Hoje</h3>
-      <p class="stat-value" id="saidasHoje">0</p>
-    </div>
-  </div>
-
-  <!-- FILTROS -->
-  <div class="card">
-    <h2 class="section-title">Filtros</h2>
-    <div class="filter-grid">
-      <select id="filtroTipo" class="select-filter">
-        <option value="">Todas as movimentações</option>
-        <option value="ENTRADA">Entradas</option>
-        <option value="SAIDA">Saídas</option>
-      </select>
-      <input type="date" id="filtroData" class="select-filter">
-      <button class="btn" onclick="carregarEstoque()"> Recarregar</button>
+    <div class="card-resumo">
+      <h4>Estoque Baixo</h4>
+      <p id="estoqueBaixo" style="color: #ffa500;">0</p>
     </div>
   </div>
 
-  <!-- TABELA DE MOVIMENTAÇÕES -->
+  <!-- INVENTÁRIO -->
   <div class="card card-full">
-    <h2 class="section-title">Movimentações de Estoque</h2>
+    <h2 class="section-title">Inventário de Produtos</h2>
+    
+    <div class="filtros">
+      <input type="text" id="filtroNome" placeholder="Filtrar por nome">
+      <button onclick="filtrarEstoque()">🔍 Filtrar</button>
+      <button onclick="limparFiltros()" style="background: #666;">✕ Limpar</button>
+    </div>
+
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
             <th>ID</th>
             <th>Produto</th>
-            <th>Tipo</th>
+            <th>Preço</th>
             <th>Quantidade</th>
-            <th>Data/Hora</th>
+            <th>Status</th>
           </tr>
         </thead>
-        <tbody id="estoqueList">
-          <tr><td colspan="5" style="text-align: center; color: #999;">Carregando...</td></tr>
+        <tbody id="tabelaEstoque">
+          <tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <p id="msg" class="msg"></p>
+  <!-- MOVIMENTAÇÃO -->
+  <div class="card card-full" style="margin-top: 30px;">
+    <h2 class="section-title">Registrar Movimentação</h2>
+    
+    <div class="movimentacao-form">
+      <div class="form-row">
+        <select id="produtoSelect" required>
+          <option value="">-- Selecione o Produto --</option>
+        </select>
+        <select id="tipoMovimento" required>
+          <option value="">-- Tipo --</option>
+          <option value="ENTRADA">📥 Entrada</option>
+          <option value="SAIDA">📤 Saída</option>
+        </select>
+        <input type="number" id="quantidadeMovimento" placeholder="Quantidade" min="1" required>
+        <button onclick="registrarMovimento()">Registrar</button>
+      </div>
+    </div>
+
+    <p id="msgMovimento" class="msg"></p>
+
+    <h3>Últimas Movimentações</h3>
+    <div style="overflow-x: auto;">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Produto</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaMovimentos">
+          <tr><td colspan="5" style="text-align: center;">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
 </main>
 
@@ -76,82 +227,10 @@
   <p>© 2025 <span>Gestfy</span> • Módulo de Estoque</p>
 </footer>
 
-<script>
-  const API_URL = "http://localhost:8080/api/estoque";
-  const estoqueList = document.getElementById("estoqueList");
-  const msg = document.getElementById("msg");
-
-  // Carregar estoque ao abrir página
-  async function carregarEstoque() {
-    try {
-      const filtroTipo = document.getElementById("filtroTipo").value;
-      const filtroData = document.getElementById("filtroData").value;
-      
-      let url = API_URL;
-      if (filtroTipo) url += `?tipo=${filtroTipo}`;
-      if (filtroData) url += (filtroTipo ? "&" : "?") + `data=${filtroData}`;
-
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
-          return;
-        }
-        throw new Error("Erro ao buscar estoque");
-      }
-
-      const movimentacoes = await response.json();
-      
-      if (!Array.isArray(movimentacoes) || movimentacoes.length === 0) {
-        estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
-        atualizarEstatisticas([]);
-        return;
-      }
-
-      estoqueList.innerHTML = "";
-      movimentacoes.forEach(mov => {
-        const row = document.createElement("tr");
-        const tipo = mov.tipoMovimento || mov.tipo || "---";
-        const badge = tipo === "ENTRADA" ? "✅" : "❌";
-        
-        row.innerHTML = `
-          <td>#${mov.id}</td>
-          <td>${mov.produtoNome || mov.produto?.nome || "Produto " + mov.produtoId}</td>
-          <td><span class="badge">${badge} ${tipo}</span></td>
-          <td>${mov.quantidade} un.</td>
-          <td>${new Date(mov.dataMovimento).toLocaleString("pt-BR")}</td>
-        `;
-        estoqueList.appendChild(row);
-      });
-
-      atualizarEstatisticas(movimentacoes);
-    } catch (error) {
-      console.error(error);
-      estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #f44;"> Erro ao carregar</td></tr>';
-      msg.textContent = "❌ " + error.message;
-      msg.style.display = "block";
-    }
-  }
-
-  function atualizarEstatisticas(movimentacoes) {
-    const hoje = new Date().toLocaleDateString("pt-BR");
-    const entradas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "ENTRADA").length;
-    const saidas = movimentacoes.filter(m => (m.tipoMovimento || m.tipo) === "SAIDA").length;
-
-    document.getElementById("totalProdutos").textContent = new Set(movimentacoes.map(m => m.produtoId)).size;
-    document.getElementById("entradasHoje").textContent = entradas;
-    document.getElementById("saidasHoje").textContent = saidas;
-  }
-
-  // Carregar ao abrir página
-  carregarEstoque();
-
-  // Auto-refresh a cada 30 segundos
-  setInterval(() => {
-    carregarEstoque();
-  }, 30000);
-</script>
+<script src="../js/admin-menu.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/estoque.js"></script>
 
 </body>
 </html>

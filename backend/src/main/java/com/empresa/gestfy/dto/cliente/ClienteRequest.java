@@ -12,5 +12,8 @@ public record ClienteRequest(
     String telefone,
 
     @Email(message = "E-mail inválido")
-    String email
+    String email,
+
+    @NotBlank(message = "O endereço do cliente é obrigatório")
+    String endereco
 ) {}

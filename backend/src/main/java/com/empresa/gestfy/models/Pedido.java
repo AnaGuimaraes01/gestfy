@@ -20,6 +20,7 @@ public class Pedido {
 
     private String formaPagamento;
     private String formaRecebimento; // RETIRADA ou ENTREGA
+    private String endereco; // Endereço para entrega
     private String status;
 
     @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
@@ -68,6 +69,14 @@ public class Pedido {
 
     public void setFormaRecebimento(String formaRecebimento) {
         this.formaRecebimento = formaRecebimento;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
     }
 
     public String getStatus() {

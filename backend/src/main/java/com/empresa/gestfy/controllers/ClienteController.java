@@ -32,12 +32,13 @@ public class ClienteController {
         cliente.setNome(request.nome());
         cliente.setTelefone(request.telefone());
         cliente.setEmail(request.email());
+        cliente.setEndereco(request.endereco());
 
         cliente = clienteRepository.save(cliente);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
+                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(), cliente.getEndereco()));
     }
 
     // =========================
@@ -46,7 +47,7 @@ public class ClienteController {
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
         List<ClienteDTO> clientes = clienteRepository.findAll()
-                .stream()
+                .stream(), c.getEndereco()
                 .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail()))
                 .collect(Collectors.toList());
 
@@ -59,7 +60,7 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> buscarPorId(@PathVariable Long id) {
         return clienteRepository.findById(id)
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail()))
+                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -78,11 +79,12 @@ public class ClienteController {
         cliente.setNome(request.nome());
         cliente.setTelefone(request.telefone());
         cliente.setEmail(request.email());
+        cliente.setEndereco(request.endereco());
 
         cliente = clienteRepository.save(cliente);
 
         return ResponseEntity
-                .ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail()));
+                .ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(), cliente.getEndereco()));
     }
 
     // =========================

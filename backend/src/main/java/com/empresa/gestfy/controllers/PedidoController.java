@@ -66,6 +66,7 @@ public class PedidoController {
         pedido.setCliente(cliente);
         pedido.setFormaPagamento(request.formaPagamento());
         pedido.setFormaRecebimento(request.formaRecebimento());
+        pedido.setEndereco(request.endereco());
         pedido.setStatus("RECEBIDO");
         pedido.setData(LocalDateTime.now());
 
@@ -254,6 +255,7 @@ public class PedidoController {
                 pedido.getId(),
                 pedido.getCliente().getNome(),
                 pedido.getCliente().getTelefone(),
+                pedido.getEndereco(),
                 pedido.getFormaPagamento(),
                 pedido.getFormaRecebimento(),
                 pedido.getStatus(),

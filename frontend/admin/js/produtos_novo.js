@@ -3,20 +3,17 @@ const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
 const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");
 const msg = document.getElementById("msg");
-const btnSalvar = document.getElementById("btnSalvar");
-const btnCancelar = document.getElementById("btnCancelar");
 
-// ID do produto em edição (null = novo produto)
 let produtoEmEdicao = null;
 
-/*Listar Pedidos*/
+/*Listar Produtos*/
 async function listarProdutos() {
   try {
     console.log("Buscando produtos na API: ", API_URL);
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      throw new Error("Erro ao buscar produtos, api url : ", API_URL);
+      throw new Error("Erro ao buscar produtos");
     }
 
     const produtos = await response.json();
@@ -29,9 +26,7 @@ async function listarProdutos() {
 
     produtos.forEach(produto => {
       const li = document.createElement("li");
-      const imageUrl = produto.urlFoto || "🍦";
       
-      // Se é URL, tenta carregar imagem; senão mostra emoji
       let imagemHtml = "";
       if (produto.urlFoto && produto.urlFoto.startsWith("http")) {
         imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='🍦'">`;
@@ -61,12 +56,12 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao carregar produtos, api url" + API_URL;
+    msg.textContent = "❌ Erro ao carregar produtos";
   }
 }
 
 /*
-   CADASTRAR/ATUALIZAR PRODUTO
+   CADASTRAR OU ATUALIZAR PRODUTO
 */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -74,17 +69,14 @@ form.addEventListener("submit", async (e) => {
   // Validar campos
   if (!nome.value.trim()) {
     msg.textContent = " Nome do produto é obrigatório";
-    msg.style.color = "#f44";
     return;
   }
   if (!preco.value || parseFloat(preco.value) <= 0) {
     msg.textContent = " Preço deve ser maior que 0";
-    msg.style.color = "#f44";
     return;
   }
   if (!quantidade.value || parseInt(quantidade.value) <= 0) {
     msg.textContent = " Quantidade deve ser maior que 0";
-    msg.style.color = "#f44";
     return;
   }
 
@@ -98,42 +90,39 @@ form.addEventListener("submit", async (e) => {
 
   try {
     let response;
+    let mensagem;
     
     if (produtoEmEdicao) {
-      // ATUALIZAR produto existente
+      // ATUALIZAR PRODUTO EXISTENTE
       response = await fetch(`${API_URL}/${produtoEmEdicao}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(produto)
       });
-      
-      if (!response.ok) {
-        const erro = await response.json();
-        throw new Error(erro.message || "Erro ao atualizar produto");
-      }
-      
-      msg.textContent = "✅ Produto atualizado com sucesso!";
-      produtoEmEdicao = null;
-      btnSalvar.textContent = "Salvar Produto";
-      btnCancelar.style.display = "none";
+      mensagem = "✅ Produto atualizado com sucesso!";
     } else {
-      // CRIAR novo produto
+      // CRIAR NOVO PRODUTO
       response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(produto)
       });
-
-      if (!response.ok) {
-        const erro = await response.json();
-        throw new Error(erro.message || "Erro ao cadastrar produto");
-      }
-
-      msg.textContent = "✅ Produto cadastrado com sucesso!";
+      mensagem = "✅ Produto cadastrado com sucesso!";
     }
 
+    if (!response.ok) {
+      const erro = await response.json();
+      throw new Error(erro.message || "Erro ao processar produto");
+    }
+
+    msg.textContent = mensagem;
     msg.style.color = "#34a853";
     form.reset();
+    produtoEmEdicao = null;
+    
+    // Atualizar label do botão
+    document.querySelector("button[type='submit']").textContent = "Salvar Produto";
+    
     listarProdutos();
     setTimeout(() => msg.textContent = "", 3000);
 
@@ -150,45 +139,29 @@ form.addEventListener("submit", async (e) => {
 async function editarProduto(id) {
   try {
     const response = await fetch(`${API_URL}/${id}`);
-    
     if (!response.ok) {
-      throw new Error("Erro ao carregar dados do produto");
+      throw new Error("Erro ao buscar produto");
     }
-    
+
     const produto = await response.json();
     
-    // Preencher o form com os dados do produto
+    // Preencher formulário com dados do produto
     document.getElementById("nome").value = produto.nome;
-    document.getElementById("descricao").value = produto.descricao || "";
+    document.getElementById("descricao").value = produto.descricao;
     document.getElementById("preco").value = produto.preco;
-    document.getElementById("quantidade").value = produto.quantidade || 0;
     document.getElementById("urlFoto").value = produto.urlFoto || "";
+    document.getElementById("quantidade").value = produto.quantidade;
     
-    // Marcar que estamos em edição
     produtoEmEdicao = id;
+    document.querySelector("button[type='submit']").textContent = "Atualizar Produto";
     
-    // Atualizar UI
-    btnSalvar.textContent = "💾 Atualizar Produto";
-    btnCancelar.style.display = "inline-block";
-    
-    // Scroll até o formulário
+    // Scroll para o formulário
     form.scrollIntoView({ behavior: "smooth" });
-    
-    msg.textContent = "ℹ️ Produto carregado para edição. Altere os dados e clique em salvar.";
-    msg.style.color = "#2196F3";
-    msg.style.display = "block";
     
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ " + error.message;
-    msg.style.color = "#f44";
+    msg.textContent = "❌ Erro ao buscar produto para edição";
   }
 }
 
-function cancelarEdicao() {
-  produtoEmEdicao = null;
-  form.reset();
-  btnSalvar.textContent = "Salvar Produto";
-  btnCancelar.style.display = "none";
-  msg.textContent = "";
-}
+listarProdutos();

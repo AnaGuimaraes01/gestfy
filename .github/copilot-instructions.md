@@ -18,22 +18,23 @@
 ## Key Architectural Patterns
 
 ### Backend Structure
-- **Models** (`models/`): JPA entities with `@Entity` annotations, relationships via `@OneToMany`, `@ManyToOne`
-- **DTOs** (`dto/`): Request records with Jakarta Validation (`@NotBlank`, `@Email`), response POJOs for API contracts
-- **Controllers** (`controllers/`): RESTful endpoints with `@RequestBody` validation, `ResponseEntity` for status codes
-- **Repositories** (`repositories/`): Spring Data JPA interfaces, no custom queries visible (use simple `findAll()`, `save()`)
+- **Models** (`models/`): JPA entities with `@Entity` annotations, relationships via `@OneToMany`, `@ManyToOne`; many use Lombok `@Getter`/`@Setter` (optional)
+- **DTOs** (`dto/`): Request records (e.g., `ClienteRequest`) with Jakarta Validation (`@NotBlank`, `@Email`), response records/POJOs for API contracts
+- **Controllers** (`controllers/`): RESTful endpoints with `@RequestBody` validation, `ResponseEntity` for status codes; all use `@CrossOrigin(origins = "*")`
+- **Repositories** (`repositories/`): Spring Data JPA interfaces, use simple methods like `findAll()`, `findById()`, custom finders like `findByData()` when needed
 - **Config** (`config/`): `EnvConfig` loads `.env` via dotenv-java library for PostgreSQL credentials
 
 ### Frontend-Backend Contract
 - Frontend uses `fetch()` API with JSON payloads
-- Base URL: `http://localhost:8080/api/{resource}` (hardcoded in JS files like `produtos.js`)
+- Base URL: `https://gestfy-backend.onrender.com/api/{resource}` (hardcoded in JS files; development uses `localhost:8080`)
 - Response format: Array of DTOs or single DTO object
 - Error handling: Check `response.ok`, catch exceptions, display errors to user via DOM elements (e.g., `msg.textContent`)
+- CORS enabled on all controllers via `@CrossOrigin(origins = "*")`
 
 ### Data Flow Example (Produtos)
 ```
-produtos.js (fetch) → ClienteController (/api/produtos) 
-→ ClienteRepository.findAll() → JPA → DTO mapping 
+produtos.js (fetch) → ProdutoController (/api/produtos) 
+→ ProdutoRepository.findAll() → JPA → DTO mapping 
 → JSON response → JS updates DOM
 ```
 
@@ -58,8 +59,9 @@ cd backend
 
 ### Frontend Development
 - Open HTML files directly in browser (static files, no build needed)
-- API calls expect backend running on `localhost:8080`
-- CSS centralized in `frontend/css/style.css`
+- Two main areas: `admin/` (management panel) and `cliente/` (customer area)
+- API URLs hardcoded as `https://gestfy-backend.onrender.com/api/{resource}` (update to `localhost:8080` for local development)
+- CSS: `frontend/admin/css/style.css` and `frontend/cliente/css/style.css` (separate stylesheets per area)
 
 ## Code Conventions & Patterns
 
@@ -79,8 +81,9 @@ public record ClienteRequest(
 ```
 
 ### Model-DTO Conversion
-- Map inside controllers manually (no ModelMapper library visible)
+- DTOs can optionally use `fromEntity()` factory method (e.g., `ClienteDTO.fromEntity(cliente)`) for reusability
 - Stream + collect pattern for lists: `repository.findAll().stream().map(c -> new DTO(...)).collect(Collectors.toList())`
+- Single entity mapping: `repository.findById(id).map(DTO::new).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build())`
 
 ### HTTP Status Codes
 - `POST` with creation: Return `HttpStatus.CREATED` with `ResponseEntity.status(HttpStatus.CREATED)`
@@ -104,7 +107,7 @@ public record ClienteRequest(
 3. Add `@PostMapping` or `@GetMapping` to `controllers/{Resource}Controller`
 4. Inject `{Resource}Repository` via constructor
 5. Map model to DTO in controller; return `ResponseEntity.status(...)`
-6. Add corresponding `fetch()` in `frontend/js/{resource}.js`
+6. Add corresponding `fetch()` in `frontend/admin/js/{resource}.js` or `frontend/cliente/js/{resource}.js`
 
 ### Adding a New Model Entity
 1. Create class in `models/` with `@Entity` + `@Table(name = "...")` 
@@ -130,26 +133,30 @@ async function listar{Resource}() {
 
 ## File Organization Reference
 
-- **Backend entry**: [backend/src/main/java/com/empresa/gestfy/GestfyApplication.java](backend/src/main/java/com/empresa/gestfy/GestfyApplication.java)
-- **REST controllers**: [backend/src/main/java/com/empresa/gestfy/controllers/](backend/src/main/java/com/empresa/gestfy/controllers/)
-- **Database models**: [backend/src/main/java/com/empresa/gestfy/models/](backend/src/main/java/com/empresa/gestfy/models/)
-- **DTOs**: [backend/src/main/java/com/empresa/gestfy/dto/](backend/src/main/java/com/empresa/gestfy/dto/)
-- **Config (Env)**: [backend/src/main/java/com/empresa/gestfy/config/EnvConfig.java](backend/src/main/java/com/empresa/gestfy/config/EnvConfig.java)
-- **Frontend admin panel**: [frontend/admin/index.html](frontend/admin/index.html)
-- **Frontend customer area**: [frontend/cliente/index.html](frontend/cliente/index.html)
-- **Frontend JS**: [frontend/js/](frontend/js/)
+- **Backend entry**: `backend/src/main/java/com/empresa/gestfy/GestfyApplication.java`
+- **REST controllers**: `backend/src/main/java/com/empresa/gestfy/controllers/`
+- **Database models**: `backend/src/main/java/com/empresa/gestfy/models/`
+- **Repositories**: `backend/src/main/java/com/empresa/gestfy/repositories/`
+- **DTOs**: `backend/src/main/java/com/empresa/gestfy/dto/` (organized by resource: `cliente/`, `produto/`, `pedido/`, `caixa/`, `estoque/`, `relatorios/`)
+- **Config (Env)**: `backend/src/main/java/com/empresa/gestfy/config/EnvConfig.java`
+- **Frontend admin panel**: `frontend/admin/index.html` with `frontend/admin/js/`
+- **Frontend customer area**: `frontend/cliente/index.html` with `frontend/cliente/js/`
 
 ## Critical Integration Points
 
-1. **PostgreSQL Connection**: Requires `.env` file with `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
-2. **CORS**: Ensure frontend `localhost:3000` (or file:// protocol) can reach `localhost:8080` backend
-3. **DateTime Handling**: Use `LocalDateTime` in models (JPA handles persistence)
-4. **JSON Serialization**: `@JsonIgnore` prevents circular refs; `@JsonManagedReference` for order-item collections
+1. **PostgreSQL Connection**: Requires `.env` file with `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` in project root
+2. **CORS**: All controllers use `@CrossOrigin(origins = "*")` to allow frontend (file:// or deployed) to access backend
+3. **DateTime Handling**: Use `LocalDateTime` for timestamps (e.g., `Pedido.data`), `LocalDate` for dates (e.g., `Caixa.data`)
+4. **JSON Serialization**: `@JsonIgnore` prevents circular refs on collections; `@JsonManagedReference`/`@JsonBackReference` for order-item relationships
+5. **Frontend API URLs**: Hardcoded in each JS file; for local dev, replace `https://gestfy-backend.onrender.com/api` with `http://localhost:8080/api`
 
-## Testing
-- Unit tests in `backend/src/test/java/com/empresa/gestfy/ApplicationTests.java`
-- Run: `./mvnw test`
+## Dependencies Note
+
+Key dependencies beyond Spring Boot:
+- **Lombok**: `org.projectlombok:lombok` (optional, used for `@Getter`/`@Setter` on some models)
+- **dotenv-java**: `io.github.cdimascio:dotenv-java` 3.0.0 (loads `.env` file in `EnvConfig`)
+- **Jakarta Validation**: Built-in with Spring Boot for DTO validation
 
 ---
 
-**Last Updated**: December 16, 2025 | **Java**: 17 | **Spring Boot**: 3.2.5
+**Last Updated**: January 11, 2026 | **Java**: 17 | **Spring Boot**: 3.2.5 | **Frontend**: Vanilla JS

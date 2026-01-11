@@ -48,6 +48,11 @@
                         </select>
                     </div>
 
+                    <div class="form-group" id="enderecoGroup" style="display: none;">
+                        <label>Endereço para Entrega *</label>
+                        <input type="text" id="endereco" placeholder="Rua, número, complemento, bairro">
+                    </div>
+
                     <div class="form-group">
                         <label>Forma de Pagamento *</label>
                         <select id="formaPagamento" required>
@@ -85,9 +90,24 @@
         const msg = document.getElementById("mensagem");
         const resumoPedido = document.getElementById("resumoPedido");
         const totalFinal = document.getElementById("totalFinal");
+        const formaRecebimento = document.getElementById("formaRecebimento");
+        const enderecoGroup = document.getElementById("enderecoGroup");
+        const enderecoInput = document.getElementById("endereco");
 
         let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
         let clienteId = null;
+
+        // Mostrar/ocultar endereço baseado em forma de recebimento
+        formaRecebimento.addEventListener("change", (e) => {
+            if (e.target.value === "ENTREGA") {
+                enderecoGroup.style.display = "block";
+                enderecoInput.required = true;
+            } else {
+                enderecoGroup.style.display = "none";
+                enderecoInput.required = false;
+                enderecoInput.value = "";
+            }
+        });
 
         // Carregar resumo do carrinho
         function carregarResumoPedido() {
@@ -122,11 +142,18 @@
             const nome = document.getElementById("nome").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
             const email = document.getElementById("email").value.trim();
-            const formaRecebimento = document.getElementById("formaRecebimento").value;
+            const formRecebimento = formaRecebimento.value;
+            const endereco = enderecoInput.value.trim();
             const formaPagamento = document.getElementById("formaPagamento").value;
 
-            if (!nome || !telefone || !formaRecebimento || !formaPagamento) {
+            if (!nome || !telefone || !formRecebimento || !formaPagamento) {
                 msg.textContent = "⚠️ Preencha todos os campos obrigatórios";
+                msg.style.display = "block";
+                return;
+            }
+
+            if (formRecebimento === "ENTREGA" && !endereco) {
+                msg.textContent = "⚠️ Endereço é obrigatório para entrega";
                 msg.style.display = "block";
                 return;
             }
@@ -158,7 +185,8 @@
                 const pedidoReq = {
                     clienteId: clienteId,
                     formaPagamento: formaPagamento,
-                    formaRecebimento: formaRecebimento,
+                    formaRecebimento: formRecebimento,
+                    endereco: endereco || "",
                     itens: itens
                 };
 

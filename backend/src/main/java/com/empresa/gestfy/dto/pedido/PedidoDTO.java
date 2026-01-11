@@ -7,6 +7,7 @@ public record PedidoDTO(
         Long id,
         String nomeCliente,
         String telefone,
+        String endereco,
         String formaPagamento,
         String formaRecebimento,
         String status,

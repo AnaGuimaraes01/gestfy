@@ -93,15 +93,17 @@
 </footer>
 
 <script>
-  const API_URL_RELATORIOS = "http://localhost:8080/api/relatorios";
-  const API_URL_ESTOQUE = "http://localhost:8080/api/estoque";
+  const API_RELATORIOS = "https://gestfy-backend.onrender.com/api/relatorios";
+  const API_ESTOQUE = "https://gestfy-backend.onrender.com/api/estoque";
   const msg = document.getElementById("msg");
 
-  // Definir datas padrão (hoje)
+  // Definir datas padrão (últimos 7 dias)
   function definirDatas() {
-    const hoje = new Date().toISOString().split("T")[0];
-    document.getElementById("dataInicio").value = hoje;
-    document.getElementById("dataFim").value = hoje;
+    const hoje = new Date();
+    const seteDiasAtras = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    document.getElementById("dataInicio").value = seteDiasAtras.toISOString().split("T")[0];
+    document.getElementById("dataFim").value = hoje.toISOString().split("T")[0];
   }
 
   // Gerar relatório
@@ -117,7 +119,7 @@
       }
 
       // Carregar vendas por dia
-      await carregarVendasPorDia(dataInicio, dataFim);
+      await carregarVendasPorDia(dataInicio);
       
       // Carregar estoque
       await carregarStatusEstoque();
@@ -132,70 +134,52 @@
     }
   }
 
-  async function carregarVendasPorDia(dataInicio, dataFim) {
+  async function carregarVendasPorDia(data) {
     try {
-      const response = await fetch(`${API_URL_RELATORIOS}/vendas-por-dia?dataInicio=${dataInicio}&dataFim=${dataFim}`);
+      const response = await fetch(`${API_RELATORIOS}/vendas-por-dia?data=${data}`);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
-          return;
-        }
-        throw new Error("Erro ao buscar vendas");
-      }
-
-      const vendas = await response.json();
-      
-      if (!Array.isArray(vendas) || vendas.length === 0) {
         document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
         atualizarEstatisticas([]);
         return;
       }
 
+      const venda = await response.json();
+      
       document.getElementById("relatorioList").innerHTML = "";
-      let totalVendido = 0;
-      let totalVendas = 0;
+      
+      // Exibir dados do relatório
+      const row = document.createElement("tr");
+      const total = venda.totalVendas || 0;
+      const qtd = venda.quantidadePedidos || 0;
+      const ticketMedio = qtd > 0 ? total / qtd : 0;
 
-      vendas.forEach(venda => {
-        const row = document.createElement("tr");
-        const total = parseFloat(venda.total) || 0;
-        const qtd = venda.quantidade || 1;
-        const ticketMedio = total / qtd;
-
-        totalVendido += total;
-        totalVendas += qtd;
-
-        row.innerHTML = `
-          <td>${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
-          <td>${qtd}</td>
-          <td>R$ ${total.toFixed(2)}</td>
-          <td>R$ ${ticketMedio.toFixed(2)}</td>
-        `;
-        document.getElementById("relatorioList").appendChild(row);
-      });
+      row.innerHTML = `
+        <td>${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
+        <td>${qtd}</td>
+        <td>R$ ${total.toFixed(2)}</td>
+        <td>R$ ${ticketMedio.toFixed(2)}</td>
+      `;
+      document.getElementById("relatorioList").appendChild(row);
 
       // Atualizar estatísticas
-      const ticketMedio = totalVendas > 0 ? totalVendido / totalVendas : 0;
-      document.getElementById("totalVendido").textContent = "R$ " + totalVendido.toFixed(2);
-      document.getElementById("qtdVendas").textContent = totalVendas;
+      document.getElementById("totalVendido").textContent = "R$ " + total.toFixed(2);
+      document.getElementById("qtdVendas").textContent = qtd;
       document.getElementById("ticketMedio").textContent = "R$ " + ticketMedio.toFixed(2);
 
     } catch (error) {
       console.error(error);
-      document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+      document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar vendas</td></tr>';
     }
   }
 
   async function carregarStatusEstoque() {
     try {
-      const response = await fetch(API_URL_ESTOQUE);
+      const response = await fetch(API_ESTOQUE);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
-          return;
-        }
-        throw new Error("Erro ao buscar estoque");
+        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+        return;
       }
 
       const movimentacoes = await response.json();
@@ -208,12 +192,12 @@
       // Agrupar por produto
       const porProduto = {};
       movimentacoes.forEach(mov => {
-        const produtoNome = mov.produtoNome || mov.produto?.nome || "Produto " + mov.produtoId;
+        const produtoNome = mov.produtoNome || "Produto " + mov.produtoId;
         if (!porProduto[produtoNome]) {
           porProduto[produtoNome] = { entradas: 0, saidas: 0, ultima: null };
         }
         
-        const tipo = mov.tipoMovimento || mov.tipo;
+        const tipo = mov.tipoMovimento;
         if (tipo === "ENTRADA") porProduto[produtoNome].entradas += mov.quantidade || 1;
         if (tipo === "SAIDA") porProduto[produtoNome].saidas += mov.quantidade || 1;
         
@@ -225,8 +209,8 @@
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${nome}</td>
-          <td>✅ ${dados.entradas}</td>
-          <td>❌ ${dados.saidas}</td>
+          <td>📥 ${dados.entradas}</td>
+          <td>📤 ${dados.saidas}</td>
           <td>${dados.ultima ? dados.ultima.toLocaleString("pt-BR") : "---"}</td>
         `;
         document.getElementById("estoqueList").appendChild(row);
@@ -234,7 +218,7 @@
 
     } catch (error) {
       console.error(error);
-      document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+      document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar estoque</td></tr>';
     }
   }
 
@@ -270,12 +254,8 @@
   // Inicializar
   definirDatas();
   gerarRelatorio();
-
-  // Auto-refresh a cada 30 segundos
-  setInterval(() => {
-    gerarRelatorio();
-  }, 30000);
 </script>
 
+<script src="../js/auth.js"></script>
 </body>
 </html>
