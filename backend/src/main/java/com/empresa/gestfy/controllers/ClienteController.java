@@ -47,8 +47,8 @@ public class ClienteController {
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
         List<ClienteDTO> clientes = clienteRepository.findAll()
-                .stream(), c.getEndereco()
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail()))
+                .stream()
+                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(clientes);

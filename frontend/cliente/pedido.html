@@ -163,7 +163,8 @@
                 const clienteReq = {
                     nome: nome,
                     telefone: telefone,
-                    email: email || ""
+                    email: email || "",
+                    endereco: endereco || ""
                 };
 
                 const resCliente = await fetch(API_URL, {
