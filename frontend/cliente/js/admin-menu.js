@@ -1,3 +1,3 @@
-function irPara(pagina) {
-  window.location.href = pagina;
-}
+// function irPara(pagina) {
+//   window.location.href = pagina;
+// }

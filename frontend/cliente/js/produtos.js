@@ -40,7 +40,7 @@ const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
                         <p class="produto-descricao">${produto.descricao || "Sem descrição"}</p>
                         <p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
                         <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.preco})">
-                            ➕ Adicionar
+                             Adicionar
                         </button>
                     </div>
                 `;
