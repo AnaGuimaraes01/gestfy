@@ -1,4 +1,5 @@
-const API_URL = `${BASE_URL}/pedidos`;
+const API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
+
 const listaPedidos = document.getElementById("listaPedidos");
 
 async function carregarPedidos() {

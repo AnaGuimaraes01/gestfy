@@ -43,7 +43,7 @@
         <option value="SAIDA">Saídas</option>
       </select>
       <input type="date" id="filtroData" class="select-filter">
-      <button class="btn" onclick="carregarEstoque()">🔄 Recarregar</button>
+      <button class="btn" onclick="carregarEstoque()"> Recarregar</button>
     </div>
   </div>
 
@@ -128,7 +128,7 @@
       atualizarEstatisticas(movimentacoes);
     } catch (error) {
       console.error(error);
-      estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #f44;">❌ Erro ao carregar</td></tr>';
+      estoqueList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #f44;"> Erro ao carregar</td></tr>';
       msg.textContent = "❌ " + error.message;
       msg.style.display = "block";
     }

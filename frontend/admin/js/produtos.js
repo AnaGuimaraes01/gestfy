@@ -1,4 +1,5 @@
-const API_URL = `${BASE_URL}/produtos`;
+const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
+
 
 const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");
@@ -6,7 +7,7 @@ const msg = document.getElementById("msg");
 
 /* =========================
    LISTAR PRODUTOS
-========================= */
+
 async function listarProdutos() {
   try {
     console.log("Buscando produtos na API: ", API_URL);
@@ -63,23 +64,23 @@ async function listarProdutos() {
   }
 }
 
-/* =========================
+/* 
    CADASTRAR PRODUTO
-========================= */
+*/
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // Validar campos
   if (!nome.value.trim()) {
-    msg.textContent = "❌ Nome do produto é obrigatório";
+    msg.textContent = " Nome do produto é obrigatório";
     return;
   }
   if (!preco.value || parseFloat(preco.value) <= 0) {
-    msg.textContent = "❌ Preço deve ser maior que 0";
+    msg.textContent = " Preço deve ser maior que 0";
     return;
   }
   if (!quantidade.value || parseInt(quantidade.value) <= 0) {
-    msg.textContent = "❌ Quantidade deve ser maior que 0";
+    msg.textContent = " Quantidade deve ser maior que 0";
     return;
   }
 
@@ -116,9 +117,9 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-/* =========================
+/* 
    DELETAR PRODUTO
-========================= */
+ */
 async function deletarProduto(id) {
   if (!confirm("Tem certeza que deseja deletar este produto?")) {
     return;
@@ -145,9 +146,9 @@ async function deletarProduto(id) {
   }
 }
 
-/* =========================
+/* 
    EDITAR PRODUTO
-========================= */
+ */
 async function editarProduto(id) {
   alert("⚠️ Edição em desenvolvimento.\nPor enquanto, delete e crie novamente.");
 }

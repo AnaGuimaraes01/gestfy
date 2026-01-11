@@ -1,8 +1,8 @@
-// ==========================================
-// CAIXA.JS - Lógica do Caixa Diário
-// ==========================================
 
-const API_URL = `${BASE_URL}/caixa`;;
+// CAIXA.JS - Lógica do Caixa Diário
+
+const API_URL = "https://gestfy-backend.onrender.com/api/caixa";
+
 const corpo = document.getElementById("corpo-tabela");
 const msg = document.getElementById("msg");
 const filtroData = document.getElementById("filtro-data");
@@ -16,9 +16,8 @@ const modalFechamento = document.getElementById("modal-fechamento");
 
 let dataAtualSelecionada = new Date().toISOString().split("T")[0];
 
-// ==========================================
 // INICIALIZAÇÃO
-// ==========================================
+
 document.addEventListener("DOMContentLoaded", () => {
     inicializar();
 });
@@ -43,9 +42,9 @@ function inicializar() {
     setInterval(carregarCaixaDoDia, 30000);
 }
 
-// ==========================================
+
 // CARREGAR DADOS DO CAIXA
-// ==========================================
+
 async function carregarCaixaDoDia(data = null) {
     try {
         const params = data ? `?data=${data}` : "";
@@ -124,9 +123,8 @@ async function carregarCaixaDoDia(data = null) {
     }
 }
 
-// ==========================================
 // FILTRAR POR DATA
-// ==========================================
+
 function filtrarPorData() {
     const data = filtroData.value;
     if (!data) {
@@ -139,9 +137,9 @@ function filtrarPorData() {
     dataAtual.textContent = formatarDataBR(new Date(data + "T00:00:00"));
 }
 
-// ==========================================
+
 // VOLTAR PARA HOJE
-// ==========================================
+
 function voltarParaHoje() {
     const hoje = new Date().toISOString().split("T")[0];
     filtroData.value = hoje;
@@ -150,9 +148,6 @@ function voltarParaHoje() {
     carregarCaixaDoDia();
 }
 
-// ==========================================
-// RECARREGAR
-// ==========================================
 function recarregar() {
     carregarCaixaDoDia(
         dataAtualSelecionada === new Date().toISOString().split("T")[0]
@@ -161,9 +156,9 @@ function recarregar() {
     );
 }
 
-// ==========================================
+
 // MODAL DE FECHAMENTO
-// ==========================================
+
 function abrirModalFechamento() {
     const total = document.getElementById("total-arrecadado").textContent;
     document.getElementById("modal-total").textContent = total;
@@ -176,9 +171,8 @@ function fecharModal() {
 
 async function confirmarFechamento() {
     try {
-        // Aqui você poderia fazer uma chamada para marcar o caixa como fechado
-        // Por enquanto, apenas mostramos a confirmação
-        mostrarMensagem("Caixa fechado com sucesso! 🎉", "sucesso");
+        
+        mostrarMensagem("Caixa fechado! ", "sucesso");
         fecharModal();
         setTimeout(recarregar, 2000);
     } catch (erro) {
@@ -201,13 +195,13 @@ async function visualizarRelatorio() {
 
         // Constrói mensagem com dados do relatório
         let mensagem = `
-📊 RELATÓRIO DO DIA ${relatorio.data}
+ RELATÓRIO DO DIA ${relatorio.data}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💰 Total de Entradas: ${formatarMoeda(relatorio.totalEntradas)}
-💸 Total de Saídas: ${formatarMoeda(relatorio.totalSaidas)}
-💵 SALDO LÍQUIDO: ${formatarMoeda(relatorio.saldoLiquido)}
+ Total de Entradas: ${formatarMoeda(relatorio.totalEntradas)}
+ Total de Saídas: ${formatarMoeda(relatorio.totalSaidas)}
+ SALDO LÍQUIDO: ${formatarMoeda(relatorio.saldoLiquido)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 Quantidade de Transações: ${relatorio.quantidadeTransacoes}
+ Quantidade de Transações: ${relatorio.quantidadeTransacoes}
         `;
 
         alert(mensagem);
@@ -217,9 +211,8 @@ async function visualizarRelatorio() {
     }
 }
 
-// ==========================================
+
 // FUNÇÕES AUXILIARES
-// ==========================================
 
 function formatarMoeda(valor) {
     return new Intl.NumberFormat("pt-BR", {
@@ -260,9 +253,8 @@ function mostrarMensagem(texto, tipo = "info") {
     }, 4000);
 }
 
-// ==========================================
 // FECHAR MODAL AO CLICAR FORA
-// ==========================================
+
 window.addEventListener("click", (e) => {
     if (e.target === modalFechamento) {
         fecharModal();
