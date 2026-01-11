@@ -5,9 +5,7 @@ const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");
 const msg = document.getElementById("msg");
 
-/* =========================
-   LISTAR PRODUTOS
-
+/*Listar Pedidos*/
 async function listarProdutos() {
   try {
     console.log("Buscando produtos na API: ", API_URL);
@@ -64,7 +62,7 @@ async function listarProdutos() {
   }
 }
 
-/* 
+/*
    CADASTRAR PRODUTO
 */
 form.addEventListener("submit", async (e) => {
@@ -153,7 +151,5 @@ async function editarProduto(id) {
   alert("⚠️ Edição em desenvolvimento.\nPor enquanto, delete e crie novamente.");
 }
 
-/* =========================
-   CARREGAR AO ABRIR A PÁGINA
-========================= */
+
 listarProdutos();
