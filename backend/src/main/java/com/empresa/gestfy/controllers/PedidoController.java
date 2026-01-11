@@ -52,9 +52,8 @@ public class PedidoController {
         this.caixaRepository = caixaRepository;
     }
 
-    // =========================
+   
     // CRIAR PEDIDO
-    // =========================
     @PostMapping
     public ResponseEntity<PedidoDTO> criarPedido(@RequestBody @Valid PedidoRequest request) {
 
