@@ -27,7 +27,7 @@
             <div style="margin-top: 24px; text-align: center;">
                 <p style="color: #888; margin-bottom: 16px;">ID do Pedido salvo no navegador</p>
                 <input type="number" id="pesquisaId" placeholder="Ou digite o ID de outro pedido" style="width: 100%; max-width: 300px; padding: 10px; background: var(--cinza-input); border: 1px solid #444; border-radius: 8px; color: white; margin-bottom: 10px;">
-                <button onclick="pesquisarPedido()" class="btn" style="width: 100%; max-width: 300px;">🔍 Pesquisar</button>
+                <button onclick="pesquisarPedido()" class="btn" style="width: 100%; max-width: 300px;"> Pesquisar</button>
             </div>
         </div>
     </main>
@@ -73,7 +73,7 @@
                 exibirPedido(pedido);
             } catch (error) {
                 console.error(error);
-                msg.textContent = "❌ Pedido não encontrado";
+                msg.textContent = " Pedido não encontrado";
                 msg.style.display = "block";
                 container.innerHTML = "";
             }
