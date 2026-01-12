@@ -232,33 +232,51 @@ public class PedidoController {
     // HELPER: MAPEAR PARA DTO
     // =========================
     private PedidoDTO mapToDTO(Pedido pedido) {
-        List<PedidoItemDTO> itensDTO = pedido.getItens().stream()
-                .map(item -> new PedidoItemDTO(
-                        item.getId(),
-                        item.getProduto().getId(),
-                        item.getProduto().getNome(),
-                        item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0,
-                        item.getQuantidade() != null ? item.getQuantidade() : 0,
-                        (item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0) *
-                                (item.getQuantidade() != null ? item.getQuantidade() : 0)))
-                .collect(Collectors.toList());
+        // Mapeamento seguro dos itens
+        List<PedidoItemDTO> itensDTO = new ArrayList<>();
+        if (pedido.getItens() != null) {
+            itensDTO = pedido.getItens().stream()
+                    .filter(item -> item != null && item.getProduto() != null)
+                    .map(item -> new PedidoItemDTO(
+                            item.getId(),
+                            item.getProduto().getId(),
+                            item.getProduto().getNome() != null ? item.getProduto().getNome() : "Produto Indefinido",
+                            item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0,
+                            item.getQuantidade() != null ? item.getQuantidade() : 0,
+                            (item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0) *
+                                    (item.getQuantidade() != null ? item.getQuantidade() : 0)))
+                    .collect(Collectors.toList());
+        }
 
         // Garante que total nunca seja null
         Double totalFinal = pedido.getTotal();
-        if (totalFinal == null) {
+        if (totalFinal == null || totalFinal <= 0) {
             totalFinal = itensDTO.stream()
                     .mapToDouble(PedidoItemDTO::getSubtotal)
                     .sum();
         }
 
+        // Obter dados do cliente de forma segura
+        String nomeCliente = "Cliente Indefinido";
+        String telefonCliente = "N/A";
+        
+        if (pedido.getCliente() != null) {
+            if (pedido.getCliente().getNome() != null) {
+                nomeCliente = pedido.getCliente().getNome();
+            }
+            if (pedido.getCliente().getTelefone() != null) {
+                telefonCliente = pedido.getCliente().getTelefone();
+            }
+        }
+
         return new PedidoDTO(
                 pedido.getId(),
-                pedido.getCliente().getNome(),
-                pedido.getCliente().getTelefone(),
-                pedido.getEndereco(),
-                pedido.getFormaPagamento(),
-                pedido.getFormaRecebimento(),
-                pedido.getStatus(),
+                nomeCliente,
+                telefonCliente,
+                pedido.getEndereco() != null ? pedido.getEndereco() : "Não informado",
+                pedido.getFormaPagamento() != null ? pedido.getFormaPagamento() : "N/A",
+                pedido.getFormaRecebimento() != null ? pedido.getFormaRecebimento() : "N/A",
+                pedido.getStatus() != null ? pedido.getStatus() : "RECEBIDO",
                 totalFinal > 0 ? totalFinal : 0.0,
                 pedido.getData(),
                 itensDTO);
