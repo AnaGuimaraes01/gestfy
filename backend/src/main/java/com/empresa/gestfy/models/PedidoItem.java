@@ -11,16 +11,19 @@ public class PedidoItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "pedido_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "pedido_id", nullable = false)
     @JsonBackReference
     private Pedido pedido;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "produto_id")
+    @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
+    @Column(nullable = false)
     private Integer quantidade;
+
+    @Column(nullable = false)
     private Double precoUnitario;
 
     public PedidoItem() {}

@@ -14,21 +14,29 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
+    @Column(length = 50)
     private String formaPagamento;
+
+    @Column(length = 50)
     private String formaRecebimento; // RETIRADA ou ENTREGA
+
+    @Column(length = 500)
     private String endereco; // Endereço para entrega
+
+    @Column(length = 50)
     private String status;
 
     @Column(nullable = false, columnDefinition = "DOUBLE DEFAULT 0.0")
     private Double total = 0.0;
 
+    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime data;
 
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<PedidoItem> itens = new ArrayList<>();
 
