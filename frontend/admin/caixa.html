@@ -115,23 +115,6 @@
             box-shadow: 0 4px 12px rgba(176, 48, 96, 0.3);
         }
 
-        .btn-relatorio {
-            background: transparent;
-            color: var(--rosa);
-            border: 1px solid var(--rosa);
-        }
-
-        .btn-relatorio:hover {
-            background: rgba(176, 48, 96, 0.05);
-        }
-
-        .filtro-data {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
         .filtro-data input {
             padding: 10px;
             border: 1px solid var(--bordas);
@@ -395,16 +378,7 @@
 
         <!-- AÇÕES -->
         <div class="acoes-caixa">
-            <button class="btn-fechar" id="btn-fechar-caixa"> Fechar Caixa do Dia</button>
-            <button class="btn-relatorio" id="btn-relatorio"> Ver Relatório Completo</button>
-            <button class="btn-relatorio" id="btn-recarregar"> Recarregar</button>
-        </div>
-
-        <!-- FILTRO POR DATA -->
-        <div class="filtro-data">
-            <input type="date" id="filtro-data">
-            <button id="btn-filtrar">Consultar Data</button>
-            <button class="btn-relatorio" id="btn-hoje">Voltar para Hoje</button>
+            <button class="btn-fechar" id="btn-fechar-caixa">Fechar Caixa do Dia</button>
         </div>
 
         <!-- TABELA DE VENDAS -->

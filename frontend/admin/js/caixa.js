@@ -5,12 +5,7 @@ const API_URL = "https://gestfy-backend.onrender.com/api/caixa";
 
 const corpo = document.getElementById("corpo-tabela");
 const msg = document.getElementById("msg");
-const filtroData = document.getElementById("filtro-data");
-const btnFiltrar = document.getElementById("btn-filtrar");
-const btnHoje = document.getElementById("btn-hoje");
-const btnRecarregar = document.getElementById("btn-recarregar");
 const btnFecharCaixa = document.getElementById("btn-fechar-caixa");
-const btnRelatorio = document.getElementById("btn-relatorio");
 const dataAtual = document.getElementById("data-atual");
 const modalFechamento = document.getElementById("modal-fechamento");
 
@@ -23,20 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function inicializar() {
-    // Define data atual no filtro
-    const hoje = new Date().toISOString().split("T")[0];
-    filtroData.value = hoje;
+    // Define data atual
     dataAtual.textContent = formatarDataBR(new Date());
 
     // Carrega dados do dia
     carregarCaixaDoDia();
 
     // Event listeners
-    btnFiltrar.addEventListener("click", filtrarPorData);
-    btnHoje.addEventListener("click", voltarParaHoje);
-    btnRecarregar.addEventListener("click", recarregar);
     btnFecharCaixa.addEventListener("click", abrirModalFechamento);
-    btnRelatorio.addEventListener("click", visualizarRelatorio);
 
     // Auto-refresh a cada 30 segundos
     setInterval(carregarCaixaDoDia, 30000);
@@ -125,36 +114,6 @@ async function carregarCaixaDoDia(data = null) {
 
 // FILTRAR POR DATA
 
-function filtrarPorData() {
-    const data = filtroData.value;
-    if (!data) {
-        mostrarMensagem("Selecione uma data", "erro");
-        return;
-    }
-
-    dataAtualSelecionada = data;
-    carregarCaixaDoDia(data);
-    dataAtual.textContent = formatarDataBR(new Date(data + "T00:00:00"));
-}
-
-
-// VOLTAR PARA HOJE
-
-function voltarParaHoje() {
-    const hoje = new Date().toISOString().split("T")[0];
-    filtroData.value = hoje;
-    dataAtualSelecionada = hoje;
-    dataAtual.textContent = formatarDataBR(new Date());
-    carregarCaixaDoDia();
-}
-
-function recarregar() {
-    carregarCaixaDoDia(
-        dataAtualSelecionada === new Date().toISOString().split("T")[0]
-            ? null
-            : dataAtualSelecionada
-    );
-}
 
 
 // MODAL DE FECHAMENTO
@@ -174,41 +133,12 @@ async function confirmarFechamento() {
         
         mostrarMensagem("Caixa fechado! ", "sucesso");
         fecharModal();
-        setTimeout(recarregar, 2000);
+        setTimeout(carregarCaixaDoDia, 2000);
     } catch (erro) {
         console.error("Erro:", erro);
         mostrarMensagem("Erro ao fechar caixa", "erro");
     }
 }
-
-// ==========================================
-// VISUALIZAR RELATÓRIO
-// ==========================================
-async function visualizarRelatorio() {
-    try {
-        const params = dataAtualSelecionada ? `?data=${dataAtualSelecionada}` : "";
-        const response = await fetch(`${API_URL}/relatorio/fechamento${params}`);
-
-        if (!response.ok) throw new Error("Erro ao gerar relatório");
-
-        const relatorio = await response.json();
-
-        // Constrói mensagem com dados do relatório
-        let mensagem = `
- RELATÓRIO DO DIA ${relatorio.data}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total de Entradas: ${formatarMoeda(relatorio.totalEntradas)}
- Total de Saídas: ${formatarMoeda(relatorio.totalSaidas)}
- SALDO LÍQUIDO: ${formatarMoeda(relatorio.saldoLiquido)}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Quantidade de Transações: ${relatorio.quantidadeTransacoes}
-        `;
-
-        alert(mensagem);
-    } catch (erro) {
-        console.error("Erro:", erro);
-        mostrarMensagem("Erro ao gerar relatório", "erro");
-    }
 }
 
 

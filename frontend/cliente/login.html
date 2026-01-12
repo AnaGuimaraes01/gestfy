@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+        }
+
+        .login-container {
+            background: #1a1a1a;
+            border: 2px solid #b03060;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(176, 48, 96, 0.3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            margin: 0;
+            color: var(--rosa);
+            font-size: 28px;
+        }
+
+        .login-header p {
+            color: var(--texto-secundario);
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--texto-primario);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--rosa);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--rosa);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .msg {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .msg.erro {
+            background: rgba(244, 68, 68, 0.1);
+            color: #f44;
+            border: 1px solid #f44;
+        }
+
+        .msg.sucesso {
+            background: rgba(52, 168, 83, 0.1);
+            color: #34a853;
+            border: 1px solid #34a853;
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--texto-secundario);
+        }
+
+        .links a {
+            color: var(--rosa);
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: var(--texto-secundario);
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--rosa);
+            border-bottom-color: var(--rosa);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>GESTFY</h1>
+            <p>Sistema de Vendas</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="abrirAba('login')">Entrar</button>
+            <button class="tab-btn" onclick="abrirAba('cadastro')">Cadastro</button>
+        </div>
+
+        <div id="msg" class="msg"></div>
+
+        <!-- ABA LOGIN -->
+        <div id="login" class="tab-content active">
+            <form id="loginForm" onsubmit="fazerLogin(event)">
+                <div class="form-group">
+                    <label for="loginUsuario">Usuário</label>
+                    <input type="text" id="loginUsuario" placeholder="Seu usuário" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginSenha">Senha</label>
+                    <input type="password" id="loginSenha" placeholder="••••••" required>
+                </div>
+
+                <button type="submit" class="btn-login" id="btnLogin">Entrar</button>
+            </form>
+        </div>
+
+        <!-- ABA CADASTRO -->
+        <div id="cadastro" class="tab-content">
+            <form id="cadastroForm" onsubmit="fazerCadastro(event)">
+                <div class="form-group">
+                    <label for="cadastroNome">Nome Completo</label>
+                    <input type="text" id="cadastroNome" placeholder="Seu nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cadastroTelefone">Telefone</label>
+                    <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cadastroUsuario">Usuário</label>
+                    <input type="text" id="cadastroUsuario" placeholder="Escolha um usuário" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cadastroSenha">Senha</label>
+                    <input type="password" id="cadastroSenha" placeholder="••••••" required>
+                </div>
+
+                <button type="submit" class="btn-login" id="btnCadastro">Criar Conta</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const msg = document.getElementById("msg");
+
+        function abrirAba(aba) {
+            // Esconder todos os tabs
+            document.querySelectorAll(".tab-content").forEach(el => {
+                el.classList.remove("active");
+            });
+            document.querySelectorAll(".tab-btn").forEach(el => {
+                el.classList.remove("active");
+            });
+
+            // Mostrar aba selecionada
+            document.getElementById(aba).classList.add("active");
+            event.target.classList.add("active");
+
+            // Limpar mensagem
+            msg.style.display = "none";
+        }
+
+        // Verificar se já está autenticado
+        window.addEventListener("DOMContentLoaded", () => {
+            const cliente = sessionStorage.getItem("clienteAutenticado");
+            if (cliente === "true") {
+                window.location.href = "catalogo.html";
+            }
+        });
+
+        function fazerLogin(event) {
+            event.preventDefault();
+
+            const usuario = document.getElementById("loginUsuario").value;
+            const senha = document.getElementById("loginSenha").value;
+            const btnLogin = document.getElementById("btnLogin");
+
+            // Obter clientes do localStorage
+            const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+            const clienteEncontrado = clientes.find(c => c.usuario === usuario && c.senha === senha);
+
+            if (clienteEncontrado) {
+                // Salvar autenticação
+                sessionStorage.setItem("clienteAutenticado", "true");
+                sessionStorage.setItem("clienteId", clienteEncontrado.id);
+                sessionStorage.setItem("clienteUsuario", clienteEncontrado.usuario);
+                sessionStorage.setItem("clienteNome", clienteEncontrado.nome);
+                sessionStorage.setItem("clienteTelefone", clienteEncontrado.telefone);
+
+                msg.textContent = "Bem-vindo(a)! Redirecionando...";
+                msg.className = "msg sucesso";
+                msg.style.display = "block";
+
+                btnLogin.disabled = true;
+                btnLogin.textContent = "Entrando...";
+
+                setTimeout(() => {
+                    window.location.href = "catalogo.html";
+                }, 1500);
+            } else {
+                msg.textContent = "Usuário ou senha incorretos";
+                msg.className = "msg erro";
+                msg.style.display = "block";
+            }
+        }
+
+        function fazerCadastro(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById("cadastroNome").value;
+            const telefone = document.getElementById("cadastroTelefone").value;
+            const usuario = document.getElementById("cadastroUsuario").value;
+            const senha = document.getElementById("cadastroSenha").value;
+            const btnCadastro = document.getElementById("btnCadastro");
+
+            // Obter clientes do localStorage
+            let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+            // Verificar se usuário já existe
+            if (clientes.some(c => c.usuario === usuario)) {
+                msg.textContent = "Este usuário já existe. Escolha outro.";
+                msg.className = "msg erro";
+                msg.style.display = "block";
+                return;
+            }
+
+            // Criar novo cliente
+            const novoCliente = {
+                id: Date.now(),
+                nome: nome,
+                telefone: telefone,
+                usuario: usuario,
+                senha: senha,
+                dataCadastro: new Date().toISOString()
+            };
+
+            clientes.push(novoCliente);
+            localStorage.setItem("clientes", JSON.stringify(clientes));
+
+            // Auto-login
+            sessionStorage.setItem("clienteAutenticado", "true");
+            sessionStorage.setItem("clienteId", novoCliente.id);
+            sessionStorage.setItem("clienteUsuario", novoCliente.usuario);
+            sessionStorage.setItem("clienteNome", novoCliente.nome);
+            sessionStorage.setItem("clienteTelefone", novoCliente.telefone);
+
+            msg.textContent = "Conta criada com sucesso! Redirecionando...";
+            msg.className = "msg sucesso";
+            msg.style.display = "block";
+
+            btnCadastro.disabled = true;
+            btnCadastro.textContent = "Criando...";
+
+            setTimeout(() => {
+                window.location.href = "catalogo.html";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

@@ -48,7 +48,7 @@ function adicionarBotaoFecharCaixa() {
         `;
         
         caixaDiv.innerHTML = `
-            <span>💰 ${usuario} | Aberto às ${horaAbertura}</span>
+            <span>${usuario} | Aberto às ${horaAbertura}</span>
             <button onclick="fecharCaixa()" style="
                 padding: 6px 12px;
                 background: #f44;
@@ -73,7 +73,7 @@ function fecharCaixa() {
         sessionStorage.removeItem("caixaUser");
         sessionStorage.removeItem("caixaOpenedAt");
         
-        // Redirecionar para login do caixa
-        window.location.href = "caixa-login.html";
+        // Redirecionar para login do caixa (usa replace para não voltar ao histórico)
+        window.location.replace("caixa-login.html");
     }
 }
