@@ -16,7 +16,7 @@ public class PedidoItem {
     @JsonBackReference
     private Pedido pedido;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "produto_id")
     private Produto produto;
 
