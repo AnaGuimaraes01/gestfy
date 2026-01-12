@@ -47,7 +47,7 @@ async function listarProdutos() {
           <small style="color: #999; display: block; margin-top: 5px;">ID: ${produto.id}</small>
         </div>
         <div class="produto-actions">
-          <button class="btn-small" onclick="editarProduto(${produto.id})">✏️ Editar</button>
+          <button class="btn-small" onclick="editarProduto(${produto.id})">Editar</button>
         </div>
       `;
 

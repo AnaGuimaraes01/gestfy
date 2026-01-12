@@ -45,7 +45,7 @@ function adicionarBotaoLogout() {
         `;
         
         userDiv.innerHTML = `
-            <span style="font-size: 14px;">👤 ${usuario}</span>
+            <span style="font-size: 14px;">${usuario}</span>
             <button onclick="fazerLogout()" style="
                 padding: 6px 12px;
                 background: var(--rosa);

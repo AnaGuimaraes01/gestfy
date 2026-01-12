@@ -1,5 +1,4 @@
 const API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
-
 const listaPedidos = document.getElementById("listaPedidos");
 
 async function carregarPedidos() {
@@ -20,27 +19,27 @@ async function carregarPedidos() {
         listaPedidos.innerHTML = "";
 
         pedidos.forEach(pedido => {
-        const tr = document.createElement("tr");
+            const tr = document.createElement("tr");
 
-        tr.innerHTML = `
-            <td>${pedido.id}</td>
-            <td>
-                <strong>${pedido.nomeCliente}</strong><br>
-                <small>${pedido.telefone}</small>
-            </td>
-            <td>${pedido.formaPagamento}</td>
-            <td>R$ ${pedido.total.toFixed(2)}</td>
-            <td>
-                <select onchange="atualizarStatus(${pedido.id}, this.value)">
-                    ${gerarOptionsStatus(pedido.status)}
-                </select>
-            </td>
-            <td>
-                <button onclick="verDetalhes(${pedido.id})">Detalhes</button>
-            </td>
-        `;
+            tr.innerHTML = `
+                <td>${pedido.id}</td>
+                <td>
+                    <strong>${pedido.nomeCliente}</strong><br>
+                    <small>${pedido.telefone}</small>
+                </td>
+                <td>${pedido.formaPagamento}</td>
+                <td>R$ ${pedido.total.toFixed(2)}</td>
+                <td>
+                    <select onchange="atualizarStatus(${pedido.id}, this.value)">
+                        ${gerarOptionsStatus(pedido.status)}
+                    </select>
+                </td>
+                <td>
+                    <button onclick="verDetalhes(${pedido.id})">Detalhes</button>
+                </td>
+            `;
 
-        listaPedidos.appendChild(tr);
+            listaPedidos.appendChild(tr);
         });
     } catch (error) {
         console.error("Erro ao carregar pedidos:", error);
