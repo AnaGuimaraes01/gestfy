@@ -107,4 +107,7 @@ async function verDetalhes(id) {
     }
 }
 
-carregarPedidos();
+// Carregar pedidos quando página carrega
+document.addEventListener("DOMContentLoaded", () => {
+    carregarPedidos();
+});

@@ -192,3 +192,8 @@ function cancelarEdicao() {
   btnCancelar.style.display = "none";
   msg.textContent = "";
 }
+
+// Carregar produtos quando página carrega
+document.addEventListener("DOMContentLoaded", () => {
+  listarProdutos();
+});
