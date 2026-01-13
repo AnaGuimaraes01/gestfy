@@ -85,11 +85,13 @@ public class PedidoController {
             itens.add(item);
         }
 
-        // 4️⃣ Adiciona os itens ao pedido
-        pedido.setItens(itens);
+        // 4️⃣ Adiciona os itens ao pedido usando addItem()
+        for (PedidoItem item : itens) {
+            pedido.addItem(item);
+        }
 
         // 5️⃣ Calcula e define o total
-        Double totalCalculado = itens.stream()
+        Double totalCalculado = pedido.getItens().stream()
                 .mapToDouble(i -> i.getPrecoUnitario() * i.getQuantidade())
                 .sum();
         pedido.setTotal(totalCalculado > 0 ? totalCalculado : 0.0);
