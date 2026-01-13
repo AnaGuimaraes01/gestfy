@@ -21,19 +21,20 @@ package com.empresa.gestfy.dto.pedido;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record PedidoRequest(
 
-        // CLIENTE (já vem do front)
-        @NotBlank String nomeCliente,
-        @NotBlank String telefone,
-        String email,
+        // CLIENTE - Cliente DEVE estar cadastrado e logado
+        @NotNull(message = "ID do cliente é obrigatório") Long clienteId,
 
         // PEDIDO
-        @NotBlank String formaPagamento,
-        @NotBlank String formaRecebimento,
+        @NotBlank(message = "Forma de pagamento é obrigatória") String formaPagamento,
+
+        @NotBlank(message = "Forma de recebimento é obrigatória (RETIRADA ou ENTREGA)") String formaRecebimento,
+
         String endereco,
 
-        @NotEmpty List<PedidoItemRequest> itens
+        @NotEmpty(message = "Pedido deve ter pelo menos um item") List<PedidoItemRequest> itens
 ) {}

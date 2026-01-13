@@ -57,16 +57,9 @@ public class PedidoController {
     @PostMapping
     public ResponseEntity<PedidoDTO> criarPedido(@RequestBody @Valid PedidoRequest request) {
 
-        // 1️⃣ Busca ou cria cliente automaticamente (SEM QUEBRAR O FRONT)
-Cliente cliente = clienteRepository.findByTelefone(request.telefone())
-        .orElseGet(() -> {
-            Cliente novo = new Cliente();
-            novo.setNome(request.nomeCliente());
-            novo.setTelefone(request.telefone());
-            novo.setEmail(request.email());
-            novo.setEndereco(request.endereco());
-            return clienteRepository.save(novo);
-        });
+        // 1️⃣ Busca o cliente (DEVE estar cadastrado - não cria automaticamente)
+        Cliente cliente = clienteRepository.findById(request.clienteId())
+                .orElseThrow(() -> new RuntimeException("Cliente não encontrado: ID " + request.clienteId()));
 
         // 2️⃣ Cria o pedido
         Pedido pedido = new Pedido();
