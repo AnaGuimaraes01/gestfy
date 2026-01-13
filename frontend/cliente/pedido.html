@@ -230,7 +230,9 @@
                 }));
 
                 const pedidoReq = {
-                    clienteId: clienteId,
+                    nomeCliente: nome,
+                    telefone: telefone,
+                    email: email || "",
                     formaPagamento: formaPagamento,
                     formaRecebimento: formRecebimento,
                     endereco: endereco || "",
