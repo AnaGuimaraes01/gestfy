@@ -24,7 +24,7 @@ public class Cliente {
 
     public Cliente() {}
 
-    // getters e setters
+    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -41,5 +41,4 @@ public class Cliente {
     public void setEndereco(String endereco) { this.endereco = endereco; }
 
     public List<Pedido> getPedidos() { return pedidos; }
-    public void setPedidos(List<Pedido> pedidos) { this.pedidos = pedidos; }
 }
