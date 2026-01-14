@@ -207,6 +207,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="cadastroEmail">E-mail</label>
+                    <input type="email" id="cadastroEmail" placeholder="seu.email@exemplo.com" required>
+                </div>
+
+                <div class="form-group">
                     <label for="cadastroUsuario">Usuário</label>
                     <input type="text" id="cadastroUsuario" placeholder="Escolha um usuário" required>
                 </div>
@@ -289,6 +294,7 @@
 
             const nome = document.getElementById("cadastroNome").value;
             const telefone = document.getElementById("cadastroTelefone").value;
+            const email = document.getElementById("cadastroEmail").value;
             const usuario = document.getElementById("cadastroUsuario").value;
             const senha = document.getElementById("cadastroSenha").value;
             const btnCadastro = document.getElementById("btnCadastro");
@@ -309,6 +315,7 @@
                 id: Date.now(),
                 nome: nome,
                 telefone: telefone,
+                email: email,
                 usuario: usuario,
                 senha: senha,
                 dataCadastro: new Date().toISOString()
@@ -323,6 +330,7 @@
             sessionStorage.setItem("clienteUsuario", novoCliente.usuario);
             sessionStorage.setItem("clienteNome", novoCliente.nome);
             sessionStorage.setItem("clienteTelefone", novoCliente.telefone);
+            sessionStorage.setItem("clienteEmail", novoCliente.email);
 
             msg.textContent = "Conta criada com sucesso! Redirecionando...";
             msg.className = "msg sucesso";
