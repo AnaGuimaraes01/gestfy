@@ -1,3 +1,5 @@
+
+
 package com.empresa.gestfy.dto.cliente;
 
 import jakarta.validation.constraints.Email;
@@ -15,6 +17,5 @@ public record ClienteRequest(
     @Email(message = "E-mail inválido")
     String email,
 
-    @NotBlank(message = "O endereço do cliente é obrigatório")
-    String endereco
+    String endereco // ALTERAÇÃO: Endereço pode ser informado depois no pedido
 ) {}

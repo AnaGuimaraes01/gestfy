@@ -299,7 +299,7 @@
             const senha = document.getElementById("cadastroSenha").value;
             const btnCadastro = document.getElementById("btnCadastro");
 
-            // Obter clientes do localStorage
+            // Obter clientes do localStorage (mantido para compatibilidade com login)
             let clientes = JSON.parse(localStorage.getItem("clientes")) || [];
 
             // Verificar se usuário já existe
@@ -310,38 +310,63 @@
                 return;
             }
 
-            // Criar novo cliente
-            const novoCliente = {
-                id: Date.now(),
+            // ALTERAÇÃO: Enviar cliente para o backend e usar ID retornado
+            const clienteReq = {
                 nome: nome,
                 telefone: telefone,
                 email: email,
-                usuario: usuario,
-                senha: senha,
-                dataCadastro: new Date().toISOString()
+                endereco: "" // Campo obrigatório no backend
             };
 
-            clientes.push(novoCliente);
-            localStorage.setItem("clientes", JSON.stringify(clientes));
+            fetch("https://gestfy-backend.onrender.com/api/clientes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(clienteReq)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Erro ao criar cliente no servidor");
+                return res.json();
+            })
+            .then(clienteDoBackend => {
+                // Criar objeto com ID do banco (para login futuro)
+                const novoCliente = {
+                    id: clienteDoBackend.id, // ID do banco, não mais Date.now()
+                    nome: nome,
+                    telefone: telefone,
+                    email: email,
+                    usuario: usuario,
+                    senha: senha,
+                    dataCadastro: new Date().toISOString()
+                };
 
-            // Auto-login
-            sessionStorage.setItem("clienteAutenticado", "true");
-            sessionStorage.setItem("clienteId", novoCliente.id);
-            sessionStorage.setItem("clienteUsuario", novoCliente.usuario);
-            sessionStorage.setItem("clienteNome", novoCliente.nome);
-            sessionStorage.setItem("clienteTelefone", novoCliente.telefone);
-            sessionStorage.setItem("clienteEmail", novoCliente.email);
+                clientes.push(novoCliente);
+                localStorage.setItem("clientes", JSON.stringify(clientes));
 
-            msg.textContent = "Conta criada com sucesso! Redirecionando...";
-            msg.className = "msg sucesso";
-            msg.style.display = "block";
+                // Auto-login com ID do banco
+                sessionStorage.setItem("clienteAutenticado", "true");
+                sessionStorage.setItem("clienteId", novoCliente.id); // ID do banco
+                sessionStorage.setItem("clienteUsuario", novoCliente.usuario);
+                sessionStorage.setItem("clienteNome", novoCliente.nome);
+                sessionStorage.setItem("clienteTelefone", novoCliente.telefone);
+                sessionStorage.setItem("clienteEmail", novoCliente.email);
 
-            btnCadastro.disabled = true;
-            btnCadastro.textContent = "Criando...";
+                msg.textContent = "Conta criada com sucesso! Redirecionando...";
+                msg.className = "msg sucesso";
+                msg.style.display = "block";
 
-            setTimeout(() => {
-                window.location.href = "catalogo.html";
-            }, 1500);
+                btnCadastro.disabled = true;
+                btnCadastro.textContent = "Criando...";
+
+                setTimeout(() => {
+                    window.location.href = "catalogo.html";
+                }, 1500);
+            })
+            .catch(error => {
+                console.error("Erro no cadastro:", error);
+                msg.textContent = "Erro ao criar conta: " + error.message;
+                msg.className = "msg erro";
+                msg.style.display = "block";
+            });
         }
     </script>
 </body>
