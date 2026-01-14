@@ -27,7 +27,7 @@ public class EnvConfig implements EnvironmentPostProcessor {
 
         // VERIFICAÇÃO DE INTEGRIDADE
         if (!envMap.containsKey("DB_URL") || !envMap.containsKey("DB_USERNAME") || !envMap.containsKey("DB_PASSWORD")) {
-            System.out.println("⚠️ AVISO: Arquivo .env não encontrado ou incompleto!");
+            System.out.println("AVISO: Arquivo .env não encontrado ou incompleto!");
             System.out.println("   As variáveis DB_URL, DB_USERNAME e DB_PASSWORD são necessárias.");
             System.out.println("   Verifique se o arquivo .env existe no diretório raiz do projeto.");
         }

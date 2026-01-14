@@ -86,11 +86,21 @@ public class PedidoController {
             Produto produto = produtoRepository.findById(itemReq.getIdProduto())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + itemReq.getIdProduto()));
 
+            // Verificar se tem quantidade suficiente
+            if (produto.getQuantidade() == null || produto.getQuantidade() < itemReq.getQuantidade()) {
+                throw new RuntimeException("Quantidade insuficiente do produto: " + produto.getNome());
+            }
+
             PedidoItem item = new PedidoItem();
-            item.setPedido(pedido); // importante!
-            item.setProduto(produto); // importante!
+            item.setPedido(pedido);
+            item.setProduto(produto);
             item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
             item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
+
+            // IMPORTANTE: Descontar quantidade do produto
+            Integer novaQuantidade = produto.getQuantidade() - item.getQuantidade();
+            produto.setQuantidade(novaQuantidade);
+            produtoRepository.save(produto); // Salva produto com quantidade reduzida
 
             itens.add(item);
         }
@@ -180,9 +190,9 @@ public class PedidoController {
             caixa.setData(LocalDate.now());
 
             caixaRepository.save(caixa);
-            System.out.println("✅ Venda registrada no caixa: Pedido #" + pedido.getId());
+            System.out.println("Venda registrada no caixa: Pedido #" + pedido.getId());
         } catch (Exception e) {
-            System.err.println("❌ Erro ao registrar venda no caixa: " + e.getMessage());
+            System.err.println("Erro ao registrar venda no caixa: " + e.getMessage());
             // Não interrompe o fluxo se falhar no registro do caixa
         }
     }

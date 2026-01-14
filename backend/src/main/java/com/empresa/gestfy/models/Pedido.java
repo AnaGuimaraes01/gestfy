@@ -28,7 +28,7 @@ public class Pedido {
     @Column(nullable = false)
     private Double total = 0.0;
 
-    // ⚠️ NÃO inicializar aqui para evitar falha no DDL
+    // AVISO: NÃO inicializar aqui para evitar falha no DDL
     @Column(nullable = false)
     private LocalDateTime data;
 

@@ -1,15 +1,13 @@
 package com.empresa.gestfy.controllers;
 
-import com.empresa.gestfy.dto.caixa.CaixaDTO;
-import com.empresa.gestfy.dto.caixa.CaixaRequest;
-import com.empresa.gestfy.models.Caixa;
-import com.empresa.gestfy.repositories.CaixaRepository;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import com.empresa.gestfy.models.Pedido;
+import com.empresa.gestfy.repositories.PedidoRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,147 +18,137 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/caixa")
 public class CaixaController {
 
-    private final CaixaRepository caixaRepository;
+    private final PedidoRepository pedidoRepository;
 
-    public CaixaController(CaixaRepository caixaRepository) {
-        this.caixaRepository = caixaRepository;
+    public CaixaController(PedidoRepository pedidoRepository) {
+        this.pedidoRepository = pedidoRepository;
     }
 
     // =========================
-    // REGISTRAR VENDA NO CAIXA (automático quando pedido finaliza)
-    // =========================
-    @PostMapping
-    public ResponseEntity<CaixaDTO> registrarVenda(@RequestBody @Valid CaixaRequest request) {
-        Caixa caixa = new Caixa();
-        caixa.setSaldo(request.saldo());
-        caixa.setDescricao(request.descricao());
-        caixa.setData(LocalDate.now());
-
-        caixa = caixaRepository.save(caixa);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(caixa));
-    }
-
-    // =========================
-    // LISTAR TODOS OS REGISTROS
-    // =========================
-    @GetMapping
-    public ResponseEntity<List<CaixaDTO>> listarTodos() {
-        List<CaixaDTO> registros = caixaRepository.findAll()
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(registros);
-    }
-
-    // =========================
-    // BUSCAR REGISTROS DO DIA
+    // BUSCAR VENDAS DO DIA
     // =========================
     @GetMapping("/dia")
     public ResponseEntity<Map<String, Object>> obterCaixaDoDia(@RequestParam(required = false) String data) {
         LocalDate dataFiltro = (data != null && !data.isEmpty()) ? LocalDate.parse(data) : LocalDate.now();
 
-        List<Caixa> registrosDoDia = caixaRepository.findByData(dataFiltro);
+        // Buscar todos os pedidos do dia (completos ou parciais)
+        LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
+        LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
 
-        Double totalDia = registrosDoDia.stream()
-                .mapToDouble(Caixa::getSaldo)
+        List<Pedido> pedidosDoDia = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> p.getData() != null && 
+                        !p.getData().isBefore(inicioDodia) && 
+                        !p.getData().isAfter(fimDodia) &&
+                        "FINALIZADO".equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        // Calcular totais
+        Double totalDia = pedidosDoDia.stream()
+                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
                 .sum();
+
+        // Criar lista de registros para tabela
+        List<Map<String, Object>> registros = pedidosDoDia.stream()
+                .map(p -> {
+                    Map<String, Object> reg = new HashMap<>();
+                    reg.put("id", p.getId());
+                    reg.put("descricao", "Pedido #" + p.getId() + " - " + (p.getCliente() != null ? p.getCliente().getNome() : "Cliente"));
+                    reg.put("saldo", p.getTotal() != null ? p.getTotal() : 0.0);
+                    reg.put("data", p.getData());
+                    return reg;
+                })
+                .collect(Collectors.toList());
 
         Map<String, Object> response = new HashMap<>();
         response.put("data", dataFiltro);
         response.put("totalDia", totalDia);
-        response.put("quantidadeRegistros", registrosDoDia.size());
-        response.put("registros", registrosDoDia.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList()));
+        response.put("quantidadeRegistros", pedidosDoDia.size());
+        response.put("registros", registros);
 
         return ResponseEntity.ok(response);
     }
 
     // =========================
-    // BUSCAR POR ID
-    // =========================
-    @GetMapping("/{id}")
-    public ResponseEntity<CaixaDTO> buscarPorId(@PathVariable Long id) {
-        return caixaRepository.findById(id)
-                .map(c -> ResponseEntity.ok(mapToDTO(c)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // =========================
-    // ATUALIZAR REGISTRO
-    // =========================
-    @PutMapping("/{id}")
-    public ResponseEntity<CaixaDTO> atualizar(
-            @PathVariable Long id,
-            @RequestBody @Valid CaixaRequest request) {
-
-        Caixa caixa = caixaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro de caixa não encontrado: ID " + id));
-
-        caixa.setSaldo(request.saldo());
-        caixa.setDescricao(request.descricao());
-
-        caixa = caixaRepository.save(caixa);
-        return ResponseEntity.ok(mapToDTO(caixa));
-    }
-
-    // =========================
-    // DELETAR REGISTRO
-    // =========================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!caixaRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        caixaRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // =========================
-    // FECHAMENTO DO DIA
+    // RELATÓRIO DE FECHAMENTO DO DIA
     // =========================
     @GetMapping("/relatorio/fechamento")
     public ResponseEntity<Map<String, Object>> fechamentoDia(@RequestParam(required = false) String data) {
         LocalDate dataFiltro = (data != null && !data.isEmpty()) ? LocalDate.parse(data) : LocalDate.now();
 
-        List<Caixa> registrosDoDia = caixaRepository.findByData(dataFiltro);
+        LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
+        LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
 
-        Double totalEntradas = registrosDoDia.stream()
-                .filter(r -> r.getSaldo() > 0)
-                .mapToDouble(Caixa::getSaldo)
+        List<Pedido> pedidosDoDia = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> p.getData() != null && 
+                        !p.getData().isBefore(inicioDodia) && 
+                        !p.getData().isAfter(fimDodia) &&
+                        "FINALIZADO".equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Double totalVendas = pedidosDoDia.stream()
+                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
                 .sum();
 
-        Double totalSaidas = registrosDoDia.stream()
-                .filter(r -> r.getSaldo() < 0)
-                .mapToDouble(Caixa::getSaldo)
-                .sum();
+        // Totalizadores por forma de pagamento
+        Map<String, Double> vendaseporFormaPagamento = new HashMap<>();
+        pedidosDoDia.forEach(p -> {
+            String forma = p.getFormaPagamento() != null ? p.getFormaPagamento() : "Indefinido";
+            vendaseporFormaPagamento.put(forma, 
+                    vendaseporFormaPagamento.getOrDefault(forma, 0.0) + (p.getTotal() != null ? p.getTotal() : 0.0));
+        });
 
-        Double saldoLiquido = totalEntradas + totalSaidas;
+        List<Map<String, Object>> detalhes = pedidosDoDia.stream()
+                .map(p -> {
+                    Map<String, Object> det = new HashMap<>();
+                    det.put("id", p.getId());
+                    det.put("descricao", "Pedido #" + p.getId());
+                    det.put("valor", p.getTotal());
+                    det.put("forma", p.getFormaPagamento());
+                    det.put("data", p.getData());
+                    return det;
+                })
+                .collect(Collectors.toList());
 
         Map<String, Object> fechamento = new HashMap<>();
         fechamento.put("data", dataFiltro);
-        fechamento.put("totalEntradas", totalEntradas);
-        fechamento.put("totalSaidas", Math.abs(totalSaidas));
-        fechamento.put("saldoLiquido", saldoLiquido);
-        fechamento.put("quantidadeTransacoes", registrosDoDia.size());
-        fechamento.put("detalhes", registrosDoDia.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList()));
+        fechamento.put("totalVendas", totalVendas);
+        fechamento.put("quantidadeVendas", pedidosDoDia.size());
+        fechamento.put("formasPagamento", vendaseporFormaPagamento);
+        fechamento.put("detalhes", detalhes);
 
         return ResponseEntity.ok(fechamento);
     }
 
     // =========================
-    // CONVERTER PARA DTO
+    // TOTALIZADORES DO DIA
     // =========================
-    private CaixaDTO mapToDTO(Caixa caixa) {
-        return new CaixaDTO(
-                caixa.getId(),
-                caixa.getSaldo(),
-                caixa.getDescricao(),
-                caixa.getData()
-        );
+    @GetMapping("/totalizadores")
+    public ResponseEntity<Map<String, Object>> getTotalizadores(@RequestParam(required = false) String data) {
+        LocalDate dataFiltro = (data != null && !data.isEmpty()) ? LocalDate.parse(data) : LocalDate.now();
+
+        LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
+        LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
+
+        List<Pedido> pedidosDoDia = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> p.getData() != null && 
+                        !p.getData().isBefore(inicioDodia) && 
+                        !p.getData().isAfter(fimDodia) &&
+                        "FINALIZADO".equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Double totalVendas = pedidosDoDia.stream()
+                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
+                .sum();
+
+        Map<String, Object> totalizadores = new HashMap<>();
+        totalizadores.put("data", dataFiltro);
+        totalizadores.put("totalVendas", totalVendas);
+        totalizadores.put("quantidadeVendas", pedidosDoDia.size());
+        totalizadores.put("ticketMedio", pedidosDoDia.size() > 0 ? totalVendas / pedidosDoDia.size() : 0.0);
+
+        return ResponseEntity.ok(totalizadores);
     }
 }
