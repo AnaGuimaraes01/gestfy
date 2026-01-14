@@ -1,15 +1,13 @@
 
 // CAIXA.JS - Lógica do Caixa Diário
 
-const API_URL = "https://gestfy-backend.onrender.com/api/caixa";
+const API_CAIXA = "https://gestfy-backend.onrender.com/api/caixa";
 
 const corpo = document.getElementById("corpo-tabela");
 const msg = document.getElementById("msg");
 const btnFecharCaixa = document.getElementById("btn-fechar-caixa");
 const dataAtual = document.getElementById("data-atual");
 const modalFechamento = document.getElementById("modal-fechamento");
-
-let dataAtualSelecionada = new Date().toISOString().split("T")[0];
 
 // INICIALIZAÇÃO
 
@@ -22,76 +20,62 @@ function inicializar() {
     dataAtual.textContent = formatarDataBR(new Date());
 
     // Carrega dados do dia
-    carregarCaixaDoDia();
+    carregarVendasDoDia();
 
     // Event listeners
     btnFecharCaixa.addEventListener("click", abrirModalFechamento);
 
     // Auto-refresh a cada 30 segundos
-    setInterval(carregarCaixaDoDia, 30000);
+    setInterval(carregarVendasDoDia, 30000);
 }
 
 
-// CARREGAR DADOS DO CAIXA
+// CARREGAR VENDAS DO DIA
 
-async function carregarCaixaDoDia(data = null) {
+async function carregarVendasDoDia(data = null) {
     try {
         const params = data ? `?data=${data}` : "";
-        const response = await fetch(`${API_URL}/dia${params}`);
+        const response = await fetch(`${API_CAIXA}/dia${params}`);
 
-        if (!response.ok) throw new Error("Erro ao carregar caixa");
+        if (!response.ok) throw new Error("Erro ao carregar vendas");
 
         const dados = await response.json();
 
         // Atualiza totalizadores
         document.getElementById("total-arrecadado").textContent = formatarMoeda(
-            dados.totalDia
+            dados.totalDia || 0
         );
-        document.getElementById("qtd-transacoes").textContent = dados.quantidadeRegistros;
+        document.getElementById("qtd-transacoes").textContent = dados.quantidadeRegistros || 0;
 
-        // Calcula entradas e saídas
-        const entradas = dados.registros
-            .filter((r) => r.saldo > 0)
-            .reduce((sum, r) => sum + r.saldo, 0);
+        // Calcula entradas (todas as vendas são positivas)
+        const totalEntradas = dados.totalDia || 0;
 
-        const saidas = dados.registros
-            .filter((r) => r.saldo < 0)
-            .reduce((sum, r) => sum + r.saldo, 0);
-
-        document.getElementById("total-entradas").textContent = formatarMoeda(entradas);
-        document.getElementById("total-saidas").textContent = formatarMoeda(
-            Math.abs(saidas)
-        );
+        document.getElementById("total-entradas").textContent = formatarMoeda(totalEntradas);
+        document.getElementById("total-saidas").textContent = formatarMoeda(0);
 
         // Limpa tabela
         corpo.innerHTML = "";
 
         // Verifica se há registros
-        if (dados.registros.length === 0) {
+        if (!dados.registros || dados.registros.length === 0) {
             corpo.innerHTML = `
                 <tr>
                     <td colspan="4" class="empty-state">
-                        <p>Nenhuma transação registrada para essa data.</p>
+                        <p>Nenhuma venda registrada para esse dia.</p>
                     </td>
                 </tr>
             `;
             return;
         }
 
-        // Popula tabela com registros
+        // Popula tabela com vendas
         dados.registros.forEach((registro) => {
             const tr = document.createElement("tr");
-            const classe =
-                registro.saldo > 0
-                    ? "valor-positivo"
-                    : registro.saldo < 0
-                        ? "valor-negativo"
-                        : "valor-neutro";
 
             tr.innerHTML = `
                 <td>#${registro.id}</td>
                 <td>${registro.descricao}</td>
-                <td class="${classe}">${formatarMoeda(registro.saldo)}</td>
+                <td class="valor-positivo">${formatarMoeda(registro.saldo || 0)}</td>
                 <td>${formatarDataHora(registro.data)}</td>
             `;
 
@@ -112,9 +96,6 @@ async function carregarCaixaDoDia(data = null) {
     }
 }
 
-// FILTRAR POR DATA
-
-
 
 // MODAL DE FECHAMENTO
 
@@ -130,15 +111,13 @@ function fecharModal() {
 
 async function confirmarFechamento() {
     try {
-        
-        mostrarMensagem("Caixa fechado! ", "sucesso");
+        mostrarMensagem("Caixa fechado com sucesso!", "sucesso");
         fecharModal();
-        setTimeout(carregarCaixaDoDia, 2000);
+        setTimeout(carregarVendasDoDia, 2000);
     } catch (erro) {
         console.error("Erro:", erro);
         mostrarMensagem("Erro ao fechar caixa", "erro");
     }
-}
 }
 
 
@@ -148,7 +127,7 @@ function formatarMoeda(valor) {
     return new Intl.NumberFormat("pt-BR", {
         style: "currency",
         currency: "BRL",
-    }).format(valor);
+    }).format(valor || 0);
 }
 
 function formatarDataBR(data) {
@@ -163,7 +142,7 @@ function formatarDataBR(data) {
 
 function formatarDataHora(dataString) {
     if (!dataString) return "-";
-    const data = new Date(dataString + "T00:00:00");
+    const data = new Date(dataString);
     return new Intl.DateTimeFormat("pt-BR", {
         day: "2-digit",
         month: "2-digit",

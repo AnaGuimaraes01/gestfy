@@ -133,7 +133,7 @@
         function irParaPagamento() {
             const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
             if (carrinho.length === 0) {
-                msg.textContent = "⚠️ Adicione itens ao carrinho";
+                msg.textContent = "Adicione itens ao carrinho";
                 msg.style.display = "block";
                 return;
             }

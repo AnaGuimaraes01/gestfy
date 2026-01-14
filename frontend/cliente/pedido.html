@@ -167,25 +167,25 @@
             const formaPagamento = document.getElementById("formaPagamento").value;
             
             if (!nome) {
-                msg.textContent = "⚠️ Preencha o nome do cliente";
+                msg.textContent = "Preencha o nome do cliente";
                 msg.style.display = "block";
                 return;
             }
 
             if (!telefone) {
-                msg.textContent = "⚠️ Preencha o telefone do cliente";
+                msg.textContent = "Preencha o telefone do cliente";
                 msg.style.display = "block";
                 return;
             }
 
             if (!formRecebimento) {
-                msg.textContent = "⚠️ Selecione a forma de recebimento";
+                msg.textContent = "Selecione a forma de recebimento";
                 msg.style.display = "block";
                 return;
             }
 
             if (!formaPagamento) {
-                msg.textContent = "⚠️ Selecione a forma de pagamento";
+                msg.textContent = "Selecione a forma de pagamento";
                 msg.style.display = "block";
                 return;
             }
@@ -198,7 +198,7 @@
                 const complemento = enderecComplemento.value.trim();
 
                 if (!rua || !numero) {
-                    msg.textContent = "⚠️ Rua e número são obrigatórios para entrega";
+                    msg.textContent = "Rua e número são obrigatórios para entrega";
                     msg.style.display = "block";
                     return;
                 }
@@ -237,7 +237,7 @@
 
                 // Sucesso
                 localStorage.removeItem("carrinho");
-                msg.textContent = `✅ Pedido #${pedido.id} criado com sucesso!`;
+                msg.textContent = `Pedido #${pedido.id} criado com sucesso!`;
                 msg.style.display = "block";
                 msg.style.background = "rgba(52, 168, 83, 0.1)";
                 msg.style.color = "#34a853";
@@ -249,7 +249,7 @@
 
             } catch (error) {
                 console.error(error);
-                msg.textContent = "❌ Erro ao processar pedido: " + error.message;
+                msg.textContent = "Erro ao processar pedido: " + error.message;
                 msg.style.display = "block";
             }
         });

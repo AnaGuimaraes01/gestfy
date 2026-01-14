@@ -29,14 +29,14 @@ async function listarProdutos() {
 
     produtos.forEach(produto => {
       const li = document.createElement("li");
-      const imageUrl = produto.urlFoto || "🍦";
+      const imageUrl = produto.urlFoto || "/images/placeholder.png";
       
       // Se é URL, tenta carregar imagem; senão mostra emoji
       let imagemHtml = "";
       if (produto.urlFoto && produto.urlFoto.startsWith("http")) {
-        imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='🍦'">`;
+        imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='[Sem imagem]'">`;
       } else {
-        imagemHtml = `<div class="produto-thumb-emoji">🍦</div>`;
+        imagemHtml = `<div class="produto-thumb-emoji">[Sem imagem]</div>`;
       }
 
       li.className = "produto-item";
@@ -61,7 +61,7 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao carregar produtos, api url" + API_URL;
+    msg.textContent = "Erro ao carregar produtos, api url" + API_URL;
   }
 }
 
@@ -112,7 +112,7 @@ form.addEventListener("submit", async (e) => {
         throw new Error(erro.message || "Erro ao atualizar produto");
       }
       
-      msg.textContent = "✅ Produto atualizado com sucesso!";
+      msg.textContent = "Produto atualizado com sucesso!";
       produtoEmEdicao = null;
       btnSalvar.textContent = "Salvar Produto";
       btnCancelar.style.display = "none";
@@ -129,7 +129,7 @@ form.addEventListener("submit", async (e) => {
         throw new Error(erro.message || "Erro ao cadastrar produto");
       }
 
-      msg.textContent = "✅ Produto cadastrado com sucesso!";
+      msg.textContent = "Produto cadastrado com sucesso!";
     }
 
     msg.style.color = "#34a853";
@@ -168,7 +168,7 @@ async function editarProduto(id) {
     produtoEmEdicao = id;
     
     // Atualizar UI
-    btnSalvar.textContent = "💾 Atualizar Produto";
+    btnSalvar.textContent = "Atualizar Produto";
     btnCancelar.style.display = "inline-block";
     
     // Scroll até o formulário
@@ -180,7 +180,7 @@ async function editarProduto(id) {
     
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ " + error.message;
+    msg.textContent = "Erro: " + error.message;
     msg.style.color = "#f44";
   }
 }

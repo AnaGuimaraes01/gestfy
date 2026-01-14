@@ -15,19 +15,13 @@
     <main>
         <div class="container" style="max-width: 800px;">
             <div style="margin-bottom: 20px;">
-                <a href="catalogo.html" class="btn">← Fazer Novo Pedido</a>
+                <a href="catalogo.html" class="btn">Fazer Novo Pedido</a>
             </div>
 
             <div id="mensagem" class="msg" style="display: none;"></div>
 
             <div id="pedidoContainer" style="background: var(--cinza-card); border-radius: 12px; padding: 24px; border: 1px solid #3a3a3a;">
                 <!-- Dados do pedido serão preenchidos aqui -->
-            </div>
-
-            <div style="margin-top: 24px; text-align: center;">
-                <p style="color: #888; margin-bottom: 16px;">ID do Pedido salvo no navegador</p>
-                <input type="number" id="pesquisaId" placeholder="Ou digite o ID de outro pedido" style="width: 100%; max-width: 300px; padding: 10px; background: var(--cinza-input); border: 1px solid #444; border-radius: 8px; color: white; margin-bottom: 10px;">
-                <button onclick="pesquisarPedido()" class="btn" style="width: 100%; max-width: 300px;"> Pesquisar</button>
             </div>
         </div>
     </main>
@@ -45,7 +39,7 @@
         const statusMap = {
             "RECEBIDO": { label: "Recebido", emoji: "📋", badge: "status-recebido" },
             "EM_PREPARO": { label: "Em Preparo", emoji: "👨‍🍳", badge: "status-preparacao" },
-            "PRONTO_RETIRADA": { label: "Pronto para Retirada", emoji: "✅", badge: "status-pronto" },
+            "PRONTO_RETIRADA": { label: "Pronto para Retirada", emoji: "", badge: "status-pronto" },
             "SAIU_ENTREGA": { label: "Saiu para Entrega", emoji: "🚗", badge: "status-entrega" },
             "FINALIZADO": { label: "Finalizado", emoji: "🎉", badge: "status-finalizado" }
         };
@@ -153,23 +147,12 @@
             `;
         }
 
-        // Pesquisar pedido por ID
-        function pesquisarPedido() {
-            const id = document.getElementById("pesquisaId").value.trim();
-            if (!id) {
-                msg.textContent = "⚠️ Digite um ID válido";
-                msg.style.display = "block";
-                return;
-            }
-            carregarPedido(id);
-        }
-
         // Carregar na página
         const idPedido = obterIdPedido();
         if (idPedido) {
             carregarPedido(idPedido);
         } else {
-            msg.textContent = "⚠️ Nenhum pedido encontrado. Faça um novo pedido!";
+            msg.textContent = "Nenhum pedido encontrado. Faça um novo pedido!";
             msg.style.display = "block";
             container.innerHTML = "";
         }

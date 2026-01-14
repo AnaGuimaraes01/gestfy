@@ -81,29 +81,7 @@ async function atualizarStatus(id, status) {
 }
 
 async function verDetalhes(id) {
-    try {
-        const response = await fetch(`${API_URL}/${id}`);
-        if (!response.ok) {
-            alert("Erro ao buscar detalhes do pedido.");
-            return;
-        }
-        const pedido = await response.json();
-        let itens = (pedido.itens || []).map(item =>
-            `• ${item.nomeProduto || 'Produto'} (x${item.quantidade}) - R$ ${(item.precoUnitario * item.quantidade).toFixed(2)}`
-        ).join("\n");
-        alert(
-            `Pedido #${pedido.id}\n\n` +
-            `Cliente: ${pedido.nomeCliente || ''}\n` +
-            `Endereço: ${pedido.endereco || 'Retirada no local'}\n` +
-            `Total: R$ ${(pedido.total || 0).toFixed(2)}\n` +
-            `Status: ${pedido.status || ''}\n` +
-            `Pagamento: ${pedido.formaPagamento || ''}\n\n` +
-            `Itens:\n${itens}`
-        );
-    } catch (error) {
-        console.error("Erro:", error);
-        alert("Erro ao buscar detalhes do pedido.");
-    }
+    window.location.href = `pedido-detalhes.html?id=${id}`;
 }
 
 // Carregar pedidos quando página carrega

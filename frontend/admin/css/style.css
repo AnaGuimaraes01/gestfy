@@ -345,15 +345,17 @@ button,
   background: linear-gradient(135deg, var(--rosa), #d4436a);
   border: none;
   color: var(--branco);
-  padding: 12px 24px;
+  padding: 14px 28px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: inline-block;
+  min-height: 48px;
+  min-width: 120px;
 }
 
 button:hover,
@@ -393,14 +395,16 @@ button:active {
 }
 
 .btn-small {
-  padding: 8px 16px;
-  font-size: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  min-height: 40px;
 }
 
 button[type="submit"] {
   grid-column: 1 / -1;
-  padding: 14px;
-  font-size: 16px;
+  padding: 16px;
+  font-size: 18px;
+  min-height: 50px;
 }
 
 /* =====================================================
@@ -1010,6 +1014,96 @@ button[type="submit"] {
 }
 
 @media (max-width: 768px) {
+  /* TYPOGRAPHY */
+  html {
+    font-size: 16px;
+  }
+  
+  body {
+    font-size: 16px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  h2 {
+    font-size: 20px;
+  }
+  
+  h3 {
+    font-size: 18px;
+  }
+  
+  p {
+    font-size: 15px;
+  }
+  
+  /* BUTTONS */
+  button,
+  .btn {
+    padding: 14px 20px;
+    font-size: 15px;
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .btn-small {
+    padding: 12px 16px;
+    font-size: 13px;
+    width: auto;
+  }
+  
+  button[type="submit"] {
+    padding: 18px;
+    font-size: 16px;
+  }
+  
+  /* HEADER */
+  .admin-header {
+    padding: 16px;
+  }
+  
+  .admin-header h1 {
+    font-size: 22px;
+  }
+  
+  .admin-header p {
+    font-size: 13px;
+  }
+  
+  /* CONTAINER */
+  .container {
+    padding: 0 15px;
+    margin: 20px auto;
+  }
+  
+  /* INPUTS */
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px;
+    padding: 14px;
+    min-height: 44px;
+  }
+  
+  /* GRID */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .catalogo-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
@@ -1022,5 +1116,44 @@ button[type="submit"] {
   .carrinho-resumo {
     position: relative;
     top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  /* EXTRA SMALL DEVICES */
+  html {
+    font-size: 15px;
+  }
+  
+  .admin-header {
+    padding: 12px;
+  }
+  
+  .admin-header h1 {
+    font-size: 20px;
+  }
+  
+  h2 {
+    font-size: 18px;
+  }
+  
+  button,
+  .btn {
+    padding: 16px;
+    font-size: 15px;
+  }
+  
+  .container {
+    padding: 0 12px;
+  }
+  
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  
+  table {
+    font-size: 14px;
   }
 }

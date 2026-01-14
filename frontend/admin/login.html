@@ -178,7 +178,7 @@
                 sessionStorage.setItem("adminAuthenticated", "true");
                 sessionStorage.setItem("adminUser", usuario);
 
-                msg.textContent = "✅ Login realizado com sucesso!";
+                msg.textContent = "Login realizado com sucesso!";
                 msg.className = "msg sucesso";
                 msg.style.display = "block";
 
@@ -189,7 +189,7 @@
                     window.location.href = "index.html";
                 }, 1500);
             } else {
-                msg.textContent = "❌ Usuário ou senha incorretos";
+                msg.textContent = "Usuário ou senha incorretos";
                 msg.className = "msg erro";
                 msg.style.display = "block";
             }

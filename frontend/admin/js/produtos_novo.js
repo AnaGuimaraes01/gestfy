@@ -29,9 +29,9 @@ async function listarProdutos() {
       
       let imagemHtml = "";
       if (produto.urlFoto && produto.urlFoto.startsWith("http")) {
-        imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='🍦'">`;
+        imagemHtml = `<img src="${produto.urlFoto}" alt="${produto.nome}" class="produto-thumb" onerror="this.textContent='[Sem imagem]'">`;
       } else {
-        imagemHtml = `<div class="produto-thumb-emoji">🍦</div>`;
+        imagemHtml = `<div class="produto-thumb-emoji">[Sem imagem]</div>`;
       }
 
       li.className = "produto-item";
@@ -56,7 +56,7 @@ async function listarProdutos() {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao carregar produtos";
+    msg.textContent = "Erro ao carregar produtos";
   }
 }
 
@@ -99,7 +99,7 @@ form.addEventListener("submit", async (e) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(produto)
       });
-      mensagem = "✅ Produto atualizado com sucesso!";
+      mensagem = "Produto atualizado com sucesso!";
     } else {
       // CRIAR NOVO PRODUTO
       response = await fetch(API_URL, {
@@ -107,7 +107,7 @@ form.addEventListener("submit", async (e) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(produto)
       });
-      mensagem = "✅ Produto cadastrado com sucesso!";
+      mensagem = "Produto cadastrado com sucesso!";
     }
 
     if (!response.ok) {
@@ -128,7 +128,7 @@ form.addEventListener("submit", async (e) => {
 
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ " + error.message;
+    msg.textContent = "Erro: " + error.message;
     msg.style.color = "#f44";
   }
 });
@@ -160,7 +160,7 @@ async function editarProduto(id) {
     
   } catch (error) {
     console.error(error);
-    msg.textContent = "❌ Erro ao buscar produto para edição";
+    msg.textContent = "Erro ao buscar produto para edição";
   }
 }
 

@@ -10,9 +10,13 @@
 <body class="admin-body">
 
 <header class="admin-header">
-  <img src="../images/logo.png" class="logo" alt="Gestfy">
-  <h1>GESTÃO DE PRODUTOS</h1>
-  <p class="subtitle">Cadastro e manutenção de produtos</p>
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <button onclick="history.back()" class="btn-voltar" title="Voltar">←</button>
+    <div>
+      <h1>GESTÃO DE PRODUTOS</h1>
+      <p class="subtitle">Cadastro e manutenção de produtos</p>
+    </div>
+  </div>
 </header>
 
 <main class="container">
@@ -50,5 +54,17 @@
 <script src="../js/api.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/produtos.js"></script>
-</body>
+<style>
+  .btn-voltar { 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    color: var(--rosa); 
+    cursor: pointer; 
+    padding: 8px;
+  }
+  .btn-voltar:hover { 
+    opacity: 0.8; 
+  }
+</style></body>
 </html>

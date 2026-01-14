@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Pedido - Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button onclick="history.back()" class="btn-voltar" title="Voltar">←</button>
+            <div>
+                <h1>GESTFY</h1>
+                <p class="subtitle">Detalhes do Pedido</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="max-width: 900px;">
+        <div id="mensagem" class="msg" style="display: none;"></div>
+
+        <div id="detalhesContainer" style="background: var(--cinza-card); border-radius: 12px; padding: 24px; border: 1px solid #3a3a3a;">
+            <!-- Carregado dinamicamente -->
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 <span>Gestfy</span> • Sistema de Gestão Empresarial</p>
+    </footer>
+
+    <script>
+        const API_PEDIDOS = "https://gestfy-backend.onrender.com/api/pedidos";
+        const container = document.getElementById("detalhesContainer");
+        const msg = document.getElementById("mensagem");
+
+        // Obter ID do pedido da URL
+        function obterIdPedido() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get("id");
+        }
+
+        // Carregar pedido
+        async function carregarPedido() {
+            const id = obterIdPedido();
+            if (!id) {
+                msg.textContent = "Pedido não encontrado";
+                msg.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_PEDIDOS}/${id}`);
+                if (!response.ok) throw new Error("Erro ao buscar pedido");
+                
+                const pedido = await response.json();
+                exibirDetalhes(pedido);
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "Erro ao carregar pedido: " + error.message;
+                msg.style.display = "block";
+            }
+        }
+
+        // Exibir detalhes completos
+        function exibirDetalhes(pedido) {
+            const statusMap = {
+                "RECEBIDO": { label: "Recebido", badge: "badge-recebido" },
+                "EM_PREPARO": { label: "Em Preparo", badge: "badge-preparacao" },
+                "PRONTO_RETIRADA": { label: "Pronto para Retirada", badge: "badge-pronto" },
+                "SAIU_ENTREGA": { label: "Saiu para Entrega", badge: "badge-entrega" },
+                "FINALIZADO": { label: "Finalizado", badge: "badge-finalizado" }
+            };
+
+            const statusInfo = statusMap[pedido.status] || { label: pedido.status, badge: "badge-recebido" };
+
+            let itensHTML = pedido.itens.map(item => `
+                <tr>
+                    <td>${item.produtoNome}</td>
+                    <td style="text-align: center;">${item.quantidade}</td>
+                    <td style="text-align: right;">R$ ${parseFloat(item.precoUnitario).toFixed(2)}</td>
+                    <td style="text-align: right;">R$ ${parseFloat(item.subtotal).toFixed(2)}</td>
+                </tr>
+            `).join("");
+
+            container.innerHTML = `
+                <h2 class="section-title">Pedido #${pedido.id}</h2>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 24px 0;">
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; border-left: 4px solid var(--rosa);">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Cliente</p>
+                        <p style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${pedido.clienteNome}</p>
+                        <p style="font-size: 13px; color: #bdbdbd; margin: 4px 0 0 0;">Tel: ${pedido.clienteTelefone}</p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; border-left: 4px solid var(--rosa);">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Status</p>
+                        <p style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${statusInfo.label}</p>
+                        <span class="${statusInfo.badge}" style="display: inline-block; margin-top: 8px; font-size: 11px;">${statusInfo.label.toUpperCase()}</span>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; border-left: 4px solid var(--rosa);">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Data</p>
+                        <p style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${new Date(pedido.data).toLocaleDateString('pt-BR')}</p>
+                        <p style="font-size: 13px; color: #bdbdbd; margin: 4px 0 0 0;">${new Date(pedido.data).toLocaleTimeString('pt-BR')}</p>
+                    </div>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #3a3a3a; margin: 24px 0;">
+
+                <h3 class="section-title">Informações de Entrega</h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Forma de Recebimento</p>
+                        <p style="font-size: 16px; font-weight: 600; color: white; margin: 0;">
+                            ${pedido.formaRecebimento === 'RETIRADA' ? 'Retirada no local' : 'Entrega'}
+                        </p>
+                    </div>
+
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Forma de Pagamento</p>
+                        <p style="font-size: 16px; font-weight: 600; color: white; margin: 0;">${pedido.formaPagamento}</p>
+                    </div>
+                </div>
+
+                ${pedido.endereco ? `
+                    <div style="background: #1a1a1a; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                        <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; font-weight: 600;">Endereço de Entrega</p>
+                        <p style="font-size: 16px; color: white; margin: 0;">${pedido.endereco}</p>
+                    </div>
+                ` : ''}
+
+                <hr style="border: none; border-top: 1px solid #3a3a3a; margin: 24px 0;">
+
+                <h3 class="section-title">Itens do Pedido</h3>
+
+                <div style="overflow-x: auto;">
+                    <table class="tabela-geral">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th style="text-align: center;">Quantidade</th>
+                                <th style="text-align: right;">Preço Unit.</th>
+                                <th style="text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itensHTML}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #3a3a3a; margin: 24px 0;">
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: linear-gradient(135deg, #2b2b2b, #1a1a1a); border-radius: 8px; border: 1px solid #3a3a3a;">
+                    <span style="font-size: 18px; font-weight: 600; color: white;">Total do Pedido:</span>
+                    <span style="font-size: 28px; font-weight: 700; color: var(--rosa);">R$ ${parseFloat(pedido.total).toFixed(2)}</span>
+                </div>
+
+                <div style="margin-top: 24px; display: flex; gap: 12px;">
+                    <select id="novoStatus" style="flex: 1; padding: 12px; background: var(--cinza-input); border: 1px solid #444; border-radius: 6px; color: white;">
+                        <option value="">-- Alterar Status --</option>
+                        <option value="RECEBIDO" ${pedido.status === 'RECEBIDO' ? 'selected' : ''}>Recebido</option>
+                        <option value="EM_PREPARO" ${pedido.status === 'EM_PREPARO' ? 'selected' : ''}>Em Preparo</option>
+                        <option value="PRONTO_RETIRADA" ${pedido.status === 'PRONTO_RETIRADA' ? 'selected' : ''}>Pronto para Retirada</option>
+                        <option value="SAIU_ENTREGA" ${pedido.status === 'SAIU_ENTREGA' ? 'selected' : ''}>Saiu para Entrega</option>
+                        <option value="FINALIZADO" ${pedido.status === 'FINALIZADO' ? 'selected' : ''}>Finalizado</option>
+                    </select>
+                    <button onclick="atualizarStatus('${pedido.id}')" class="btn" style="padding: 12px 24px;">Atualizar</button>
+                </div>
+            `;
+        }
+
+        // Atualizar status do pedido
+        async function atualizarStatus(id) {
+            const novoStatus = document.getElementById("novoStatus").value;
+            
+            if (!novoStatus) {
+                msg.textContent = "Selecione um novo status";
+                msg.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_PEDIDOS}/${id}/status?status=${novoStatus}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" }
+                });
+
+                if (!response.ok) throw new Error("Erro ao atualizar status");
+                
+                msg.textContent = "Status atualizado com sucesso!";
+                msg.style.display = "block";
+                msg.style.background = "rgba(52, 168, 83, 0.1)";
+                msg.style.color = "#34a853";
+                msg.style.borderLeftColor = "#34a853";
+
+                setTimeout(() => {
+                    carregarPedido();
+                }, 1500);
+
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "Erro ao atualizar: " + error.message;
+                msg.style.display = "block";
+            }
+        }
+
+        // Estilos para badges
+        const style = document.createElement('style');
+        style.textContent = `
+            .badge-recebido { background: rgba(255, 152, 0, 0.2); color: #ffa500; padding: 4px 8px; border-radius: 4px; }
+            .badge-preparacao { background: rgba(33, 150, 243, 0.2); color: #2196f3; padding: 4px 8px; border-radius: 4px; }
+            .badge-pronto { background: rgba(76, 175, 80, 0.2); color: #4caf50; padding: 4px 8px; border-radius: 4px; }
+            .badge-entrega { background: rgba(156, 39, 176, 0.2); color: #9c27b0; padding: 4px 8px; border-radius: 4px; }
+            .badge-finalizado { background: rgba(52, 168, 83, 0.2); color: #34a853; padding: 4px 8px; border-radius: 4px; }
+            .btn-voltar { background: none; border: none; font-size: 24px; color: var(--rosa); cursor: pointer; padding: 8px; }
+            .btn-voltar:hover { opacity: 0.8; }
+        `;
+        document.head.appendChild(style);
+
+        // Carregar ao abrir página
+        carregarPedido();
+    </script>
+</body>
+</html>

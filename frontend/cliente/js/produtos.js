@@ -14,7 +14,7 @@ const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
                 exibirProdutos(todosProdutos);
             } catch (error) {
                 console.error(error);
-                msg.textContent = "❌ Erro ao carregar produtos";
+                msg.textContent = "Erro ao carregar produtos";
                 msg.style.display = "block";
             }
         }
@@ -33,7 +33,7 @@ const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
                 card.className = "produto-card";
                 card.innerHTML = `
                     <div class="produto-imagem">
-                        <img src="${produto.urlFoto || '🍦'}" alt="${produto.nome}" onerror="this.style.display='none'">
+                        <img src="${produto.urlFoto || '/images/placeholder.png'}" alt="${produto.nome}" onerror="this.style.display='none'">
                     </div>
                     <div class="produto-info">
                         <h3 class="produto-nome">${produto.nome}</h3>
@@ -76,7 +76,7 @@ const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
             
             localStorage.setItem("carrinho", JSON.stringify(carrinho));
             
-            msg.textContent = `✅ "${nome}" adicionado ao carrinho!`;
+            msg.textContent = `"${nome}" adicionado ao carrinho!`;
             msg.style.display = "block";
             setTimeout(() => msg.style.display = "none", 2000);
         }

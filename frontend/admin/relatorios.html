@@ -10,9 +10,13 @@
 <body class="admin-body">
 
 <header class="admin-header">
-  <img src="../images/logo.png" class="logo" alt="Gestfy">
-  <h1>RELATÓRIOS E ANÁLISES</h1>
-  <p class="subtitle">Vendas, estoque e dados financeiros</p>
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <button onclick="history.back()" class="btn-voltar" title="Voltar">←</button>
+    <div>
+      <h1>RELATÓRIOS E ANÁLISES</h1>
+      <p class="subtitle">Vendas, estoque e dados financeiros</p>
+    </div>
+  </div>
 </header>
 
 <main class="container">
@@ -40,7 +44,7 @@
       <input type="date" id="dataInicio" class="select-filter">
       <input type="date" id="dataFim" class="select-filter">
       <button class="btn" onclick="gerarRelatorio()">Gerar Relatório</button>
-      <button class="btn" style="background: #34a853;" onclick="exportarCSV()">💾 Exportar CSV</button>
+      <button class="btn" style="background: #34a853;" onclick="exportarCSV()">Exportar CSV</button>
     </div>
   </div>
 
@@ -66,15 +70,15 @@
 
   <!-- RELATÓRIO DE ESTOQUE -->
   <div class="card card-full">
-    <h2 class="section-title">Status do Estoque</h2>
+    <h2 class="section-title">Status de Produtos</h2>
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
             <th>Produto</th>
-            <th>Últimas Entradas</th>
-            <th>Últimas Saídas</th>
-            <th>Data Última Movimentação</th>
+            <th>Quantidade</th>
+            <th>Preço Unitário</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody id="estoqueList">
@@ -113,7 +117,7 @@
       const dataFim = document.getElementById("dataFim").value;
 
       if (!dataInicio || !dataFim) {
-        msg.textContent = "⚠️ Selecione as datas";
+        msg.textContent = "Selecione as datas";
         msg.style.display = "block";
         return;
       }
@@ -124,12 +128,12 @@
       // Carregar estoque
       await carregarStatusEstoque();
 
-      msg.textContent = "✅ Relatório gerado com sucesso";
+      msg.textContent = "Relatório gerado com sucesso";
       msg.style.display = "block";
       setTimeout(() => msg.style.display = "none", 3000);
     } catch (error) {
       console.error(error);
-      msg.textContent = "❌ " + error.message;
+      msg.textContent = "Erro: " + error.message;
       msg.style.display = "block";
     }
   }
@@ -169,56 +173,44 @@
 
     } catch (error) {
       console.error(error);
-      document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar vendas</td></tr>';
+      document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">Erro ao carregar vendas</td></tr>';
     }
   }
 
   async function carregarStatusEstoque() {
     try {
-      const response = await fetch(API_ESTOQUE);
+      const response = await fetch(API_RELATORIOS + "/produtos");
       
       if (!response.ok) {
-        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhum produto encontrado</td></tr>';
         return;
       }
 
-      const movimentacoes = await response.json();
+      const produtos = await response.json();
       
-      if (!Array.isArray(movimentacoes) || movimentacoes.length === 0) {
-        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma movimentação encontrada</td></tr>';
+      if (!Array.isArray(produtos) || produtos.length === 0) {
+        document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhum produto encontrado</td></tr>';
         return;
       }
-
-      // Agrupar por produto
-      const porProduto = {};
-      movimentacoes.forEach(mov => {
-        const produtoNome = mov.produtoNome || "Produto " + mov.produtoId;
-        if (!porProduto[produtoNome]) {
-          porProduto[produtoNome] = { entradas: 0, saidas: 0, ultima: null };
-        }
-        
-        const tipo = mov.tipoMovimento;
-        if (tipo === "ENTRADA") porProduto[produtoNome].entradas += mov.quantidade || 1;
-        if (tipo === "SAIDA") porProduto[produtoNome].saidas += mov.quantidade || 1;
-        
-        porProduto[produtoNome].ultima = new Date(mov.dataMovimento);
-      });
 
       document.getElementById("estoqueList").innerHTML = "";
-      Object.entries(porProduto).forEach(([nome, dados]) => {
+      produtos.forEach(produto => {
         const row = document.createElement("tr");
+        const status = produto.quantidade <= 0 ? "Em Falta" : produto.quantidade <= 5 ? "Baixo" : "Disponível";
+        const statusColor = produto.quantidade <= 0 ? "#f44" : produto.quantidade <= 5 ? "#ffa500" : "#4caf50";
+        
         row.innerHTML = `
-          <td>${nome}</td>
-          <td>📥 ${dados.entradas}</td>
-          <td>📤 ${dados.saidas}</td>
-          <td>${dados.ultima ? dados.ultima.toLocaleString("pt-BR") : "---"}</td>
+          <td>${produto.nome}</td>
+          <td>${produto.quantidade} un.</td>
+          <td>R$ ${(produto.preco || 0).toFixed(2)}</td>
+          <td><span style="color: ${statusColor}; font-weight: 600;">${status}</span></td>
         `;
         document.getElementById("estoqueList").appendChild(row);
       });
 
     } catch (error) {
       console.error(error);
-      document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">❌ Erro ao carregar estoque</td></tr>';
+      document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">Erro ao carregar produtos</td></tr>';
     }
   }
 
@@ -228,7 +220,7 @@
     const dataFim = document.getElementById("dataFim").value;
 
     if (!dataInicio || !dataFim) {
-      alert("⚠️ Selecione as datas primeiro");
+      alert("Selecione as datas primeiro");
       return;
     }
 
@@ -257,5 +249,19 @@
 </script>
 
 <script src="../js/auth.js"></script>
+
+<style>
+  .btn-voltar { 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    color: var(--rosa); 
+    cursor: pointer; 
+    padding: 8px;
+  }
+  .btn-voltar:hover { 
+    opacity: 0.8; 
+  }
+</style>
 </body>
 </html>

@@ -343,11 +343,15 @@
     <div class="caixa-container">
         <!-- HEADER -->
         <div class="header-caixa">
-            <div>
-                <h1>CAIXA DIÁRIO</h1>
-                <div class="data-info">
-                    Data: <span id="data-atual">Loading...</span>
+            <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                <button onclick="history.back()" class="btn-voltar" title="Voltar">←</button>
+                <div>
+                    <h1>CAIXA DIÁRIO</h1>
+                    <div class="data-info">
+                        Data: <span id="data-atual">Loading...</span>
+                    </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -418,6 +422,20 @@
 <script src="../js/api.js"></script>
 <script src="../js/caixa-auth.js"></script>
 <script src="../js/caixa.js"></script>
+
+<style>
+  .btn-voltar { 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    color: var(--rosa); 
+    cursor: pointer; 
+    padding: 8px;
+  }
+  .btn-voltar:hover { 
+    opacity: 0.8; 
+  }
+</style>
 </body>
 
 </html>

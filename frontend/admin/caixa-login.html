@@ -179,7 +179,7 @@
                 sessionStorage.setItem("caixaUser", usuario);
                 sessionStorage.setItem("caixaOpenedAt", new Date().toISOString());
 
-                msg.textContent = "✅ Caixa aberto com sucesso!";
+                msg.textContent = "Caixa aberto com sucesso!";
                 msg.className = "msg sucesso";
                 msg.style.display = "block";
 
@@ -190,7 +190,7 @@
                     window.location.href = "caixa.html";
                 }, 1500);
             } else {
-                msg.textContent = "❌ Usuário ou senha incorretos";
+                msg.textContent = "Usuário ou senha incorretos";
                 msg.className = "msg erro";
                 msg.style.display = "block";
             }
