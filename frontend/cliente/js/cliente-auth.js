@@ -30,7 +30,6 @@ function fazerLogoutCliente() {
         sessionStorage.removeItem("clienteId");
         sessionStorage.removeItem("clienteUsuario");
         sessionStorage.removeItem("clienteNome");
-        sessionStorage.removeItem("clienteTelefone");
         localStorage.removeItem("carrinho");
         
         window.location.replace("login.html");
