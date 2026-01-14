@@ -24,6 +24,20 @@
                 <h2 class="section-title">Informações do Pedido</h2>
 
                 <form id="formPedido">
+                    <h3 style="margin: 0 0 15px 0; color: var(--rosa);">Dados do Cliente</h3>
+                    
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="nomeCliente" placeholder="Seu nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="telefoneCliente" placeholder="(11) 99999-9999" required>
+                    </div>
+
+                    <h3 style="margin: 20px 0 15px 0; color: var(--rosa);">Forma de Recebimento</h3>
+                    
                     <div class="form-group">
                         <label>Forma de Recebimento *</label>
                         <select id="formaRecebimento" required>
@@ -52,6 +66,8 @@
                         </div>
                     </div>
 
+                    <h3 style="margin: 20px 0 15px 0; color: var(--rosa);">Forma de Pagamento</h3>
+                    
                     <div class="form-group">
                         <label>Forma de Pagamento *</label>
                         <select id="formaPagamento" required>
@@ -93,9 +109,10 @@
         const enderecRua = document.getElementById("enderecRua");
         const enderecNumero = document.getElementById("enderecNumero");
         const enderecComplemento = document.getElementById("enderecComplemento");
+        const nomeCliente = document.getElementById("nomeCliente");
+        const telefoneCliente = document.getElementById("telefoneCliente");
 
         let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-        let clienteId = null;
 
         // Mostrar/ocultar endereço baseado em forma de recebimento
         formaRecebimento.addEventListener("change", (e) => {
@@ -143,16 +160,35 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            const autenticadoId = sessionStorage.getItem("clienteId");
+            // Validar campos obrigatórios
+            const nome = nomeCliente.value.trim();
+            const telefone = telefoneCliente.value.trim();
+            const formRecebimento = formaRecebimento.value;
+            const formaPagamento = document.getElementById("formaPagamento").value;
             
-            if (!autenticadoId) {
-                msg.textContent = "⚠️ Você precisa estar logado para fazer um pedido";
+            if (!nome) {
+                msg.textContent = "⚠️ Preencha o nome do cliente";
                 msg.style.display = "block";
                 return;
             }
 
-            const formRecebimento = formaRecebimento.value;
-            const formaPagamento = document.getElementById("formaPagamento").value;
+            if (!telefone) {
+                msg.textContent = "⚠️ Preencha o telefone do cliente";
+                msg.style.display = "block";
+                return;
+            }
+
+            if (!formRecebimento) {
+                msg.textContent = "⚠️ Selecione a forma de recebimento";
+                msg.style.display = "block";
+                return;
+            }
+
+            if (!formaPagamento) {
+                msg.textContent = "⚠️ Selecione a forma de pagamento";
+                msg.style.display = "block";
+                return;
+            }
 
             // Construir endereço a partir dos campos separados
             let endereco = "";
@@ -170,21 +206,16 @@
                 endereco = `${rua}, ${numero}${complemento ? ', ' + complemento : ''}`;
             }
 
-            if (!formRecebimento || !formaPagamento) {
-                msg.textContent = "⚠️ Preencha todos os campos obrigatórios";
-                msg.style.display = "block";
-                return;
-            }
-
             try {
-                // Criar pedido com clienteId
+                // Criar pedido com dados do cliente
                 const itens = carrinho.map(item => ({
                     idProduto: item.id,
                     quantidade: item.quantidade
                 }));
 
                 const pedidoReq = {
-                    clienteId: parseInt(autenticadoId),
+                    nomeCliente: nome,
+                    telefoneCliente: telefone,
                     formaPagamento: formaPagamento,
                     formaRecebimento: formRecebimento,
                     endereco: endereco || "",
@@ -197,12 +228,16 @@
                     body: JSON.stringify(pedidoReq)
                 });
 
-                if (!resPedido.ok) throw new Error("Erro ao criar pedido");
+                if (!resPedido.ok) {
+                    const erro = await resPedido.json();
+                    throw new Error(erro.message || "Erro ao criar pedido");
+                }
+                
                 const pedido = await resPedido.json();
 
                 // Sucesso
                 localStorage.removeItem("carrinho");
-                msg.textContent = `Pedido ${pedido.id} criado com sucesso!`;
+                msg.textContent = `✅ Pedido #${pedido.id} criado com sucesso!`;
                 msg.style.display = "block";
                 msg.style.background = "rgba(52, 168, 83, 0.1)";
                 msg.style.color = "#34a853";
@@ -214,7 +249,7 @@
 
             } catch (error) {
                 console.error(error);
-                msg.textContent = "Erro ao processar pedido: " + error.message;
+                msg.textContent = "❌ Erro ao processar pedido: " + error.message;
                 msg.style.display = "block";
             }
         });
@@ -222,6 +257,5 @@
         // Carregar na página
         carregarResumoPedido();
     </script>
-    <script src="./js/cliente-auth.js"></script>
 </body>
 </html>

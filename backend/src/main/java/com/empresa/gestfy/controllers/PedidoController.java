@@ -57,9 +57,19 @@ public class PedidoController {
     @PostMapping
     public ResponseEntity<PedidoDTO> criarPedido(@RequestBody @Valid PedidoRequest request) {
 
-        // 1️⃣ Busca o cliente (DEVE estar cadastrado - não cria automaticamente)
-        Cliente cliente = clienteRepository.findById(request.clienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado: ID " + request.clienteId()));
+        // 1️⃣ Busca ou cria o cliente baseado no telefone
+        Cliente cliente = clienteRepository.findAll().stream()
+                .filter(c -> c.getTelefone() != null && c.getTelefone().equals(request.telefoneCliente()))
+                .findFirst()
+                .orElseGet(() -> {
+                    // Se não encontra por telefone, cria novo cliente
+                    Cliente novoCliente = new Cliente();
+                    novoCliente.setNome(request.nomeCliente());
+                    novoCliente.setTelefone(request.telefoneCliente());
+                    novoCliente.setEmail(""); // Email vazio por enquanto
+                    novoCliente.setEndereco("");
+                    return clienteRepository.save(novoCliente);
+                });
 
         // 2️⃣ Cria o pedido
         Pedido pedido = new Pedido();
@@ -99,7 +109,7 @@ public class PedidoController {
         // 6️⃣ Salva o pedido (JPA salva os itens automaticamente)
         pedido = pedidoRepository.save(pedido);
 
-        // 7️⃣ NOVO: Registra movimento de SAIDA no estoque para cada item
+        // 7️⃣ Registra movimento de SAIDA no estoque para cada item
         for (PedidoItem item : pedido.getItens()) {
             Estoque movimento = new Estoque();
             movimento.setProdutoId(item.getProduto().getId());
