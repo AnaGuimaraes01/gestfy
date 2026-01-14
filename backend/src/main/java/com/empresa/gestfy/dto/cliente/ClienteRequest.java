@@ -11,6 +11,7 @@ public record ClienteRequest(
     @NotBlank(message = "O telefone do cliente é obrigatório")
     String telefone,
 
+    @NotBlank(message = "O e-mail do cliente é obrigatório")
     @Email(message = "E-mail inválido")
     String email,
 
