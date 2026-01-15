@@ -26,8 +26,6 @@ public class ProdutoController {
         this.produtoRepository = produtoRepository;
         this.estoqueRepository = estoqueRepository;
     }
-
-    // CREATE
     @PostMapping
     public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoRequest request) {
         Produto produto = new Produto(
