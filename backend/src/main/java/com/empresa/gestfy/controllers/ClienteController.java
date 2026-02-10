@@ -39,7 +39,8 @@ public class ClienteController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(), cliente.getEndereco()));
+                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(),
+                        cliente.getEndereco()));
     }
 
     // =========================
@@ -61,8 +62,8 @@ public class ClienteController {
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> buscarPorId(@PathVariable Long id) {
         return clienteRepository.findById(id)
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco()))
-                .map(ResponseEntity::ok)
+                .map(c -> ResponseEntity
+                        .ok(new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -74,18 +75,18 @@ public class ClienteController {
             @PathVariable Long id,
             @RequestBody @Valid ClienteRequest request) {
 
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-
-        cliente.setNome(request.nome());
-        cliente.setTelefone(request.telefone());
-        cliente.setEmail(request.email());
-        cliente.setEndereco(request.endereco());
-
-        cliente = clienteRepository.save(cliente);
-
-        return ResponseEntity
-                .ok(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(), cliente.getEndereco()));
+        return clienteRepository.findById(id)
+                .map(cliente -> {
+                    cliente.setNome(request.nome());
+                    cliente.setTelefone(request.telefone());
+                    cliente.setEmail(request.email());
+                    cliente.setEndereco(request.endereco());
+                    cliente = clienteRepository.save(cliente);
+                    return ResponseEntity.ok(
+                            new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(),
+                                    cliente.getEmail(), cliente.getEndereco()));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // =========================
@@ -96,10 +97,7 @@ public class ClienteController {
         if (!clienteRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
         clienteRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
-
-

@@ -52,9 +52,9 @@ public class EstoqueController {
     // ========================= GET BY ID =========================
     @GetMapping("/{id}")
     public ResponseEntity<EstoqueDTO> buscarPorId(@PathVariable Long id) {
-        Estoque estoque = estoqueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movimentação não encontrada"));
-        return ResponseEntity.ok(toDTO(estoque));
+        return estoqueRepository.findById(id)
+                .map(estoque -> ResponseEntity.ok(toDTO(estoque)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ========================= FILTER BY TIPO =========================
@@ -97,21 +97,21 @@ public class EstoqueController {
             @PathVariable Long id,
             @Valid @RequestBody EstoqueRequest request) {
 
-        Estoque estoque = estoqueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movimentação não encontrada"));
-
-        estoque.setTipoMovimento(request.tipoMovimento());
-        estoque.setQuantidade(request.quantidade());
-
-        Estoque atualizado = estoqueRepository.save(estoque);
-        return ResponseEntity.ok(toDTO(atualizado));
+        return estoqueRepository.findById(id)
+                .map(estoque -> {
+                    estoque.setTipoMovimento(request.tipoMovimento());
+                    estoque.setQuantidade(request.quantidade());
+                    Estoque atualizado = estoqueRepository.save(estoque);
+                    return ResponseEntity.ok(toDTO(atualizado));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ========================= DELETE =========================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (!estoqueRepository.existsById(id)) {
-            throw new RuntimeException("Movimentação não encontrada");
+            return ResponseEntity.notFound().build();
         }
         estoqueRepository.deleteById(id);
         return ResponseEntity.noContent().build();
@@ -150,7 +150,6 @@ public class EstoqueController {
                 estoque.getProdutoId(),
                 estoque.getTipoMovimento(),
                 estoque.getDataMovimento(),
-                estoque.getQuantidade()
-        );
+                estoque.getQuantidade());
     }
 }

@@ -52,7 +52,6 @@ public class PedidoController {
         this.caixaRepository = caixaRepository;
     }
 
-   
     // CRIAR PEDIDO
     @PostMapping
     public ResponseEntity<PedidoDTO> criarPedido(@RequestBody @Valid PedidoRequest request) {
@@ -162,21 +161,20 @@ public class PedidoController {
     public ResponseEntity<PedidoDTO> atualizarStatus(
             @PathVariable Long id,
             @RequestParam String status) {
-        Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado: ID " + id));
+        return pedidoRepository.findById(id)
+                .map(pedido -> {
+                    // Validar transição de status
+                    validarTransicaoStatus(pedido.getStatus(), status);
+                    pedido.setStatus(status);
+                    pedidoRepository.save(pedido);
 
-        // Validar transição de status
-        validarTransicaoStatus(pedido.getStatus(), status);
-
-        pedido.setStatus(status);
-        pedidoRepository.save(pedido);
-
-        // 🔥 NOVO: Se o pedido foi FINALIZADO, registra automaticamente no CAIXA
-        if (status.equals("FINALIZADO")) {
-            registrarVendaNoCaixa(pedido);
-        }
-
-        return ResponseEntity.ok(mapToDTO(pedido));
+                    // 🔥 NOVO: Se o pedido foi FINALIZADO, registra automaticamente no CAIXA
+                    if (status.equals("FINALIZADO")) {
+                        registrarVendaNoCaixa(pedido);
+                    }
+                    return ResponseEntity.ok(mapToDTO(pedido));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // =========================
@@ -201,7 +199,8 @@ public class PedidoController {
     // VALIDAR TRANSIÇÃO DE STATUS
     // =========================
     private void validarTransicaoStatus(String statusAtual, String novoStatus) {
-        List<String> statusValidos = Arrays.asList("RECEBIDO", "EM_PREPARO", "PRONTO_RETIRADA", "SAIU_ENTREGA", "FINALIZADO", "CANCELADO");
+        List<String> statusValidos = Arrays.asList("RECEBIDO", "EM_PREPARO", "PRONTO_RETIRADA", "SAIU_ENTREGA",
+                "FINALIZADO", "CANCELADO");
         if (!statusValidos.contains(novoStatus)) {
             throw new RuntimeException("Status inválido: " + novoStatus);
         }
@@ -223,7 +222,8 @@ public class PedidoController {
             }
         } else if (statusAtual.equals("EM_PREPARO")) {
             if (!novoStatus.equals("PRONTO_RETIRADA") && !novoStatus.equals("SAIU_ENTREGA")) {
-                throw new RuntimeException("De EM_PREPARO só é possível ir para PRONTO_RETIRADA, SAIU_ENTREGA ou FINALIZADO/CANCELADO");
+                throw new RuntimeException(
+                        "De EM_PREPARO só é possível ir para PRONTO_RETIRADA, SAIU_ENTREGA ou FINALIZADO/CANCELADO");
             }
         } else if (statusAtual.equals("PRONTO_RETIRADA")) {
             if (!novoStatus.equals("FINALIZADO")) {
@@ -241,11 +241,9 @@ public class PedidoController {
     // =========================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removerPedido(@PathVariable Long id) {
-
         if (!pedidoRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
         pedidoRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -281,7 +279,7 @@ public class PedidoController {
         // Obter dados do cliente de forma segura
         String nomeCliente = "Cliente Indefinido";
         String telefonCliente = "N/A";
-        
+
         if (pedido.getCliente() != null) {
             if (pedido.getCliente().getNome() != null) {
                 nomeCliente = pedido.getCliente().getNome();

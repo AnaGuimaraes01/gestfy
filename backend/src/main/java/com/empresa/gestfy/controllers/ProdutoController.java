@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @CrossOrigin(origins = "*")
 
 @RestController
@@ -33,8 +34,7 @@ public class ProdutoController {
                 request.descricao(),
                 request.preco(),
                 request.urlFoto(),
-                request.quantidade()
-        );
+                request.quantidade());
         Produto salvo = produtoRepository.save(produto);
 
         // Cria movimentação ENTRADA no estoque automaticamente
@@ -74,27 +74,28 @@ public class ProdutoController {
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
-        Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        return ResponseEntity.ok(toDTO(produto));
+        return produtoRepository.findById(id)
+                .map(produto -> ResponseEntity.ok(toDTO(produto)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // UPDATE
     @PutMapping("/{id}")
-        public ResponseEntity<ProdutoDTO> atualizar(
+    public ResponseEntity<ProdutoDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProdutoRequest request) {
-        Produto produto = produtoRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-        produto.setNome(request.nome());
-        produto.setDescricao(request.descricao());
-        produto.setPreco(request.preco());
-        produto.setUrlFoto(request.urlFoto());
-        produto.setQuantidade(request.quantidade());
-        Produto atualizado = produtoRepository.save(produto);
-        return ResponseEntity.ok(toDTO(atualizado));
-        }
+        return produtoRepository.findById(id)
+                .map(produto -> {
+                    produto.setNome(request.nome());
+                    produto.setDescricao(request.descricao());
+                    produto.setPreco(request.preco());
+                    produto.setUrlFoto(request.urlFoto());
+                    produto.setQuantidade(request.quantidade());
+                    Produto atualizado = produtoRepository.save(produto);
+                    return ResponseEntity.ok(toDTO(atualizado));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     // converter Model → DTO
     private ProdutoDTO toDTO(Produto produto) {
@@ -104,7 +105,6 @@ public class ProdutoController {
                 produto.getDescricao(),
                 produto.getPreco(),
                 produto.getUrlFoto(),
-                produto.getQuantidade()
-        );
+                produto.getQuantidade());
     }
 }
