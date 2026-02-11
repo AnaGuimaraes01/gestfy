@@ -1,4 +1,4 @@
-// cliente-auth.js - Funções de autenticação removidas
+// cliente-auth.js - Autenticação removida (não necessária)
 // As páginas do cliente agora não requerem autenticação prévia
 
 function fazerLogoutCliente() {
