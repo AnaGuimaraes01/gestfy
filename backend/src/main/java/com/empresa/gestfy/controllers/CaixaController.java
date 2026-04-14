@@ -1,16 +1,13 @@
 package com.empresa.gestfy.controllers;
 
 import com.empresa.gestfy.models.Caixa;
-import com.empresa.gestfy.models.Pedido;
 import com.empresa.gestfy.repositories.CaixaRepository;
-import com.empresa.gestfy.repositories.PedidoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +19,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/caixa")
 public class CaixaController {
 
-        private final PedidoRepository pedidoRepository;
-        private final CaixaRepository caixaRepository;
+    private final CaixaRepository caixaRepository;
 
-        public CaixaController(PedidoRepository pedidoRepository, CaixaRepository caixaRepository) {
-                this.pedidoRepository = pedidoRepository;
-                this.caixaRepository = caixaRepository;
-        }
+    public CaixaController(CaixaRepository caixaRepository) {
+        this.caixaRepository = caixaRepository;
+    }
 
         // =========================
         // ABRIR CAIXA DO DIA
@@ -95,202 +90,169 @@ public class CaixaController {
                                         .body(Map.of("erro", "Caixa já foi fechado para esta data"));
                 }
 
-                // Calcula totais de vendas do dia
-                LocalDateTime inicioDodia = dataFechamento.atStartOfDay();
-                LocalDateTime fimDodia = dataFechamento.atTime(LocalTime.MAX);
+        // ✅ CORRETO: Busca apenas as ENTRADAS registradas no caixa do dia (não os pedidos!)
+        List<Caixa> entradas = caixaRepository.findByDataAndTipo(dataFechamento, "ENTRADA");
+        
+        Double totalVendas = entradas.stream()
+                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                .sum();
 
-                List<Pedido> pedidosDoDia = pedidoRepository.findAll()
-                                .stream()
-                                .filter(p -> p.getData() != null &&
-                                                !p.getData().isBefore(inicioDodia) &&
-                                                !p.getData().isAfter(fimDodia) &&
-                                                "FINALIZADO".equals(p.getStatus()))
-                                .collect(Collectors.toList());
+        // Cria registro de FECHAMENTO
+        Caixa caixaFechamento = new Caixa();
+        caixaFechamento.setTipo("FECHAMENTO");
+        caixaFechamento.setData(dataFechamento);
+        caixaFechamento.setHorarioFechamento(LocalDateTime.now());
+        caixaFechamento.setStatus("FECHADO");
+        caixaFechamento.setSaldo(totalVendas);
+        caixaFechamento.setDescricao("Fechamento de caixa");
+        caixaFechamento.setObservacoes(observacoes != null ? observacoes : "Fechamento normal");
 
-                Double totalVendas = pedidosDoDia.stream()
-                                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
-                                .sum();
+        Caixa salvo = caixaRepository.save(caixaFechamento);
 
-                // Cria registro de FECHAMENTO
-                Caixa caixaFechamento = new Caixa();
-                caixaFechamento.setTipo("FECHAMENTO");
-                caixaFechamento.setData(dataFechamento);
-                caixaFechamento.setHorarioFechamento(LocalDateTime.now());
-                caixaFechamento.setStatus("FECHADO");
-                caixaFechamento.setSaldo(totalVendas);
-                caixaFechamento.setDescricao("Fechamento de caixa");
-                caixaFechamento.setObservacoes(observacoes != null ? observacoes : "Fechamento normal");
+        // Atualiza registro de abertura para FECHADO
+        Caixa abertura = caixaAberto.get();
+        abertura.setStatus("FECHADO");
+        abertura.setHorarioFechamento(LocalDateTime.now());
+        caixaRepository.save(abertura);
 
-                Caixa salvo = caixaRepository.save(caixaFechamento);
+        Map<String, Object> response = new HashMap<>();
+        response.put("sucesso", true);
+        response.put("mensagem", "Caixa fechado com sucesso");
+        response.put("id", salvo.getId());
+        response.put("data", salvo.getData());
+        response.put("horarioFechamento", salvo.getHorarioFechamento());
+        response.put("totalEntradas", totalVendas);
+        response.put("quantidadeEntradas", entradas.size());
 
-                // Atualiza registro de abertura para FECHADO
-                Caixa abertura = caixaAberto.get();
-                abertura.setStatus("FECHADO");
-                abertura.setHorarioFechamento(LocalDateTime.now());
-                caixaRepository.save(abertura);
+        return ResponseEntity.ok(response);
+    }
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("sucesso", true);
-                response.put("mensagem", "Caixa fechado com sucesso");
-                response.put("id", salvo.getId());
-                response.put("data", salvo.getData());
-                response.put("horarioFechamento", salvo.getHorarioFechamento());
-                response.put("totalVendas", totalVendas);
-                response.put("quantidadeVendas", pedidosDoDia.size());
+    // =========================
+    // BUSCAR VENDAS DO DIA
+    // =========================
+    @GetMapping("/dia")
+    public ResponseEntity<Map<String, Object>> obterCaixaDoDia(
+            @RequestParam(required = false) String data) {
 
-                return ResponseEntity.ok(response);
-        }
+        LocalDate dataFiltro = (data != null && !data.isEmpty())
+                ? LocalDate.parse(data)
+                : LocalDate.now();
 
-        // =========================
-        // BUSCAR VENDAS DO DIA
-        // =========================
-        @GetMapping("/dia")
-        public ResponseEntity<Map<String, Object>> obterCaixaDoDia(
-                        @RequestParam(required = false) String data) {
+        // ✅ CORRETO: Busca apenas as ENTRADAS registradas no caixa
+        List<Caixa> entradas = caixaRepository.findByDataAndTipo(dataFiltro, "ENTRADA");
 
-                LocalDate dataFiltro = (data != null && !data.isEmpty())
-                                ? LocalDate.parse(data)
-                                : LocalDate.now();
+        // Calcular totais
+        Double totalDia = entradas.stream()
+                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                .sum();
 
-                // Buscar todos os pedidos finalizados do dia
-                LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
-                LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
+        // Criar lista de registros para tabela
+        List<Map<String, Object>> registros = entradas.stream()
+                .map(c -> {
+                    Map<String, Object> reg = new HashMap<>();
+                    reg.put("id", c.getId());
+                    reg.put("descricao", c.getDescricao());
+                    reg.put("saldo", c.getSaldo() != null ? c.getSaldo() : 0.0);
+                    reg.put("data", c.getData());
+                    reg.put("hora", c.getHorarioAbertura());
+                    reg.put("observacoes", c.getObservacoes());
+                    return reg;
+                })
+                .collect(Collectors.toList());
 
-                List<Pedido> pedidosDoDia = pedidoRepository.findAll()
-                                .stream()
-                                .filter(p -> p.getData() != null &&
-                                                !p.getData().isBefore(inicioDodia) &&
-                                                !p.getData().isAfter(fimDodia) &&
-                                                "FINALIZADO".equals(p.getStatus()))
-                                .collect(Collectors.toList());
+        // Verifica status do caixa
+        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(dataFiltro, "ABERTO");
+        Optional<Caixa> caixaFechado = caixaRepository.findByDataAndTipoAndStatus(
+                dataFiltro, "FECHAMENTO", "FECHADO");
 
-                // Calcular totais
-                Double totalDia = pedidosDoDia.stream()
-                                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
-                                .sum();
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", dataFiltro);
+        response.put("totalDia", totalDia);
+        response.put("quantidadeRegistros", entradas.size());
+        response.put("registros", registros);
+        response.put("caixaAberto", caixaAberto.isPresent());
+        response.put("caixaFechado", caixaFechado.isPresent());
 
-                // Criar lista de registros para tabela
-                List<Map<String, Object>> registros = pedidosDoDia.stream()
-                                .map(p -> {
-                                        Map<String, Object> reg = new HashMap<>();
-                                        reg.put("id", p.getId());
-                                        reg.put("descricao", "Pedido #" + p.getId() + " - " +
-                                                        (p.getCliente() != null ? p.getCliente().getNome()
-                                                                        : "Cliente"));
-                                        reg.put("saldo", p.getTotal() != null ? p.getTotal() : 0.0);
-                                        reg.put("data", p.getData());
-                                        reg.put("formaPagamento", p.getFormaPagamento());
-                                        return reg;
-                                })
-                                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
 
-                // Verifica status do caixa
-                Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(dataFiltro, "ABERTO");
-                Optional<Caixa> caixaFechado = caixaRepository.findByDataAndTipoAndStatus(
-                                dataFiltro, "FECHAMENTO", "FECHADO");
+    // =========================
+    // RELATÓRIO DE FECHAMENTO DO DIA
+    // =========================
+    @GetMapping("/relatorio/fechamento")
+    public ResponseEntity<Map<String, Object>> fechamentoDia(
+            @RequestParam(required = false) String data) {
 
-                Map<String, Object> response = new HashMap<>();
-                response.put("data", dataFiltro);
-                response.put("totalDia", totalDia);
-                response.put("quantidadeRegistros", pedidosDoDia.size());
-                response.put("registros", registros);
-                response.put("caixaAberto", caixaAberto.isPresent());
-                response.put("caixaFechado", caixaFechado.isPresent());
+        LocalDate dataFiltro = (data != null && !data.isEmpty())
+                ? LocalDate.parse(data)
+                : LocalDate.now();
 
-                return ResponseEntity.ok(response);
-        }
+        // ✅ CORRETO: Busca apenas as ENTRADAS registradas no caixa
+        List<Caixa> entradas = caixaRepository.findByDataAndTipo(dataFiltro, "ENTRADA");
 
-        // =========================
-        // RELATÓRIO DE FECHAMENTO DO DIA
-        // =========================
-        @GetMapping("/relatorio/fechamento")
-        public ResponseEntity<Map<String, Object>> fechamentoDia(
-                        @RequestParam(required = false) String data) {
+        Double totalVendas = entradas.stream()
+                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                .sum();
 
-                LocalDate dataFiltro = (data != null && !data.isEmpty())
-                                ? LocalDate.parse(data)
-                                : LocalDate.now();
+        // Totalizadores por forma de pagamento (extraído das observações)
+        Map<String, Double> vendaseporFormaPagamento = new HashMap<>();
+        entradas.forEach(c -> {
+            String forma = c.getObservacoes() != null
+                    ? c.getObservacoes().replaceFirst("Forma de pagamento: ", "")
+                    : "Indefinido";
+            vendaseporFormaPagamento.put(forma,
+                    vendaseporFormaPagamento.getOrDefault(forma, 0.0) +
+                            (c.getSaldo() != null ? c.getSaldo() : 0.0));
+        });
 
-                LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
-                LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
+        List<Map<String, Object>> detalhes = entradas.stream()
+                .map(c -> {
+                    Map<String, Object> det = new HashMap<>();
+                    det.put("id", c.getId());
+                    det.put("descricao", c.getDescricao());
+                    det.put("valor", c.getSaldo());
+                    det.put("hora", c.getHorarioAbertura());
+                    det.put("data", c.getData());
+                    return det;
+                })
+                .collect(Collectors.toList());
 
-                List<Pedido> pedidosDoDia = pedidoRepository.findAll()
-                                .stream()
-                                .filter(p -> p.getData() != null &&
-                                                !p.getData().isBefore(inicioDodia) &&
-                                                !p.getData().isAfter(fimDodia) &&
-                                                "FINALIZADO".equals(p.getStatus()))
-                                .collect(Collectors.toList());
+        Map<String, Object> fechamento = new HashMap<>();
+        fechamento.put("data", dataFiltro);
+        fechamento.put("totalVendas", totalVendas);
+        fechamento.put("quantidadeVendas", entradas.size());
+        fechamento.put("formasPagamento", vendaseporFormaPagamento);
+        fechamento.put("detalhes", detalhes);
 
-                Double totalVendas = pedidosDoDia.stream()
-                                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
-                                .sum();
+        return ResponseEntity.ok(fechamento);
+    }
 
-                // Totalizadores por forma de pagamento
-                Map<String, Double> vendaseporFormaPagamento = new HashMap<>();
-                pedidosDoDia.forEach(p -> {
-                        String forma = p.getFormaPagamento() != null ? p.getFormaPagamento() : "Indefinido";
-                        vendaseporFormaPagamento.put(forma,
-                                        vendaseporFormaPagamento.getOrDefault(forma, 0.0) +
-                                                        (p.getTotal() != null ? p.getTotal() : 0.0));
-                });
+    // =========================
+    // TOTALIZADORES DO DIA
+    // =========================
+    @GetMapping("/totalizadores")
+    public ResponseEntity<Map<String, Object>> getTotalizadores(
+            @RequestParam(required = false) String data) {
 
-                List<Map<String, Object>> detalhes = pedidosDoDia.stream()
-                                .map(p -> {
-                                        Map<String, Object> det = new HashMap<>();
-                                        det.put("id", p.getId());
-                                        det.put("descricao", "Pedido #" + p.getId());
-                                        det.put("valor", p.getTotal());
-                                        det.put("forma", p.getFormaPagamento());
-                                        det.put("data", p.getData());
-                                        return det;
-                                })
-                                .collect(Collectors.toList());
+        LocalDate dataFiltro = (data != null && !data.isEmpty())
+                ? LocalDate.parse(data)
+                : LocalDate.now();
 
-                Map<String, Object> fechamento = new HashMap<>();
-                fechamento.put("data", dataFiltro);
-                fechamento.put("totalVendas", totalVendas);
-                fechamento.put("quantidadeVendas", pedidosDoDia.size());
-                fechamento.put("formasPagamento", vendaseporFormaPagamento);
-                fechamento.put("detalhes", detalhes);
+        // ✅ CORRETO: Busca apenas as ENTRADAS registradas no caixa
+        List<Caixa> entradas = caixaRepository.findByDataAndTipo(dataFiltro, "ENTRADA");
 
-                return ResponseEntity.ok(fechamento);
-        }
+        Double totalVendas = entradas.stream()
+                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                .sum();
 
-        // =========================
-        // TOTALIZADORES DO DIA
-        // =========================
-        @GetMapping("/totalizadores")
-        public ResponseEntity<Map<String, Object>> getTotalizadores(
-                        @RequestParam(required = false) String data) {
+        Map<String, Object> totalizadores = new HashMap<>();
+        totalizadores.put("data", dataFiltro);
+        totalizadores.put("totalVendas", totalVendas);
+        totalizadores.put("quantidadeVendas", entradas.size());
+        totalizadores.put("ticketMedio", entradas.size() > 0
+                ? totalVendas / entradas.size()
+                : 0.0);
 
-                LocalDate dataFiltro = (data != null && !data.isEmpty())
-                                ? LocalDate.parse(data)
-                                : LocalDate.now();
-
-                LocalDateTime inicioDodia = dataFiltro.atStartOfDay();
-                LocalDateTime fimDodia = dataFiltro.atTime(LocalTime.MAX);
-
-                List<Pedido> pedidosDoDia = pedidoRepository.findAll()
-                                .stream()
-                                .filter(p -> p.getData() != null &&
-                                                !p.getData().isBefore(inicioDodia) &&
-                                                !p.getData().isAfter(fimDodia) &&
-                                                "FINALIZADO".equals(p.getStatus()))
-                                .collect(Collectors.toList());
-
-                Double totalVendas = pedidosDoDia.stream()
-                                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
-                                .sum();
-
-                Map<String, Object> totalizadores = new HashMap<>();
-                totalizadores.put("data", dataFiltro);
-                totalizadores.put("totalVendas", totalVendas);
-                totalizadores.put("quantidadeVendas", pedidosDoDia.size());
-                totalizadores.put("ticketMedio", pedidosDoDia.size() > 0
-                                ? totalVendas / pedidosDoDia.size()
-                                : 0.0);
-
-                return ResponseEntity.ok(totalizadores);
-        }
+        return ResponseEntity.ok(totalizadores);
+    }
 }
