@@ -115,6 +115,46 @@
             box-shadow: 0 4px 12px rgba(176, 48, 96, 0.3);
         }
 
+        .btn-abrir {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-abrir:hover:not(:disabled) {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-abrir:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-aberto {
+            color: #4caf50;
+            padding: 8px 12px;
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .status-fechado {
+            color: #f44336;
+            padding: 8px 12px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .status-nao-aberto {
+            color: var(--texto-secundario);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            display: inline-block;
+        }
+
         .filtro-data input {
             padding: 10px;
             border: 1px solid var(--bordas);
@@ -382,6 +422,7 @@
 
         <!-- AÇÕES -->
         <div class="acoes-caixa">
+            <button class="btn-abrir" id="btn-abrir-caixa" onclick="abrirCaixa()">Abrir Caixa</button>
             <button class="btn-fechar" id="btn-fechar-caixa">Fechar Caixa do Dia</button>
         </div>
 
@@ -411,6 +452,16 @@
             <h2>Fechar Caixa</h2>
             <p>Deseja realmente fechar o caixa de hoje?</p>
             <p style="color: var(--texto); font-weight: bold;">Total: <span id="modal-total">R$ 0,00</span></p>
+            
+            <div style="margin-bottom: 15px;">
+                <label for="observacoes-fechamento" style="display: block; margin-bottom: 5px; color: var(--texto-secundario); font-size: 13px;">
+                    Observações (opcional):
+                </label>
+                <textarea id="observacoes-fechamento" 
+                    style="width: 100%; padding: 8px; border: 1px solid var(--bordas); border-radius: 4px; background: var(--cinza-fundo); color: var(--texto); font-size: 14px; resize: vertical; min-height: 60px;" 
+                    placeholder="Adicione qualquer observação sobre o fechamento..."></textarea>
+            </div>
+            
             <div class="modal-acoes">
                 <button class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
                 <button class="btn-confirmar" onclick="confirmarFechamento()">Confirmar Fechamento</button>

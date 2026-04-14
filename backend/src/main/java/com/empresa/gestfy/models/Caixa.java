@@ -2,6 +2,7 @@ package com.empresa.gestfy.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "caixa")
@@ -10,9 +11,23 @@ public class Caixa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // TIPO DE MOVIMENTO: "ENTRADA" (pedido) ou "FECHAMENTO" (resumo do dia)
+    private String tipo;
+
     private Double saldo;
     private String descricao;
     private LocalDate data;
+
+    // Timestamps para abertura/fechamento
+    private LocalDateTime horarioAbertura;
+    private LocalDateTime horarioFechamento;
+
+    // Status: "ABERTO", "FECHADO"
+    private String status;
+
+    // Observações adicionais
+    private String observacoes;
 
     public Caixa() {
     }
@@ -23,6 +38,14 @@ public class Caixa {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
     }
 
     public Double getSaldo() {
@@ -47,5 +70,37 @@ public class Caixa {
 
     public void setData(LocalDate data) {
         this.data = data;
+    }
+
+    public LocalDateTime getHorarioAbertura() {
+        return horarioAbertura;
+    }
+
+    public void setHorarioAbertura(LocalDateTime horarioAbertura) {
+        this.horarioAbertura = horarioAbertura;
+    }
+
+    public LocalDateTime getHorarioFechamento() {
+        return horarioFechamento;
+    }
+
+    public void setHorarioFechamento(LocalDateTime horarioFechamento) {
+        this.horarioFechamento = horarioFechamento;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getObservacoes() {
+        return observacoes;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
     }
 }

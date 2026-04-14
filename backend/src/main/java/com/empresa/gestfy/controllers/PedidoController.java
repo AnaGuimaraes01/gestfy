@@ -182,10 +182,29 @@ public class PedidoController {
     // =========================
     private void registrarVendaNoCaixa(Pedido pedido) {
         try {
+            // Verifica se já existe uma entrada para este pedido no caixa (evita
+            // duplicação)
+            List<Caixa> existentes = caixaRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getDescricao() != null &&
+                            c.getDescricao().contains("Pedido #" + pedido.getId()) &&
+                            "ENTRADA".equals(c.getTipo()))
+                    .collect(Collectors.toList());
+
+            if (!existentes.isEmpty()) {
+                System.out.println("Venda já registrada no caixa para Pedido #" + pedido.getId());
+                return; // Não registra novamente
+            }
+
             Caixa caixa = new Caixa();
+            caixa.setTipo("ENTRADA");
             caixa.setSaldo(pedido.getTotal() != null ? pedido.getTotal() : 0.0);
-            caixa.setDescricao("Venda #" + pedido.getId() + " - Cliente: " + pedido.getCliente().getNome());
+            caixa.setDescricao("Pedido #" + pedido.getId() + " - Cliente: " +
+                    (pedido.getCliente() != null ? pedido.getCliente().getNome() : "Cliente"));
             caixa.setData(LocalDate.now());
+            caixa.setHorarioAbertura(LocalDateTime.now());
+            caixa.setStatus("REGISTRADO");
+            caixa.setObservacoes("Forma de pagamento: " + pedido.getFormaPagamento());
 
             caixaRepository.save(caixa);
             System.out.println("Venda registrada no caixa: Pedido #" + pedido.getId());

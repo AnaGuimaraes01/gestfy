@@ -51,7 +51,10 @@ async function carregarVendasDoDia(data = null) {
         const totalEntradas = dados.totalDia || 0;
 
         document.getElementById("total-entradas").textContent = formatarMoeda(totalEntradas);
-        document.getElementById("total-saidas").textContent = formatarMoeda(0);
+        document.getElementById("total-saidas").textContent = formatarMoeda(0); // Sistema sem saídas
+
+        // Atualiza status do caixa
+        atualizarStatusCaixa(dados.caixaAberto, dados.caixaFechado);
 
         // Limpa tabela
         corpo.innerHTML = "";
@@ -82,7 +85,10 @@ async function carregarVendasDoDia(data = null) {
             corpo.appendChild(tr);
         });
 
-        mostrarMensagem("Dados carregados com sucesso!", "sucesso");
+        // Não mostra mensagem se for auto-refresh
+        if (data === null) {
+            mostrarMensagem("Dados carregados com sucesso!", "sucesso", true);
+        }
     } catch (erro) {
         console.error("Erro:", erro);
         mostrarMensagem("Erro ao carregar dados do caixa", "erro");
@@ -96,6 +102,69 @@ async function carregarVendasDoDia(data = null) {
     }
 }
 
+// ATUALIZAR STATUS DO CAIXA
+
+function atualizarStatusCaixa(caixaAberto, caixaFechado) {
+    const btnFechar = document.getElementById("btn-fechar-caixa");
+    const statusElement = document.getElementById("status-caixa") || criarStatusElement();
+
+    if (caixaFechado) {
+        statusElement.textContent = "✓ Caixa Fechado";
+        statusElement.className = "status-fechado";
+        btnFechar.disabled = true;
+        btnFechar.style.opacity = "0.5";
+        btnFechar.style.cursor = "not-allowed";
+    } else if (caixaAberto) {
+        statusElement.textContent = "⊙ Caixa Aberto";
+        statusElement.className = "status-aberto";
+        btnFechar.disabled = false;
+        btnFechar.style.opacity = "1";
+        btnFechar.style.cursor = "pointer";
+    } else {
+        statusElement.textContent = "○ Caixa Não Aberto";
+        statusElement.className = "status-nao-aberto";
+        btnFechar.disabled = true;
+        btnFechar.style.opacity = "0.5";
+        btnFechar.style.cursor = "not-allowed";
+    }
+}
+
+function criarStatusElement() {
+    const div = document.createElement("div");
+    div.id = "status-caixa";
+    div.style.marginTop = "10px";
+    div.style.fontSize = "14px";
+    div.style.fontWeight = "bold";
+    
+    const container = document.querySelector(".acoes-caixa");
+    if (container) {
+        container.parentElement.insertBefore(div, container.nextSibling);
+    }
+    return div;
+}
+
+// ABRIR CAIXA
+
+async function abrirCaixa() {
+    try {
+        const response = await fetch(`${API_CAIXA}/abrir`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const dados = await response.json();
+
+        if (response.ok) {
+            mostrarMensagem(dados.mensagem, "sucesso");
+            setTimeout(carregarVendasDoDia, 1000);
+        } else {
+            mostrarMensagem(dados.erro || "Erro ao abrir caixa", "erro");
+        }
+    } catch (erro) {
+        console.error("Erro:", erro);
+        mostrarMensagem("Erro ao abrir caixa", "erro");
+    }
+}
 
 // MODAL DE FECHAMENTO
 
@@ -111,9 +180,24 @@ function fecharModal() {
 
 async function confirmarFechamento() {
     try {
-        mostrarMensagem("Caixa fechado com sucesso!", "sucesso");
-        fecharModal();
-        setTimeout(carregarVendasDoDia, 2000);
+        const observacoes = document.getElementById("observacoes-fechamento")?.value || 
+                           "Fechamento normal do caixa";
+
+        const response = await fetch(`${API_CAIXA}/fechar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ observacoes: observacoes })
+        });
+
+        const dados = await response.json();
+
+        if (response.ok) {
+            mostrarMensagem("Caixa fechado com sucesso!", "sucesso");
+            fecharModal();
+            setTimeout(carregarVendasDoDia, 2000);
+        } else {
+            mostrarMensagem(dados.erro || "Erro ao fechar caixa", "erro");
+        }
     } catch (erro) {
         console.error("Erro:", erro);
         mostrarMensagem("Erro ao fechar caixa", "erro");
@@ -152,14 +236,15 @@ function formatarDataHora(dataString) {
     }).format(data);
 }
 
-function mostrarMensagem(texto, tipo = "info") {
+function mostrarMensagem(texto, tipo = "info", autoHide = false) {
     msg.textContent = texto;
     msg.className = `msg-info msg-${tipo}`;
     msg.style.display = "block";
 
+    const duracao = autoHide ? 2000 : 4000;
     setTimeout(() => {
         msg.style.display = "none";
-    }, 4000);
+    }, duracao);
 }
 
 // FECHAR MODAL AO CLICAR FORA
