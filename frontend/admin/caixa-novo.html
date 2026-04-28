@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caixa Simples | Gestfy</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CABEÇALHO */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .header h1 {
+            color: #b0305f;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* STATUS DO CAIXA */
+        .status-box {
+            background: linear-gradient(135deg, #fff5f7 0%, #f0f0f0 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #b0305f;
+        }
+
+        .status-box.aberto {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f0f0f0 100%);
+            border-left-color: #4caf50;
+        }
+
+        .status-box.fechado {
+            background: linear-gradient(135deg, #ffebee 0%, #f0f0f0 100%);
+            border-left-color: #f44336;
+        }
+
+        .status-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .status-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b0305f;
+        }
+
+        /* BOTÕES DE AÇÃO */
+        .botoes-principais {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #b0305f, #d63a6f);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(176, 48, 96, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #388e3c;
+        }
+
+        /* SECTION BUSCA DE PRODUTOS */
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            color: #b0305f;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* BUSCA DE PRODUTO */
+        .busca-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .busca-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .busca-container input:focus {
+            outline: none;
+            border-color: #b0305f;
+        }
+
+        .busca-container button {
+            padding: 12px 30px;
+        }
+
+        /* LISTA DE PRODUTOS ENCONTRADOS */
+        .produtos-encontrados {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .produtos-encontrados.ativo {
+            display: block;
+        }
+
+        .produto-item {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .produto-item:hover {
+            background: #f9f9f9;
+        }
+
+        .produto-info {
+            flex: 1;
+        }
+
+        .produto-nome {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .produto-detalhes {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .produto-preco {
+            font-weight: bold;
+            color: #b0305f;
+            font-size: 16px;
+            margin-right: 20px;
+        }
+
+        /* FORMULÁRIO DE VENDA */
+        .form-venda {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .form-venda.completo {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #b0305f;
+        }
+
+        .form-group input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .form-group .valor {
+            font-size: 18px;
+            font-weight: bold;
+            color: #b0305f;
+            padding: 10px;
+        }
+
+        /* RESUMO DE VENDA */
+        .resumo-venda {
+            background: linear-gradient(135deg, #fff5f7 0%, #f0f0f0 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #b0305f;
+            display: none;
+        }
+
+        .resumo-venda.ativo {
+            display: block;
+        }
+
+        .resumo-linha {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .resumo-linha.total {
+            border-top: 2px solid #b0305f;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #b0305f;
+        }
+
+        .resumo-linha.troco {
+            background: #e8f5e9;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        /* HISTÓRICO DE VENDAS */
+        .historico-vendas {
+            margin-top: 30px;
+        }
+
+        .vendas-lista {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .venda-item {
+            background: white;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .venda-detalhes {
+            flex: 1;
+        }
+
+        .venda-produto {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .venda-info {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .venda-valor {
+            font-weight: bold;
+            color: #4caf50;
+            font-size: 16px;
+        }
+
+        /* MENSAGENS */
+        .mensagem {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .mensagem.ativo {
+            display: block;
+        }
+
+        .mensagem.sucesso {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #4caf50;
+        }
+
+        .mensagem.erro {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .mensagem.info {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+        }
+
+        /* TOTALIZADORES */
+        .totalizadores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card-total {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .card-total h3 {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .card-total .valor {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b0305f;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .botoes-principais {
+                grid-template-columns: 1fr;
+            }
+
+            .form-venda.completo {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .status-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <div class="header">
+            <h1>🏪 CAIXA SIMPLES</h1>
+            <p>Sistema de vendas em dinheiro</p>
+        </div>
+
+        <!-- MENSAGENS -->
+        <div id="msg" class="mensagem"></div>
+
+        <!-- STATUS DO CAIXA -->
+        <div id="statusBox" class="status-box">
+            <div class="status-info">
+                <span class="status-text">
+                    Caixa: <span id="statusText">Fechado</span>
+                </span>
+                <span class="status-valor">
+                    Total: R$ <span id="totalDia">0.00</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- BOTÕES PRINCIPAIS -->
+        <div class="botoes-principais">
+            <button class="btn btn-primary" id="btnAbrirCaixa" onclick="abrirCaixa()">✓ Abrir Caixa</button>
+            <button class="btn btn-danger" id="btnFecharCaixa" onclick="fecharCaixa()" disabled>✕ Fechar Caixa</button>
+        </div>
+
+        <!-- SEÇÃO DE BUSCA E VENDA -->
+        <div id="secaoVenda" style="display: none;">
+            <!-- BUSCAR PRODUTO -->
+            <div class="section">
+                <h2>Buscar Produto</h2>
+                <div class="busca-container">
+                    <input type="text" id="buscaProduto" placeholder="Digite o nome do produto..." autocomplete="off">
+                    <button class="btn btn-primary" onclick="buscarProduto()">🔍 Buscar</button>
+                </div>
+                <div id="produtosEncontrados" class="produtos-encontrados"></div>
+            </div>
+
+            <!-- FORMULÁRIO DE VENDA -->
+            <div class="section">
+                <h2>Registrar Venda</h2>
+
+                <!-- RESUMO DA VENDA -->
+                <div id="resumoVenda" class="resumo-venda">
+                    <div class="resumo-linha">
+                        <span>Produto:</span>
+                        <strong id="resumoProduto">-</strong>
+                    </div>
+                    <div class="resumo-linha">
+                        <span>Preço unitário:</span>
+                        <strong>R$ <span id="resumoPreco">0.00</span></strong>
+                    </div>
+                    <div class="resumo-linha">
+                        <span>Quantidade:</span>
+                        <strong id="resumoQtd">0</strong>
+                    </div>
+                    <div class="resumo-linha total">
+                        <span>Valor Total:</span>
+                        <strong>R$ <span id="resumoTotal">0.00</span></strong>
+                    </div>
+                    <div class="resumo-linha">
+                        <span>Valor recebido:</span>
+                        <strong>R$ <span id="resumoRecebido">0.00</span></strong>
+                    </div>
+                    <div class="resumo-linha troco">
+                        <span>💰 TROCO:</span>
+                        <strong>R$ <span id="resumoTroco">0.00</span></strong>
+                    </div>
+                </div>
+
+                <!-- FORM DE VENDA -->
+                <div class="form-venda completo">
+                    <div class="form-group">
+                        <label>Produto (ID)</label>
+                        <input type="number" id="produtoId" placeholder="Selecione um produto" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade</label>
+                        <input type="number" id="quantidade" placeholder="0" min="1" onchange="calcularTroco()">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor a Receber</label>
+                        <input type="number" id="valorTotal" placeholder="0.00" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Recebido</label>
+                        <input type="number" id="valorRecebido" placeholder="0.00" min="0" step="0.01"
+                            onchange="calcularTroco()">
+                    </div>
+                </div>
+
+                <!-- BOTÕES DE VENDA -->
+                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button class="btn btn-success" onclick="confirmarVenda()">✓ Confirmar Venda</button>
+                    <button class="btn btn-secondary" onclick="limparFormulario()">↻ Limpar</button>
+                </div>
+            </div>
+
+            <!-- HISTÓRICO DE VENDAS DO DIA -->
+            <div class="section">
+                <h2>Vendas do Dia</h2>
+
+                <div class="totalizadores">
+                    <div class="card-total">
+                        <h3>Total de Vendas</h3>
+                        <div class="valor" id="totalVendas">0</div>
+                    </div>
+                    <div class="card-total">
+                        <h3>Total Arrecadado</h3>
+                        <div class="valor">R$ <span id="totalArrecadado">0.00</span></div>
+                    </div>
+                </div>
+
+                <div id="vendasLista" class="vendas-lista"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/caixa-novo.js"></script>
+</body>
+
+</html>
