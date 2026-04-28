@@ -9,12 +9,9 @@ import jakarta.validation.constraints.PositiveOrZero;
  * Contém: produto selecionado, quantidade comprada e valor recebido em dinheiro
  */
 public record VendaRequest(
-        @NotNull(message = "ID do produto é obrigatório")
-        Long produtoId,
+        @NotNull(message = "ID do produto é obrigatório") Long produtoId,
 
-        @Positive(message = "Quantidade deve ser maior que zero")
-        Integer quantidade,
+        @Positive(message = "Quantidade deve ser maior que zero") Integer quantidade,
 
-        @PositiveOrZero(message = "Valor recebido não pode ser negativo")
-        Double valorRecebido
-) {}
+        @PositiveOrZero(message = "Valor recebido não pode ser negativo") Double valorRecebido) {
+}
