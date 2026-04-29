@@ -1,5 +1,6 @@
-const API_ESTOQUE = "https://gestfy-backend.onrender.com/api/estoque";
-const API_PRODUTOS = "https://gestfy-backend.onrender.com/api/produtos";
+let API_ESTOQUE = "https://gestfy-backend.onrender.com/api/estoque";
+let API_PRODUTOS = "https://gestfy-backend.onrender.com/api/produtos";
+(async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/estoque', { signal: c.signal }); clearTimeout(t); if (r && r.ok) { API_ESTOQUE = 'http://localhost:8080/api/estoque'; API_PRODUTOS = 'http://localhost:8080/api/produtos'; } } catch (e) {} })();
 
 const tabelaEstoque = document.getElementById("tabelaEstoque");
 

@@ -97,8 +97,9 @@
 </footer>
 
 <script>
-  const API_RELATORIOS = "https://gestfy-backend.onrender.com/api/relatorios";
-  const API_ESTOQUE = "https://gestfy-backend.onrender.com/api/estoque";
+  let API_RELATORIOS = "https://gestfy-backend.onrender.com/api/relatorios";
+  let API_ESTOQUE = "https://gestfy-backend.onrender.com/api/estoque";
+  (async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/relatorios', { signal: c.signal }); clearTimeout(t); if (r && r.ok) { API_RELATORIOS = 'http://localhost:8080/api/relatorios'; API_ESTOQUE = 'http://localhost:8080/api/estoque'; } } catch (e) {} })();
   const msg = document.getElementById("msg");
 
   // Definir datas padrão (últimos 7 dias)

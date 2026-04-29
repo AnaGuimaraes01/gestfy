@@ -8,6 +8,7 @@ import com.empresa.gestfy.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,5 +130,69 @@ public class RelatorioService {
         dashboard.put("ticketMedio", totalPedidosGeral > 0 ? totalVendasGeral / totalPedidosGeral : 0.0);
 
         return dashboard;
+    }
+
+    /**
+     * Vendas por dia
+     */
+    public Map<String, Object> vendedorPorDia(String data) {
+        LocalDate dataFiltro = (data != null && !data.isEmpty()) ? LocalDate.parse(data) : LocalDate.now();
+
+        List<Pedido> pedidosDodia = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> p.getData().toLocalDate().equals(dataFiltro) && "FINALIZADO".equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Double totalVendas = pedidosDodia.stream()
+                .mapToDouble(Pedido::getTotal)
+                .sum();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", dataFiltro);
+        response.put("totalVendas", totalVendas);
+        response.put("quantidadePedidos", pedidosDodia.size());
+        response.put("pedidos", pedidosDodia.stream()
+                .map(p -> new HashMap<String, Object>() {{
+                    put("id", p.getId());
+                    put("cliente", p.getCliente().getNome());
+                    put("total", p.getTotal());
+                }})
+                .collect(Collectors.toList()));
+
+        return response;
+    }
+
+    /**
+     * Total de pedidos por período
+     */
+    public Map<String, Object> totalPedidosPorPeriodo(Integer dias) {
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(dias);
+
+        List<Pedido> pedidos = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> p.getData().isAfter(dataLimite))
+                .collect(Collectors.toList());
+
+        Long totalFinalizados = pedidos.stream()
+                .filter(p -> "FINALIZADO".equals(p.getStatus()))
+                .count();
+
+        Long totalPendentes = pedidos.stream()
+                .filter(p -> !p.getStatus().equals("FINALIZADO"))
+                .count();
+
+        Double receitaTotal = pedidos.stream()
+                .filter(p -> "FINALIZADO".equals(p.getStatus()))
+                .mapToDouble(Pedido::getTotal)
+                .sum();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("periodo", dias + " dias");
+        response.put("totalPedidos", pedidos.size());
+        response.put("pedidosFinalizados", totalFinalizados);
+        response.put("pedidosPendentes", totalPendentes);
+        response.put("receitaTotal", receitaTotal);
+
+        return response;
     }
 }

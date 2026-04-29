@@ -1,4 +1,5 @@
-const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
+let API_URL = "https://gestfy-backend.onrender.com/api/produtos";
+(async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/produtos', { signal: c.signal }); clearTimeout(t); if (r && r.ok) API_URL = 'http://localhost:8080/api/produtos'; } catch (e) {} })();
 
 const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");

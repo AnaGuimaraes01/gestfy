@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.empresa.gestfy.dto.caixa.ProdutoBuscaResponse;
 
 /**
  * ProdutoController
@@ -53,15 +54,10 @@ public class ProdutoController {
      * GET /api/produtos/buscar?nome=sorvete
      */
     @GetMapping("/buscar")
-    public ResponseEntity<List<ProdutoDTO>> buscarPorNome(@RequestParam String nome) {
-        // Nota: buscarPorNome do ProdutoService retorna ProdutoBuscaResponse
-        // Para essa busca avançada, precisamos listar todos e filtrar
-        List<ProdutoDTO> produtos = produtoService.listar()
-                .stream()
-                .filter(p -> p.nome().toLowerCase().contains(nome.toLowerCase()))
-                .toList();
-
-        return ResponseEntity.ok(produtos);
+    public ResponseEntity<List<ProdutoBuscaResponse>> buscarPorNome(@RequestParam String nome) {
+        // Delegar a busca ao service (busca parcial, case-insensitive)
+        List<ProdutoBuscaResponse> resultados = produtoService.buscarPorNome(nome);
+        return ResponseEntity.ok(resultados);
     }
 
     /**

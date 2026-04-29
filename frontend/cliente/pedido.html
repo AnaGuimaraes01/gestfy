@@ -71,9 +71,7 @@
                     <div class="form-group">
                         <label>Forma de Pagamento *</label>
                         <select id="formaPagamento" required>
-                            <option value="">-- Selecione --</option>
-                            <option value="DINHEIRO">Dinheiro (na retirada/entrega)</option>
-                            <option value="PIX">PIX (na retirada/entrega)</option>
+                            <option value="DINHEIRO" selected>Dinheiro (na retirada/entrega)</option>
                         </select>
                     </div>
 
@@ -99,7 +97,20 @@
     </footer>
 
     <script>
-        const API_PEDIDOS = "https://gestfy-backend.onrender.com/api/pedidos";
+        let API_PEDIDOS = "https://gestfy-backend.onrender.com/api/pedidos"; // Padrão produção
+        
+        // Detectar ambiente (localhost vs produção)
+        (async function() {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 200);
+                const res = await fetch('http://localhost:8080/api/pedidos', { signal: controller.signal });
+                clearTimeout(timeout);
+                if (res && res.ok) API_PEDIDOS = 'http://localhost:8080/api/pedidos';
+            } catch (e) {
+                // Mantém padrão de produção
+            }
+        })();
         const form = document.getElementById("formPedido");
         const msg = document.getElementById("mensagem");
         const resumoPedido = document.getElementById("resumoPedido");

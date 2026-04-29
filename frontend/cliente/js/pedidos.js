@@ -1,4 +1,17 @@
-const API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
+let API_URL = "https://gestfy-backend.onrender.com/api/pedidos"; // Padrão produção
+
+// Detectar ambiente (localhost vs produção)
+(async function() {
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 200);
+        const res = await fetch('http://localhost:8080/api/pedidos', { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res && res.ok) API_URL = 'http://localhost:8080/api/pedidos';
+    } catch (e) {
+        // Mantém padrão de produção
+    }
+})();
 
 const listaPedidos = document.getElementById("listaPedidos");
 

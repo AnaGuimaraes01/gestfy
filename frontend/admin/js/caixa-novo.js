@@ -7,19 +7,30 @@
  */
 
 // ============================================
-// CONFIGURAÇÃO
-// ============================================
-// ⚠️ ALTERE PARA localhost:8080 EM DESENVOLVIMENTO
-const API_BASE = 'https://gestfy-backend.onrender.com/api';
-// const API_BASE = 'http://localhost:8080/api'; // Descomente para desenvolvimento
-
-// ============================================
 // VARIÁVEIS GLOBAIS
 // ============================================
+let API_BASE = 'https://gestfy-backend.onrender.com/api'; // Padrão de produção
 let caixaAberto = false;
 let caixaId = null;
 let produtoSelecionado = null;
 let vendas = [];
+
+// ============================================
+// DETECTAR AMBIENTE (localhost vs produção)
+// ============================================
+(async function detectApi() {
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 200);
+        const res = await fetch('http://localhost:8080/api/caixa/status', { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res && res.ok) {
+            API_BASE = 'http://localhost:8080/api';
+        }
+    } catch (e) {
+        // Mantém padrão de produção
+    }
+})();
 
 // ============================================
 // INICIALIZAÇÃO
@@ -27,8 +38,21 @@ let vendas = [];
 document.addEventListener('DOMContentLoaded', () => {
     verificarStatusCaixa();
     // Auto-buscar quando digita no campo
-    document.getElementById('buscaProduto').addEventListener('keypress', (e) => {
+    const busca = document.getElementById('buscaProduto');
+    let debounce;
+    busca.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') buscarProduto();
+    });
+    // Debounce na busca para melhorar UX
+    busca.addEventListener('input', (e) => {
+        clearTimeout(debounce);
+        const val = e.target.value.trim();
+        if (val.length < 2) {
+            document.getElementById('produtosEncontrados').innerHTML = '';
+            document.getElementById('produtosEncontrados').classList.remove('ativo');
+            return;
+        }
+        debounce = setTimeout(() => buscarProduto(), 300);
     });
 });
 
@@ -91,10 +115,7 @@ async function buscarProduto() {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/caixa/buscar-produto?nome=${encodeURIComponent(nomeBusca)}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await fetch(`${API_BASE}/caixa/buscar-produto?nome=${encodeURIComponent(nomeBusca)}`);
 
         const data = await response.json();
 
@@ -188,7 +209,7 @@ function selecionarProduto(produto) {
 function calcularTroco() {
     if (!produtoSelecionado) return;
 
-    const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
+    const quantidade = Math.max(1, parseInt(document.getElementById('quantidade').value) || 0);
     const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
 
     if (quantidade <= 0) {
@@ -231,8 +252,8 @@ async function confirmarVenda() {
         return;
     }
 
-    const quantidade = parseInt(document.getElementById('quantidade').value);
-    const valorRecebido = parseFloat(document.getElementById('valorRecebido').value);
+    const quantidade = Math.max(1, parseInt(document.getElementById('quantidade').value) || 0);
+    const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
     const valorTotal = produtoSelecionado.preco * quantidade;
 
     // Validações

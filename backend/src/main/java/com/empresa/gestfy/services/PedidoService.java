@@ -16,6 +16,7 @@ import com.empresa.gestfy.repositories.EstoqueRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
 import com.empresa.gestfy.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,6 +57,7 @@ public class PedidoService {
     /**
      * Criar novo pedido
      */
+    @Transactional
     public PedidoDTO criar(PedidoRequest request) {
         // 1. Buscar ou criar cliente
         Cliente cliente = clienteRepository.findAll().stream()
@@ -73,7 +75,8 @@ public class PedidoService {
         // 2. Criar pedido
         Pedido pedido = new Pedido();
         pedido.setCliente(cliente);
-        pedido.setFormaPagamento(request.formaPagamento());
+        // Forçar pagamento somente em dinheiro conforme regra do sistema
+        pedido.setFormaPagamento("DINHEIRO");
         pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setEndereco(request.endereco());
         pedido.setStatus("RECEBIDO");

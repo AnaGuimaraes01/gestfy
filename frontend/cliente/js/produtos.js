@@ -1,5 +1,19 @@
-const API_URL = "https://gestfy-backend.onrender.com/api/produtos";
-        const container = document.getElementById("produtosContainer");
+let API_URL = "https://gestfy-backend.onrender.com/api/produtos"; // Padrão produção
+
+// Detectar ambiente (localhost vs produção)
+(async function() {
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 200);
+        const res = await fetch('http://localhost:8080/api/produtos', { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res && res.ok) API_URL = 'http://localhost:8080/api/produtos';
+    } catch (e) {
+        // Mantém padrão de produção
+    }
+})();
+
+const container = document.getElementById("produtosContainer");
         const msg = document.getElementById("mensagem");
         const buscaInput = document.getElementById("buscaInput");
         let todosProdutos = [];

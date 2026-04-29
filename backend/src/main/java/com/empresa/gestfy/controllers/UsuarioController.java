@@ -1,121 +1,94 @@
 package com.empresa.gestfy.controllers;
 
-import com.empresa.gestfy.models.Usuario;
-import com.empresa.gestfy.repositories.UsuarioRepository;
+import com.empresa.gestfy.services.UsuarioService;
+import com.empresa.gestfy.services.UsuarioService.UsuarioDTO;
+import com.empresa.gestfy.services.UsuarioService.UsuarioRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * UsuarioController
+ * Responsável apenas por:
+ * - Receber requisições HTTP
+ * - Delegar para UsuarioService
+ * - Retornar respostas HTTP
+ */
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
     }
 
-    // =========================
-    // CRIAR USUÁRIO
-    // =========================
+    /**
+     * Criar novo usuário
+     * POST /api/usuarios
+     */
     @PostMapping
     public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody @Valid UsuarioRequest request) {
-        // Validar se email já existe
-        if (usuarioRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("Email já cadastrado");
+        try {
+            UsuarioDTO usuario = usuarioService.criar(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
         }
-
-        Usuario usuario = new Usuario(
-                request.nome(),
-                request.email(),
-                request.senha(),
-                request.perfil());
-
-        usuario = usuarioRepository.save(usuario);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil()));
     }
 
-    // =========================
-    // LISTAR TODOS OS USUÁRIOS
-    // =========================
+    /**
+     * Listar todos os usuários
+     * GET /api/usuarios
+     */
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
-        List<UsuarioDTO> usuarios = usuarioRepository.findAll()
-                .stream()
-                .map(u -> new UsuarioDTO(u.getId(), u.getNome(), u.getEmail(), u.getPerfil()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(usuarios);
+        return ResponseEntity.ok(usuarioService.listar());
     }
 
-    // =========================
-    // BUSCAR USUÁRIO POR ID
-    // =========================
+    /**
+     * Buscar usuário por ID
+     * GET /api/usuarios/{id}
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
-        return usuarioRepository.findById(id)
-                .map(u -> ResponseEntity.ok(new UsuarioDTO(u.getId(), u.getNome(), u.getEmail(), u.getPerfil())))
+        return usuarioService.buscarPorId(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // =========================
-    // ATUALIZAR USUÁRIO
-    // =========================
+    /**
+     * Atualizar usuário
+     * PUT /api/usuarios/{id}
+     */
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> atualizarUsuario(
             @PathVariable Long id,
             @RequestBody @Valid UsuarioRequest request) {
-
-        return usuarioRepository.findById(id)
-                .map(usuario -> {
-                    usuario.setNome(request.nome());
-                    usuario.setEmail(request.email());
-                    usuario.setSenha(request.senha());
-                    usuario.setPerfil(request.perfil());
-
-                    usuario = usuarioRepository.save(usuario);
-
-                    return ResponseEntity.ok(
-                            new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(),
-                                    usuario.getPerfil()));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // =========================
-    // REMOVER USUÁRIO
-    // =========================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerUsuario(@PathVariable Long id) {
-        if (!usuarioRepository.existsById(id)) {
+        try {
+            UsuarioDTO usuario = usuarioService.atualizar(id, request);
+            return ResponseEntity.ok(usuario);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-
-        usuarioRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
-    // DTOs
-    public record UsuarioRequest(
-            String nome,
-            String email,
-            String senha,
-            String perfil) {
-    }
-
-    public record UsuarioDTO(
-            Long id,
-            String nome,
-            String email,
-            String perfil) {
+    /**
+     * Remover usuário
+     * DELETE /api/usuarios/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removerUsuario(@PathVariable Long id) {
+        try {
+            usuarioService.remover(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

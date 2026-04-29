@@ -7,6 +7,7 @@ import com.empresa.gestfy.models.Caixa;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.CaixaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -109,6 +110,7 @@ public class CaixaService {
      * @param venda VendaRequest com dados da venda
      * @return Map com detalhes da venda ou erro
      */
+    @Transactional
     public Map<String, Object> registrarVenda(VendaRequest venda) {
         // 1️⃣ Busca o produto
         Optional<Produto> produtoOpt = produtoService.buscarProdutoModelo(venda.produtoId());

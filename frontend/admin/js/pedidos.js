@@ -1,4 +1,5 @@
-const API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
+let API_URL = "https://gestfy-backend.onrender.com/api/pedidos";
+(async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/pedidos', { signal: c.signal }); clearTimeout(t); if (r && r.ok) API_URL = 'http://localhost:8080/api/pedidos'; } catch (e) {} })();
 const listaPedidos = document.getElementById("listaPedidos");
 
 async function carregarPedidos() {
