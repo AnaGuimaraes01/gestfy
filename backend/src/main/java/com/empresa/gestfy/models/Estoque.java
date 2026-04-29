@@ -11,7 +11,12 @@ public class Estoque {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long produtoId;
+
+    // Relacionamento com Produto
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "produto_id", nullable = false)
+    private Produto produto;
+
     private String tipoMovimento; // ENTRADA / SAIDA
     private LocalDateTime dataMovimento;
     private Integer quantidade;
@@ -27,12 +32,12 @@ public class Estoque {
         this.id = id;
     }
 
-    public Long getProdutoId() {
-        return produtoId;
+    public Produto getProduto() {
+        return produto;
     }
 
-    public void setProdutoId(Long produtoId) {
-        this.produtoId = produtoId;
+    public void setProduto(Produto produto) {
+        this.produto = produto;
     }
 
     public String getTipoMovimento() {

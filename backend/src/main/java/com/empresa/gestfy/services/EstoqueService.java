@@ -3,7 +3,9 @@ package com.empresa.gestfy.services;
 import com.empresa.gestfy.dto.estoque.EstoqueDTO;
 import com.empresa.gestfy.dto.estoque.EstoqueRequest;
 import com.empresa.gestfy.models.Estoque;
+import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.EstoqueRepository;
+import com.empresa.gestfy.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,9 +25,11 @@ import java.util.stream.Collectors;
 public class EstoqueService {
 
     private final EstoqueRepository estoqueRepository;
+    private final ProdutoRepository produtoRepository;
 
-    public EstoqueService(EstoqueRepository estoqueRepository) {
+    public EstoqueService(EstoqueRepository estoqueRepository, ProdutoRepository produtoRepository) {
         this.estoqueRepository = estoqueRepository;
+        this.produtoRepository = produtoRepository;
     }
 
     /**
@@ -35,8 +39,11 @@ public class EstoqueService {
      * @return DTO com a movimentação registrada
      */
     public EstoqueDTO criar(EstoqueRequest request) {
+        Produto produto = produtoRepository.findById(request.produtoId())
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + request.produtoId()));
+        
         Estoque estoque = new Estoque();
-        estoque.setProdutoId(request.produtoId());
+        estoque.setProduto(produto);
         estoque.setTipoMovimento(request.tipoMovimento());
         estoque.setQuantidade(request.quantidade());
         estoque.setDataMovimento(LocalDateTime.now());
@@ -54,8 +61,11 @@ public class EstoqueService {
      * @return Objeto Estoque salvo
      */
     public Estoque registrarMovimento(Long produtoId, String tipoMovimento, Integer quantidade) {
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + produtoId));
+        
         Estoque movimento = new Estoque();
-        movimento.setProdutoId(produtoId);
+        movimento.setProduto(produto);
         movimento.setTipoMovimento(tipoMovimento);
         movimento.setDataMovimento(LocalDateTime.now());
         movimento.setQuantidade(quantidade);
@@ -84,7 +94,10 @@ public class EstoqueService {
      * Listar movimentações de um produto
      */
     public List<EstoqueDTO> listarPorProduto(Long produtoId) {
-        return estoqueRepository.findByProdutoId(produtoId)
+        Produto produto = produtoRepository.findById(produtoId)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + produtoId));
+        
+        return estoqueRepository.findByProduto(produto)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -170,7 +183,7 @@ public class EstoqueService {
     private EstoqueDTO toDTO(Estoque estoque) {
         return new EstoqueDTO(
                 estoque.getId(),
-                estoque.getProdutoId(),
+                estoque.getProduto() != null ? estoque.getProduto().getId() : null,
                 estoque.getTipoMovimento(),
                 estoque.getDataMovimento(),
                 estoque.getQuantidade());

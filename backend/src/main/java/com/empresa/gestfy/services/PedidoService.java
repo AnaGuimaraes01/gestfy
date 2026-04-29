@@ -107,7 +107,7 @@ public class PedidoService {
 
             // Registrar saída no estoque
             Estoque movimento = new Estoque();
-            movimento.setProdutoId(produto.getId());
+            movimento.setProduto(produto);
             movimento.setTipoMovimento("SAIDA");
             movimento.setQuantidade(item.getQuantidade());
             movimento.setDataMovimento(LocalDateTime.now());
