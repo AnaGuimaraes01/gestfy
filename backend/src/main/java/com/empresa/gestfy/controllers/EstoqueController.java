@@ -2,154 +2,127 @@ package com.empresa.gestfy.controllers;
 
 import com.empresa.gestfy.dto.estoque.EstoqueDTO;
 import com.empresa.gestfy.dto.estoque.EstoqueRequest;
-import com.empresa.gestfy.models.Estoque;
-import com.empresa.gestfy.repositories.EstoqueRepository;
+import com.empresa.gestfy.services.EstoqueService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * EstoqueController
+ * Responsável apenas por:
+ * - Receber requisições HTTP
+ * - Delegar para EstoqueService
+ * - Retornar respostas HTTP
+ */
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/estoque")
 public class EstoqueController {
 
-    private final EstoqueRepository estoqueRepository;
+    private final EstoqueService estoqueService;
 
-    public EstoqueController(EstoqueRepository estoqueRepository) {
-        this.estoqueRepository = estoqueRepository;
+    public EstoqueController(EstoqueService estoqueService) {
+        this.estoqueService = estoqueService;
     }
 
-    // ========================= CREATE =========================
+    /**
+     * Criar movimentação de estoque
+     * POST /api/estoque
+     */
     @PostMapping
     public ResponseEntity<EstoqueDTO> criar(@Valid @RequestBody EstoqueRequest request) {
-        Estoque estoque = new Estoque();
-        estoque.setProdutoId(request.produtoId());
-        estoque.setTipoMovimento(request.tipoMovimento()); // ENTRADA ou SAIDA
-        estoque.setQuantidade(request.quantidade());
-        estoque.setDataMovimento(LocalDateTime.now());
-
-        Estoque salvo = estoqueRepository.save(estoque);
-        return ResponseEntity.status(201).body(toDTO(salvo));
+        EstoqueDTO estoque = estoqueService.criar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(estoque);
     }
 
-    // ========================= LIST ALL =========================
+    /**
+     * Listar todas as movimentações
+     * GET /api/estoque
+     */
     @GetMapping
     public ResponseEntity<List<EstoqueDTO>> listar() {
-        List<EstoqueDTO> lista = estoqueRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .toList();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(estoqueService.listar());
     }
 
-    // ========================= GET BY ID =========================
+    /**
+     * Buscar movimentação por ID
+     * GET /api/estoque/{id}
+     */
     @GetMapping("/{id}")
     public ResponseEntity<EstoqueDTO> buscarPorId(@PathVariable Long id) {
-        return estoqueRepository.findById(id)
-                .map(estoque -> ResponseEntity.ok(toDTO(estoque)))
+        return estoqueService.buscarPorId(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ========================= FILTER BY TIPO =========================
+    /**
+     * Filtrar por tipo (ENTRADA ou SAIDA)
+     * GET /api/estoque/filtro/tipo?tipo=ENTRADA
+     */
     @GetMapping("/filtro/tipo")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorTipo(@RequestParam String tipo) {
-        List<EstoqueDTO> lista = estoqueRepository.findAll()
-                .stream()
-                .filter(e -> e.getTipoMovimento().equalsIgnoreCase(tipo))
-                .map(this::toDTO)
-                .toList();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(estoqueService.filtrarPorTipo(tipo));
     }
 
-    // ========================= FILTER BY DATA =========================
+    /**
+     * Filtrar por data
+     * GET /api/estoque/filtro/data?data=2024-01-15
+     */
     @GetMapping("/filtro/data")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorData(@RequestParam String data) {
-        LocalDate dataFiltro = LocalDate.parse(data);
-        List<EstoqueDTO> lista = estoqueRepository.findAll()
-                .stream()
-                .filter(e -> e.getDataMovimento().toLocalDate().equals(dataFiltro))
-                .map(this::toDTO)
-                .toList();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(estoqueService.filtrarPorData(data));
     }
 
-    // ========================= FILTER BY PRODUTO =========================
+    /**
+     * Filtrar por produto
+     * GET /api/estoque/filtro/produto?produtoId=1
+     */
     @GetMapping("/filtro/produto")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorProduto(@RequestParam Long produtoId) {
-        List<EstoqueDTO> lista = estoqueRepository.findAll()
-                .stream()
-                .filter(e -> e.getProdutoId().equals(produtoId))
-                .map(this::toDTO)
-                .toList();
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(estoqueService.listarPorProduto(produtoId));
     }
 
-    // ========================= UPDATE =========================
+    /**
+     * Atualizar movimentação
+     * PUT /api/estoque/{id}
+     */
     @PutMapping("/{id}")
     public ResponseEntity<EstoqueDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody EstoqueRequest request) {
-
-        return estoqueRepository.findById(id)
-                .map(estoque -> {
-                    estoque.setTipoMovimento(request.tipoMovimento());
-                    estoque.setQuantidade(request.quantidade());
-                    Estoque atualizado = estoqueRepository.save(estoque);
-                    return ResponseEntity.ok(toDTO(atualizado));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // ========================= DELETE =========================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!estoqueRepository.existsById(id)) {
+        try {
+            EstoqueDTO estoque = estoqueService.atualizar(id, request);
+            return ResponseEntity.ok(estoque);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-        estoqueRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
-    // ========================= RESUMO ESTOQUE =========================
+    /**
+     * Remover movimentação
+     * DELETE /api/estoque/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
+            estoqueService.remover(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Obter resumo de estoque
+     * GET /api/estoque/resumo
+     */
     @GetMapping("/resumo")
     public ResponseEntity<Map<String, Object>> resumoEstoque() {
-        List<Estoque> movimentos = estoqueRepository.findAll();
-
-        Integer totalEntradas = movimentos.stream()
-                .filter(e -> "ENTRADA".equals(e.getTipoMovimento()))
-                .mapToInt(Estoque::getQuantidade)
-                .sum();
-
-        Integer totalSaidas = movimentos.stream()
-                .filter(e -> "SAIDA".equals(e.getTipoMovimento()))
-                .mapToInt(Estoque::getQuantidade)
-                .sum();
-
-        Integer saldoTotal = totalEntradas - totalSaidas;
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalEntradas", totalEntradas);
-        response.put("totalSaidas", totalSaidas);
-        response.put("saldoTotal", saldoTotal);
-        response.put("totalMovimentacoes", movimentos.size());
-
-        return ResponseEntity.ok(response);
-    }
-
-    // ========================= CONVERTER =========================
-    private EstoqueDTO toDTO(Estoque estoque) {
-        return new EstoqueDTO(
-                estoque.getId(),
-                estoque.getProdutoId(),
-                estoque.getTipoMovimento(),
-                estoque.getDataMovimento(),
-                estoque.getQuantidade());
+        return ResponseEntity.ok(estoqueService.obterResumo());
     }
 }

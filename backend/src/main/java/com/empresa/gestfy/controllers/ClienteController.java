@@ -1,101 +1,91 @@
 package com.empresa.gestfy.controllers;
+
 import com.empresa.gestfy.dto.cliente.ClienteRequest;
 import com.empresa.gestfy.dto.cliente.ClienteDTO;
-import com.empresa.gestfy.models.Cliente;
-import com.empresa.gestfy.repositories.ClienteRepository;
+import com.empresa.gestfy.services.ClienteService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * ClienteController
+ * Responsável apenas por:
+ * - Receber requisições HTTP
+ * - Delegar para ClienteService
+ * - Retornar respostas HTTP
+ */
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
 
-    private final ClienteRepository clienteRepository;
+    private final ClienteService clienteService;
 
-    public ClienteController(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
     }
 
-    // =========================
-    // CRIAR CLIENTE
-    // =========================
+    /**
+     * Criar novo cliente
+     * POST /api/clientes
+     */
     @PostMapping
     public ResponseEntity<ClienteDTO> criarCliente(@RequestBody @Valid ClienteRequest request) {
-        Cliente cliente = new Cliente();
-        cliente.setNome(request.nome());
-        cliente.setTelefone(request.telefone());
-        cliente.setEmail(request.email());
-        cliente.setEndereco(request.endereco());
-
-        cliente = clienteRepository.save(cliente);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(), cliente.getEmail(),
-                        cliente.getEndereco()));
+        ClienteDTO cliente = clienteService.criar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
     }
 
-    // =========================
-    // LISTAR TODOS OS CLIENTES
-    // =========================
+    /**
+     * Listar todos os clientes
+     * GET /api/clientes
+     */
     @GetMapping
     public ResponseEntity<List<ClienteDTO>> listarClientes() {
-        List<ClienteDTO> clientes = clienteRepository.findAll()
-                .stream()
-                .map(c -> new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(clientes);
+        return ResponseEntity.ok(clienteService.listar());
     }
 
-    // =========================
-    // BUSCAR CLIENTE POR ID
-    // =========================
+    /**
+     * Buscar cliente por ID
+     * GET /api/clientes/{id}
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> buscarPorId(@PathVariable Long id) {
-        return clienteRepository.findById(id)
-                .map(c -> ResponseEntity
-                        .ok(new ClienteDTO(c.getId(), c.getNome(), c.getTelefone(), c.getEmail(), c.getEndereco())))
+        return clienteService.buscarPorId(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // =========================
-    // ATUALIZAR CLIENTE
-    // =========================
+    /**
+     * Atualizar cliente
+     * PUT /api/clientes/{id}
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ClienteDTO> atualizarCliente(
             @PathVariable Long id,
             @RequestBody @Valid ClienteRequest request) {
-
-        return clienteRepository.findById(id)
-                .map(cliente -> {
-                    cliente.setNome(request.nome());
-                    cliente.setTelefone(request.telefone());
-                    cliente.setEmail(request.email());
-                    cliente.setEndereco(request.endereco());
-                    cliente = clienteRepository.save(cliente);
-                    return ResponseEntity.ok(
-                            new ClienteDTO(cliente.getId(), cliente.getNome(), cliente.getTelefone(),
-                                    cliente.getEmail(), cliente.getEndereco()));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // =========================
-    // REMOVER CLIENTE
-    // =========================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerCliente(@PathVariable Long id) {
-        if (!clienteRepository.existsById(id)) {
+        try {
+            ClienteDTO cliente = clienteService.atualizar(id, request);
+            return ResponseEntity.ok(cliente);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-        clienteRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Remover cliente
+     * DELETE /api/clientes/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removerCliente(@PathVariable Long id) {
+        try {
+            clienteService.remover(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

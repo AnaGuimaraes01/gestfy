@@ -2,109 +2,106 @@ package com.empresa.gestfy.controllers;
 
 import com.empresa.gestfy.dto.produto.ProdutoDTO;
 import com.empresa.gestfy.dto.produto.ProdutoRequest;
-import com.empresa.gestfy.models.Produto;
-import com.empresa.gestfy.repositories.ProdutoRepository;
-import com.empresa.gestfy.models.Estoque;
-import com.empresa.gestfy.repositories.EstoqueRepository;
-import java.time.LocalDateTime;
+import com.empresa.gestfy.services.ProdutoService;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * ProdutoController
+ * Responsável apenas por:
+ * - Receber requisições HTTP
+ * - Delegar para ProdutoService
+ * - Retornar respostas HTTP
+ */
 @CrossOrigin(origins = "*")
-
 @RestController
 @RequestMapping("/api/produtos")
 public class ProdutoController {
 
-    private final ProdutoRepository produtoRepository;
-    private final EstoqueRepository estoqueRepository;
+    private final ProdutoService produtoService;
 
-    public ProdutoController(ProdutoRepository produtoRepository, EstoqueRepository estoqueRepository) {
-        this.produtoRepository = produtoRepository;
-        this.estoqueRepository = estoqueRepository;
+    public ProdutoController(ProdutoService produtoService) {
+        this.produtoService = produtoService;
     }
+
+    /**
+     * Criar novo produto
+     * POST /api/produtos
+     */
     @PostMapping
     public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoRequest request) {
-        Produto produto = new Produto(
-                request.nome(),
-                request.descricao(),
-                request.preco(),
-                request.urlFoto(),
-                request.quantidade());
-        Produto salvo = produtoRepository.save(produto);
-
-        // Cria movimentação ENTRADA no estoque automaticamente
-        Estoque entrada = new Estoque();
-        entrada.setProdutoId(salvo.getId());
-        entrada.setTipoMovimento("ENTRADA");
-        entrada.setQuantidade(salvo.getQuantidade());
-        entrada.setDataMovimento(LocalDateTime.now());
-        estoqueRepository.save(entrada);
-
-        return ResponseEntity.ok(toDTO(salvo));
+        ProdutoDTO produto = produtoService.criar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(produto);
     }
 
-    // LIST ALL
+    /**
+     * Listar todos os produtos
+     * GET /api/produtos
+     */
     @GetMapping
     public ResponseEntity<List<ProdutoDTO>> listar() {
-        List<ProdutoDTO> lista = produtoRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .toList();
-
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(produtoService.listar());
     }
 
-    // BUSCAR POR NOME
+    /**
+     * Buscar produtos pelo nome
+     * GET /api/produtos/buscar?nome=sorvete
+     */
     @GetMapping("/buscar")
     public ResponseEntity<List<ProdutoDTO>> buscarPorNome(@RequestParam String nome) {
-        List<ProdutoDTO> lista = produtoRepository.findAll()
+        // Nota: buscarPorNome do ProdutoService retorna ProdutoBuscaResponse
+        // Para essa busca avançada, precisamos listar todos e filtrar
+        List<ProdutoDTO> produtos = produtoService.listar()
                 .stream()
-                .filter(p -> p.getNome().toLowerCase().contains(nome.toLowerCase()))
-                .map(this::toDTO)
+                .filter(p -> p.nome().toLowerCase().contains(nome.toLowerCase()))
                 .toList();
 
-        return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(produtos);
     }
 
-    // GET BY ID
+    /**
+     * Buscar produto por ID
+     * GET /api/produtos/{id}
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
-        return produtoRepository.findById(id)
-                .map(produto -> ResponseEntity.ok(toDTO(produto)))
+        return produtoService.buscarPorId(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // UPDATE
+    /**
+     * Atualizar produto
+     * PUT /api/produtos/{id}
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoDTO> atualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProdutoRequest request) {
-        return produtoRepository.findById(id)
-                .map(produto -> {
-                    produto.setNome(request.nome());
-                    produto.setDescricao(request.descricao());
-                    produto.setPreco(request.preco());
-                    produto.setUrlFoto(request.urlFoto());
-                    produto.setQuantidade(request.quantidade());
-                    Produto atualizado = produtoRepository.save(produto);
-                    return ResponseEntity.ok(toDTO(atualizado));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            ProdutoDTO produto = produtoService.atualizar(id, request);
+            return ResponseEntity.ok(produto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // converter Model → DTO
-    private ProdutoDTO toDTO(Produto produto) {
-        return new ProdutoDTO(
-                produto.getId(),
-                produto.getNome(),
-                produto.getDescricao(),
-                produto.getPreco(),
-                produto.getUrlFoto(),
-                produto.getQuantidade());
+    /**
+     * Remover produto
+     * DELETE /api/produtos/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> remover(@PathVariable Long id) {
+        try {
+            produtoService.remover(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
