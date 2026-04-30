@@ -3,7 +3,6 @@ package com.empresa.gestfy.models;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "caixa")
@@ -17,8 +16,10 @@ public class Caixa {
     private String tipo;
 
     // Valor inicial do caixa (nunca pode ser null)
-    @Column(nullable = false)
-    private Double valorInicial = 0.0;
+    // @Column(nullable = false)
+    // private Double valorInicial = 0.0;
+    @Column(nullable = false, columnDefinition = "DOUBLE PRECISION DEFAULT 0")
+    private Double valorInicial;
 
     private Double saldo;
     private String descricao;
