@@ -12,7 +12,6 @@ public class Estoque {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relacionamento com Produto
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
@@ -64,4 +63,3 @@ public class Estoque {
         this.quantidade = quantidade;
     }
 }
-   

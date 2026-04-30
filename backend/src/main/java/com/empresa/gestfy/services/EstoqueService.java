@@ -40,7 +40,7 @@ public class EstoqueService {
      */
     public EstoqueDTO criar(EstoqueRequest request) {
         Produto produto = produtoRepository.findById(request.produtoId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + request.produtoId()));
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + request.produtoId()));
         
         Estoque estoque = new Estoque();
         estoque.setProduto(produto);
@@ -62,7 +62,7 @@ public class EstoqueService {
      */
     public Estoque registrarMovimento(Long produtoId, String tipoMovimento, Integer quantidade) {
         Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + produtoId));
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + produtoId));
         
         Estoque movimento = new Estoque();
         movimento.setProduto(produto);
@@ -94,10 +94,7 @@ public class EstoqueService {
      * Listar movimentações de um produto
      */
     public List<EstoqueDTO> listarPorProduto(Long produtoId) {
-        Produto produto = produtoRepository.findById(produtoId)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado com ID: " + produtoId));
-        
-        return estoqueRepository.findByProduto(produto)
+        return estoqueRepository.findByProduto_Id(produtoId)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
