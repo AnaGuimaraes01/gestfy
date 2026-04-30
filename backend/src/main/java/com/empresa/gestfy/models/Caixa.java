@@ -3,6 +3,7 @@ package com.empresa.gestfy.models;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "caixa")
@@ -34,6 +35,7 @@ public class Caixa {
     private String observacoes;
 
     public Caixa() {
+        this.valorInicial = 0.0;
     }
 
     public Long getId() {
@@ -114,5 +116,12 @@ public class Caixa {
 
     public void setValorInicial(Double valorInicial) {
         this.valorInicial = valorInicial != null ? valorInicial : 0.0;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.valorInicial == null) {
+            this.valorInicial = 0.0;
+        }
     }
 }
