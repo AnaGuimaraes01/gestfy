@@ -15,6 +15,10 @@ public class Caixa {
     // TIPO DE MOVIMENTO: "ENTRADA" (pedido) ou "FECHAMENTO" (resumo do dia)
     private String tipo;
 
+    // Valor inicial do caixa (nunca pode ser null)
+    @Column(nullable = false)
+    private Double valorInicial = 0.0;
+
     private Double saldo;
     private String descricao;
     private LocalDate data;
@@ -102,5 +106,13 @@ public class Caixa {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public Double getValorInicial() {
+        return valorInicial;
+    }
+
+    public void setValorInicial(Double valorInicial) {
+        this.valorInicial = valorInicial != null ? valorInicial : 0.0;
     }
 }
