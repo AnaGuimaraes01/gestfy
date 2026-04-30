@@ -54,6 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         debounce = setTimeout(() => buscarProduto(), 300);
     });
+
+    // Permitir confirmar venda com Enter no campo de valorRecebido
+    document.getElementById('valorRecebido').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') confirmarVenda();
+    });
 });
 
 // ============================================
@@ -209,13 +214,13 @@ function selecionarProduto(produto) {
 function calcularTroco() {
     if (!produtoSelecionado) return;
 
-    const quantidade = Math.max(1, parseInt(document.getElementById('quantidade').value) || 0);
+    let quantidade = parseInt(document.getElementById('quantidade').value) || 1;
     const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
 
-    if (quantidade <= 0) {
-        exibirMensagem('Quantidade deve ser maior que zero', 'erro');
-        document.getElementById('quantidade').value = 1;
-        return;
+    // Garantir que quantidade é no mínimo 1
+    if (quantidade < 1) {
+        quantidade = 1;
+        document.getElementById('quantidade').value = '1';
     }
 
     const valorTotal = produtoSelecionado.preco * quantidade;
@@ -229,12 +234,15 @@ function calcularTroco() {
     document.getElementById('valorTotal').value = valorTotal.toFixed(2);
 
     // Avisar se valor insuficiente
+    const trocoElement = document.getElementById('resumoTroco').closest('.resumo-linha');
     if (valorRecebido < valorTotal && valorRecebido > 0) {
-        document.getElementById('resumoTroco').closest('.resumo-linha').style.color = '#f44336';
+        trocoElement.style.color = '#f44336';
         const falta = (valorTotal - valorRecebido).toFixed(2);
         exibirMensagem(`⚠️ Valor insuficiente! Falta: R$ ${falta}`, 'info');
+    } else if (valorRecebido >= valorTotal) {
+        trocoElement.style.color = '#4caf50';
     } else {
-        document.getElementById('resumoTroco').closest('.resumo-linha').style.color = '#4caf50';
+        trocoElement.style.color = '#666';
     }
 }
 
