@@ -178,8 +178,10 @@ public class PedidoService {
         Caixa registro = new Caixa();
         registro.setTipo("ENTRADA");
         registro.setData(LocalDate.now());
-        registro.setHorarioAbertura(LocalDateTime.now());
+        registro.setDataAbertura(LocalDateTime.now());
+        registro.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
         registro.setStatus("ABERTO");
+        registro.setValorInicial(0.0); // Garantir que nunca seja null
         registro.setSaldo(pedido.getTotal());
         registro.setDescricao(
                 String.format("Pedido: #%d - Cliente: %s", pedido.getId(), pedido.getCliente().getNome()));

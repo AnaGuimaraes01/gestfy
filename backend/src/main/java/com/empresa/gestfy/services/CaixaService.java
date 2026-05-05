@@ -65,7 +65,8 @@ public class CaixaService {
                 Caixa caixa = new Caixa();
                 caixa.setTipo("ABERTURA");
                 caixa.setData(hoje);
-                caixa.setHorarioAbertura(LocalDateTime.now());
+                caixa.setDataAbertura(LocalDateTime.now());
+                caixa.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
                 caixa.setStatus("ABERTO");
                 caixa.setValorInicial(0.0); // Garantir que nunca seja null
                 caixa.setSaldo(0.0);
@@ -79,7 +80,7 @@ public class CaixaService {
                                 "mensagem", "Caixa aberto com sucesso!",
                                 "caixaId", salvo.getId(),
                                 "data", salvo.getData(),
-                                "horario", salvo.getHorarioAbertura());
+                                "horario", salvo.getDataAbertura());
         }
 
         // ========================================
@@ -159,7 +160,8 @@ public class CaixaService {
                 Caixa vendaRegistro = new Caixa();
                 vendaRegistro.setTipo("ENTRADA");
                 vendaRegistro.setData(LocalDate.now());
-                vendaRegistro.setHorarioAbertura(LocalDateTime.now());
+                vendaRegistro.setDataAbertura(LocalDateTime.now());
+                vendaRegistro.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
                 vendaRegistro.setStatus("ABERTO");
                 vendaRegistro.setValorInicial(0.0); // Garantir que nunca seja null
                 vendaRegistro.setSaldo(valorTotal);
@@ -233,9 +235,11 @@ public class CaixaService {
                 Caixa fechamento = new Caixa();
                 fechamento.setTipo("FECHAMENTO");
                 fechamento.setData(hoje);
-                fechamento.setHorarioFechamento(LocalDateTime.now());
+                fechamento.setDataFechamento(LocalDateTime.now());
+                fechamento.setHorarioFechamento(LocalDateTime.now()); // Mantém por compatibilidade
                 fechamento.setStatus("FECHADO");
                 fechamento.setValorInicial(0.0); // Garantir que nunca seja null
+                fechamento.setValorFinal(totalVendas); // Saldo final do caixa
                 fechamento.setSaldo(totalVendas);
                 fechamento.setDescricao("Fechamento de caixa do dia");
                 fechamento.setObservacoes(String.format(
@@ -248,7 +252,9 @@ public class CaixaService {
                 // Atualiza status do caixa aberto
                 Caixa caixa = caixaAberto.get();
                 caixa.setStatus("FECHADO");
-                caixa.setHorarioFechamento(LocalDateTime.now());
+                caixa.setDataFechamento(LocalDateTime.now());
+                caixa.setHorarioFechamento(LocalDateTime.now()); // Mantém por compatibilidade
+                caixa.setValorFinal(totalVendas);
                 caixaRepository.save(caixa);
 
                 return Map.of(
@@ -257,7 +263,7 @@ public class CaixaService {
                                 "totalVendas", vendas.size(),
                                 "totalArrecadado", totalVendas,
                                 "data", hoje,
-                                "horarioFechamento", fechamento.getHorarioFechamento());
+                                "horarioFechamento", fechamento.getDataFechamento());
         }
 
         // ========================================

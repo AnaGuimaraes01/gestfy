@@ -6,22 +6,31 @@ import java.time.LocalDateTime;
 public class CaixaDTO {
     private Long id;
     private String tipo;
+    private Double valorInicial;
+    private Double valorFinal;
     private Double saldo;
     private String descricao;
     private LocalDate data;
+    private LocalDateTime dataAbertura;
+    private LocalDateTime dataFechamento;
     private LocalDateTime horarioAbertura;
     private LocalDateTime horarioFechamento;
     private String status;
     private String observacoes;
 
-    public CaixaDTO(Long id, String tipo, Double saldo, String descricao, LocalDate data,
+    public CaixaDTO(Long id, String tipo, Double valorInicial, Double valorFinal, Double saldo,
+            String descricao, LocalDate data, LocalDateTime dataAbertura, LocalDateTime dataFechamento,
             LocalDateTime horarioAbertura, LocalDateTime horarioFechamento,
             String status, String observacoes) {
         this.id = id;
         this.tipo = tipo;
+        this.valorInicial = valorInicial;
+        this.valorFinal = valorFinal;
         this.saldo = saldo;
         this.descricao = descricao;
         this.data = data;
+        this.dataAbertura = dataAbertura;
+        this.dataFechamento = dataFechamento;
         this.horarioAbertura = horarioAbertura;
         this.horarioFechamento = horarioFechamento;
         this.status = status;
@@ -42,6 +51,22 @@ public class CaixaDTO {
 
     public void setTipo(String tipo) {
         this.tipo = tipo;
+    }
+
+    public Double getValorInicial() {
+        return valorInicial;
+    }
+
+    public void setValorInicial(Double valorInicial) {
+        this.valorInicial = valorInicial;
+    }
+
+    public Double getValorFinal() {
+        return valorFinal;
+    }
+
+    public void setValorFinal(Double valorFinal) {
+        this.valorFinal = valorFinal;
     }
 
     public Double getSaldo() {
@@ -66,6 +91,22 @@ public class CaixaDTO {
 
     public void setData(LocalDate data) {
         this.data = data;
+    }
+
+    public LocalDateTime getDataAbertura() {
+        return dataAbertura;
+    }
+
+    public void setDataAbertura(LocalDateTime dataAbertura) {
+        this.dataAbertura = dataAbertura;
+    }
+
+    public LocalDateTime getDataFechamento() {
+        return dataFechamento;
+    }
+
+    public void setDataFechamento(LocalDateTime dataFechamento) {
+        this.dataFechamento = dataFechamento;
     }
 
     public LocalDateTime getHorarioAbertura() {
