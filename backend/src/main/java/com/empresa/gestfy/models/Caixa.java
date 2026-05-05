@@ -12,8 +12,7 @@ public class Caixa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TIPO DE MOVIMENTO: "ABERTURA", "ENTRADA" (pedido) ou "FECHAMENTO" (resumo do
-    // dia)
+
     @Column(name = "tipo")
     private String tipo;
 
