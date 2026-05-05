@@ -310,12 +310,13 @@ public class CaixaService {
                                         .sum();
 
                         return Map.of(
-                                        "aberto", true,
+                                        "sucesso", true,
                                         "caixaId", caixa.getId(),
                                         "horarioAbertura", caixa.getHorarioAbertura(),
                                         "totalVendas", vendas.size(),
                                         "totalArrecadado", totalVendas,
-                                        "data", hoje);
+                                        "data", hoje,
+                                        "status", "ABERTO");
                 }
 
                 return Map.of(

@@ -126,7 +126,7 @@ public class CaixaController {
         // ========================================
         /**
          * Lista todas as vendas registradas no dia.
-         * GET /api/caixa/vendas-do-dia
+         * GET /api/caixa/vendas-do-dia ***
          */
         @GetMapping("/vendas-do-dia")
         public ResponseEntity<Map<String, Object>> listarVendasDoDia() {
