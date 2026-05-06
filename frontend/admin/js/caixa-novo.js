@@ -20,13 +20,13 @@ let vendas = [];
     try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 200);
-        const res = await fetch('https://gestfy-backend.onrender.com/api/caixa/status', { signal: controller.signal });
+        const res = await fetch('http://localhost:8080/api/caixa', { signal: controller.signal });
         clearTimeout(timeout);
         if (res && res.ok) {
-            API_BASE = 'https://gestfy-backend.onrender.com/api/caixa';
+            API_BASE = 'http://localhost:8080/api/caixa';
         }
     } catch (e) {
-        
+        // Usa o padrão de produção
     }
 })();
 
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 async function abrirCaixa() {
     try {
-        const response = await fetch(`${API_BASE}/caixa/abrir`, {
+        const response = await fetch(`${API_BASE}/abrir`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -118,7 +118,7 @@ async function buscarProduto() {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/caixa/buscar-produto?nome=${encodeURIComponent(nomeBusca)}`);
+        const response = await fetch(`${API_BASE}/buscar-produto?nome=${encodeURIComponent(nomeBusca)}`);
 
         const data = await response.json();
 
@@ -274,7 +274,7 @@ async function confirmarVenda() {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/caixa/vender`, {
+        const response = await fetch(`${API_BASE}/vender`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -339,7 +339,7 @@ async function fecharCaixa() {
     }
 
     try {
-        const response = await fetch(`${API_BASE}/caixa/fechar`, {
+        const response = await fetch(`${API_BASE}/fechar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -380,7 +380,7 @@ async function fecharCaixa() {
 // ============================================
 async function verificarStatusCaixa() {
     try {
-        const response = await fetch(`${API_BASE}/caixa/status`, {
+        const response = await fetch(`${API_BASE}/status`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -418,7 +418,7 @@ async function verificarStatusCaixa() {
 // ============================================
 async function atualizarTotalizadores() {
     try {
-        const response = await fetch(`${API_BASE}/caixa/vendas-do-dia`, {
+        const response = await fetch(`${API_BASE}/vendas-do-dia`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
