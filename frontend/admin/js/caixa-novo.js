@@ -6,10 +6,8 @@
  * Para desenvolvimento: http://localhost:8080/api/caixa
  */
 
-// ============================================
-// VARIÁVEIS GLOBAIS
-// ============================================
-let API_BASE = 'https://gestfy-backend.onrender.com/api'; // Padrão de produção
+// MUDEI A API DO CAIXA PARA A DO RENDER
+let API_BASE = 'https://gestfy-backend.onrender.com/api/caixa'; // Padrão de produção
 let caixaAberto = false;
 let caixaId = null;
 let produtoSelecionado = null;
@@ -22,13 +20,13 @@ let vendas = [];
     try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 200);
-        const res = await fetch('http://localhost:8080/api/caixa/status', { signal: controller.signal });
+        const res = await fetch('https://gestfy-backend.onrender.com/api/caixa/status', { signal: controller.signal });
         clearTimeout(timeout);
         if (res && res.ok) {
-            API_BASE = 'http://localhost:8080/api';
+            API_BASE = 'https://gestfy-backend.onrender.com/api/caixa';
         }
     } catch (e) {
-        // Mantém padrão de produção
+        
     }
 })();
 
