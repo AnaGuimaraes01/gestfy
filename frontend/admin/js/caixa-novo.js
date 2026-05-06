@@ -454,19 +454,31 @@ async function atualizarTotalizadores() {
             headers: { 'Content-Type': 'application/json' }
         });
 
+        if (!response.ok) {
+            console.error('Erro ao carregar vendas:', response.status);
+            return;
+        }
+
         const data = await response.json();
 
-        if (!response.ok) return;
+        if (!data.sucesso && !data.totalVendas) {
+            console.error('Resposta inválida:', data);
+            return;
+        }
 
-        document.getElementById('totalVendas').textContent = data.totalVendas;
-        document.getElementById('totalArrecadado').textContent = data.totalArrecadado.toFixed(2);
-        document.getElementById('totalDia').textContent = data.totalArrecadado.toFixed(2);
+        // Atualizar valores
+        document.getElementById('totalVendas').textContent = data.totalVendas || 0;
+        document.getElementById('totalArrecadado').textContent = (data.totalArrecadado || 0).toFixed(2);
+        document.getElementById('totalDia').textContent = (data.totalArrecadado || 0).toFixed(2);
 
         // Exibir histórico de vendas
-        exibirHistoricoVendas(data.vendas);
+        if (data.vendas && Array.isArray(data.vendas)) {
+            exibirHistoricoVendas(data.vendas);
+        }
 
     } catch (erro) {
         console.error('Erro ao atualizar totalizadores:', erro);
+        // Não quebra a interface se houver erro
     }
 }
 
@@ -477,23 +489,31 @@ function exibirHistoricoVendas(vendas) {
     const container = document.getElementById('vendasLista');
     container.innerHTML = '';
 
-    if (!vendas || vendas.length === 0) {
+    if (!vendas || !Array.isArray(vendas) || vendas.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma venda registrada</p>';
         return;
     }
 
     vendas.forEach((venda, index) => {
-        const div = document.createElement('div');
-        div.className = 'venda-item';
-        const hora = new Date(venda.horarioAbertura).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = `
-            <div class="venda-detalhes">
-                <div class="venda-produto">${venda.descricao}</div>
-                <div class="venda-info">${hora} - ${venda.observacoes}</div>
-            </div>
-            <div class="venda-valor">R$ ${(venda.saldo || 0).toFixed(2)}</div>
-        `;
-        container.appendChild(div);
+        try {
+            const div = document.createElement('div');
+            div.className = 'venda-item';
+            
+            const descricao = venda.descricao || 'Venda sem descrição';
+            const observacoes = venda.observacoes || '';
+            const saldo = venda.saldo || 0;
+            
+            div.innerHTML = `
+                <div class="venda-detalhes">
+                    <div class="venda-produto">${descricao}</div>
+                    <div class="venda-info">${observacoes}</div>
+                </div>
+                <div class="venda-valor">R$ ${(saldo).toFixed(2)}</div>
+            `;
+            container.appendChild(div);
+        } catch (e) {
+            console.error('Erro ao exibir venda:', e, venda);
+        }
     });
 }
 

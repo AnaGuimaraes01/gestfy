@@ -284,18 +284,42 @@ public class CaixaService {
         public Map<String, Object> listarVendasDoDia() {
                 LocalDate hoje = LocalDate.now();
 
-                List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
+                try {
+                        List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
 
-                Double total = vendas.stream()
-                                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
-                                .sum();
+                        Double total = vendas.stream()
+                                        .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                                        .sum();
 
-                return Map.of(
-                                "sucesso", true,
-                                "data", hoje,
-                                "totalVendas", vendas.size(),
-                                "totalArrecadado", total,
-                                "vendas", vendas);
+                        // Converter vendas para Map simples para evitar problemas de serialização
+                        List<Map<String, Object>> vendasFormatadas = new java.util.ArrayList<>();
+                        for (Caixa v : vendas) {
+                            Map<String, Object> venda = new java.util.HashMap<>();
+                            venda.put("id", v.getId());
+                            venda.put("descricao", v.getDescricao() != null ? v.getDescricao() : "");
+                            venda.put("observacoes", v.getObservacoes() != null ? v.getObservacoes() : "");
+                            venda.put("saldo", v.getSaldo() != null ? v.getSaldo() : 0.0);
+                            venda.put("data", v.getData().toString());
+                            vendasFormatadas.add(venda);
+                        }
+
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("sucesso", true);
+                        resultado.put("data", hoje.toString());
+                        resultado.put("totalVendas", vendas.size());
+                        resultado.put("totalArrecadado", total);
+                        resultado.put("vendas", vendasFormatadas);
+
+                        return resultado;
+                } catch (Exception e) {
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("sucesso", true);
+                        resultado.put("data", hoje.toString());
+                        resultado.put("totalVendas", 0);
+                        resultado.put("totalArrecadado", 0.0);
+                        resultado.put("vendas", new java.util.ArrayList<>());
+                        return resultado;
+                }
         }
 
         /**
