@@ -71,34 +71,51 @@ async function abrirCaixa() {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            if (response.status === 409) {
-                // Caixa já aberto
-                verificarStatusCaixa();
-                exibirMensagem('Caixa já está aberto para hoje!', 'info');
-                return;
+        if (data.sucesso === true) {
+            // ✓ Caixa aberto com sucesso
+            caixaAberto = true;
+            caixaId = data.caixaId;
+
+            // Atualizar interface
+            document.getElementById('btnAbrirCaixa').disabled = true;
+            document.getElementById('btnFecharCaixa').disabled = false;
+            document.getElementById('secaoVenda').style.display = 'block';
+            document.getElementById('statusBox').classList.remove('fechado');
+            document.getElementById('statusBox').classList.add('aberto');
+            document.getElementById('statusText').textContent = 'ABERTO ✓';
+
+            exibirMensagem('✓ Caixa aberto com sucesso!', 'sucesso');
+            atualizarTotalizadores();
+        } else {
+            // ✗ Falha ao abrir
+            if (response.status === 409 || data.erro?.includes('já está aberto')) {
+                // Caixa já aberto - carrega o estado
+                carregarCaixaAberto(data.caixaId);
+                exibirMensagem('✓ Caixa já estava aberto. Carregando...', 'info');
+            } else {
+                exibirMensagem(data.erro || 'Erro ao abrir caixa', 'erro');
             }
-            exibirMensagem(data.erro || 'Erro ao abrir caixa', 'erro');
-            return;
         }
-
-        caixaAberto = true;
-        caixaId = data.caixaId;
-
-        // Atualizar interface
-        document.getElementById('btnAbrirCaixa').disabled = true;
-        document.getElementById('btnFecharCaixa').disabled = false;
-        document.getElementById('secaoVenda').style.display = 'block';
-        document.getElementById('statusBox').classList.add('aberto');
-        document.getElementById('statusText').textContent = 'ABERTO ✓';
-
-        exibirMensagem('✓ Caixa aberto com sucesso!', 'sucesso');
-        atualizarTotalizadores();
 
     } catch (erro) {
         console.error('Erro:', erro);
         exibirMensagem('Erro ao conectar com o servidor', 'erro');
     }
+}
+
+// Carregar um caixa que já está aberto
+function carregarCaixaAberto(id) {
+    caixaAberto = true;
+    caixaId = id;
+    
+    document.getElementById('btnAbrirCaixa').disabled = true;
+    document.getElementById('btnFecharCaixa').disabled = false;
+    document.getElementById('secaoVenda').style.display = 'block';
+    document.getElementById('statusBox').classList.remove('fechado');
+    document.getElementById('statusBox').classList.add('aberto');
+    document.getElementById('statusText').textContent = 'ABERTO ✓';
+    
+    atualizarTotalizadores();
 }
 
 // ============================================
@@ -387,29 +404,30 @@ async function verificarStatusCaixa() {
 
         const data = await response.json();
 
-        if (data.aberto) {
-            caixaAberto = true;
-            caixaId = data.caixaId;
-
-            document.getElementById('btnAbrirCaixa').disabled = true;
-            document.getElementById('btnFecharCaixa').disabled = false;
-            document.getElementById('secaoVenda').style.display = 'block';
-            document.getElementById('statusBox').classList.add('aberto');
-            document.getElementById('statusText').textContent = 'ABERTO ✓';
-            document.getElementById('totalDia').textContent = data.totalArrecadado.toFixed(2);
-
-            atualizarTotalizadores();
-        } else {
+        if (data.aberto === false) {
+            // Caixa fechado - padrão inicial
             caixaAberto = false;
             document.getElementById('btnAbrirCaixa').disabled = false;
             document.getElementById('btnFecharCaixa').disabled = true;
             document.getElementById('secaoVenda').style.display = 'none';
+            document.getElementById('statusBox').classList.remove('aberto');
             document.getElementById('statusBox').classList.add('fechado');
             document.getElementById('statusText').textContent = 'FECHADO ✕';
+            return;
+        }
+
+        // Caixa aberto - carregar dados
+        if (data.caixaId) {
+            carregarCaixaAberto(data.caixaId);
+            if (data.totalArrecadado) {
+                document.getElementById('totalDia').textContent = data.totalArrecadado.toFixed(2);
+            }
         }
 
     } catch (erro) {
         console.error('Erro ao verificar status:', erro);
+        // Se houver erro, deixa o padrão (fechado)
+        caixaAberto = false;
     }
 }
 
