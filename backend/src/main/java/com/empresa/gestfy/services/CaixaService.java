@@ -294,13 +294,13 @@ public class CaixaService {
                         // Converter vendas para Map simples para evitar problemas de serialização
                         List<Map<String, Object>> vendasFormatadas = new java.util.ArrayList<>();
                         for (Caixa v : vendas) {
-                            Map<String, Object> venda = new java.util.HashMap<>();
-                            venda.put("id", v.getId());
-                            venda.put("descricao", v.getDescricao() != null ? v.getDescricao() : "");
-                            venda.put("observacoes", v.getObservacoes() != null ? v.getObservacoes() : "");
-                            venda.put("saldo", v.getSaldo() != null ? v.getSaldo() : 0.0);
-                            venda.put("data", v.getData().toString());
-                            vendasFormatadas.add(venda);
+                                Map<String, Object> venda = new java.util.HashMap<>();
+                                venda.put("id", v.getId());
+                                venda.put("descricao", v.getDescricao() != null ? v.getDescricao() : "");
+                                venda.put("observacoes", v.getObservacoes() != null ? v.getObservacoes() : "");
+                                venda.put("saldo", v.getSaldo() != null ? v.getSaldo() : 0.0);
+                                venda.put("data", v.getData().toString());
+                                vendasFormatadas.add(venda);
                         }
 
                         Map<String, Object> resultado = new java.util.HashMap<>();
