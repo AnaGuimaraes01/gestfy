@@ -55,10 +55,15 @@ public class CaixaService {
                 // Verifica se já existe um caixa aberto para hoje
                 Optional<Caixa> caixaExistente = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
                 if (caixaExistente.isPresent()) {
+                        Caixa caixa = caixaExistente.get();
+                        // Caixa já aberto - retornar com sucesso (recarregar interface)
                         return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Caixa já está aberto para hoje",
-                                        "caixaId", caixaExistente.get().getId());
+                                        "sucesso", true,
+                                        "mensagem", "Caixa já está aberto para hoje",
+                                        "caixaId", caixa.getId(),
+                                        "jaAberto", true,
+                                        "data", caixa.getData(),
+                                        "horario", caixa.getDataAbertura());
                 }
 
                 // Cria novo registro de abertura
@@ -79,6 +84,7 @@ public class CaixaService {
                                 "sucesso", true,
                                 "mensagem", "Caixa aberto com sucesso!",
                                 "caixaId", salvo.getId(),
+                                "jaAberto", false,
                                 "data", salvo.getData(),
                                 "horario", salvo.getDataAbertura());
         }

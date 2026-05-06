@@ -6,8 +6,8 @@
  * Para desenvolvimento: http://localhost:8080/api/caixa
  */
 
-// MUDEI A API DO CAIXA PARA A DO RENDER
-let API_BASE = 'https://gestfy-backend.onrender.com/api/caixa'; // Padrão de produção
+// PADRÃO: usar produção
+let API_BASE = 'https://gestfy-backend.onrender.com/api/caixa';
 let caixaAberto = false;
 let caixaId = null;
 let produtoSelecionado = null;
@@ -17,16 +17,24 @@ let vendas = [];
 // DETECTAR AMBIENTE (localhost vs produção)
 // ============================================
 (async function detectApi() {
+    // Se não está em localhost, usa produção
+    if (!window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
+        API_BASE = 'https://gestfy-backend.onrender.com/api/caixa';
+        return;
+    }
+
+    // Se é localhost, tenta conectar ao backend local
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 200);
-        const res = await fetch('http://localhost:8080/api/caixa', { signal: controller.signal });
+        const timeout = setTimeout(() => controller.abort(), 300);
+        const res = await fetch('http://localhost:8080/api/caixa/status', { signal: controller.signal });
         clearTimeout(timeout);
         if (res && res.ok) {
             API_BASE = 'http://localhost:8080/api/caixa';
         }
     } catch (e) {
-        // Usa o padrão de produção
+        // Mantém produção como fallback
+        API_BASE = 'https://gestfy-backend.onrender.com/api/caixa';
     }
 })();
 
@@ -71,8 +79,8 @@ async function abrirCaixa() {
 
         const data = await response.json();
 
+        // Sempre vai ser sucesso=true agora
         if (data.sucesso === true) {
-            // ✓ Caixa aberto com sucesso
             caixaAberto = true;
             caixaId = data.caixaId;
 
@@ -84,22 +92,21 @@ async function abrirCaixa() {
             document.getElementById('statusBox').classList.add('aberto');
             document.getElementById('statusText').textContent = 'ABERTO ✓';
 
-            exibirMensagem('✓ Caixa aberto com sucesso!', 'sucesso');
-            atualizarTotalizadores();
-        } else {
-            // ✗ Falha ao abrir
-            if (response.status === 409 || data.erro?.includes('já está aberto')) {
-                // Caixa já aberto - carrega o estado
-                carregarCaixaAberto(data.caixaId);
+            // Mensagem diferente se já estava aberto
+            if (data.jaAberto) {
                 exibirMensagem('✓ Caixa já estava aberto. Carregando...', 'info');
             } else {
-                exibirMensagem(data.erro || 'Erro ao abrir caixa', 'erro');
+                exibirMensagem('✓ Caixa aberto com sucesso!', 'sucesso');
             }
+
+            atualizarTotalizadores();
+        } else {
+            exibirMensagem(data.erro || 'Erro ao abrir caixa', 'erro');
         }
 
     } catch (erro) {
         console.error('Erro:', erro);
-        exibirMensagem('Erro ao conectar com o servidor', 'erro');
+        exibirMensagem('Erro ao conectar com o servidor. Verifique sua conexão.', 'erro');
     }
 }
 
@@ -401,6 +408,12 @@ async function verificarStatusCaixa() {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
+
+        if (!response.ok) {
+            console.error('Erro ao verificar status:', response.status);
+            // Se falhar, deixa como fechado (padrão)
+            return;
+        }
 
         const data = await response.json();
 

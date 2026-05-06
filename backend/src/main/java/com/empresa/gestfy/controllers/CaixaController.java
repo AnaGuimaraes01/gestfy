@@ -42,11 +42,9 @@ public class CaixaController {
         public ResponseEntity<Map<String, Object>> abrirCaixa() {
                 Map<String, Object> resultado = caixaService.abrirCaixa();
 
-                if ((Boolean) resultado.get("sucesso")) {
-                        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
-                } else {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body(resultado);
-                }
+                // Sempre retorna 200 OK com sucesso=true
+                // Se caixa já estava aberto, jaAberto=true
+                return ResponseEntity.ok(resultado);
         }
 
         // ========================================
