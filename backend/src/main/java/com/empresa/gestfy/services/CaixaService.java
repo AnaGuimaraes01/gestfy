@@ -122,83 +122,80 @@ public class CaixaService {
          */
         @Transactional
         public Map<String, Object> registrarVenda(VendaRequest venda) {
-                // 1️⃣ Busca o produto
-                Optional<Produto> produtoOpt = produtoService.buscarProdutoModelo(venda.produtoId());
-                if (produtoOpt.isEmpty()) {
-                        return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Produto não encontrado com ID: " + venda.produtoId());
+                try {
+                        // 1️⃣ Busca o produto
+                        Optional<Produto> produtoOpt = produtoService.buscarProdutoModelo(venda.produtoId());
+                        if (produtoOpt.isEmpty()) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Produto não encontrado com ID: " + venda.produtoId());
+                                return erro;
+                        }
+
+                        Produto produto = produtoOpt.get();
+
+                        // 2️⃣ Valida estoque
+                        if (!produtoService.temEstoqueSuficiente(produto, venda.quantidade())) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Estoque insuficiente");
+                                erro.put("produtoNome", produto.getNome());
+                                erro.put("estoqueDisponivel", produto.getQuantidade() != null ? produto.getQuantidade() : 0);
+                                erro.put("quantidadeSolicitada", venda.quantidade());
+                                return erro;
+                        }
+
+                        // 3️⃣ Calcula valores
+                        Double valorTotal = produto.getPreco() * venda.quantidade();
+                        Double troco = venda.valorRecebido() - valorTotal;
+
+                        // 4️⃣ Valida valor recebido
+                        if (venda.valorRecebido() < valorTotal) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Valor recebido é insuficiente");
+                                erro.put("valorTotal", valorTotal);
+                                erro.put("valorRecebido", venda.valorRecebido());
+                                erro.put("falta", valorTotal - venda.valorRecebido());
+                                return erro;
+                        }
+
+                        // 5️⃣ Atualiza estoque do produto
+                        Integer novaQuantidade = produto.getQuantidade() - venda.quantidade();
+                        produtoService.atualizarEstoque(produto, novaQuantidade);
+
+                        // 6️⃣ Registra movimento de saída no estoque
+                        estoqueService.registrarMovimento(produto.getId(), "SAIDA", venda.quantidade());
+
+                        // 7️⃣ Registra a venda no caixa
+                        Caixa vendaRegistro = new Caixa();
+                        vendaRegistro.setTipo("ENTRADA");
+                        vendaRegistro.setData(LocalDate.now());
+                        vendaRegistro.setDataAbertura(LocalDateTime.now());
+                        vendaRegistro.setHorarioAbertura(LocalDateTime.now());
+                        vendaRegistro.setStatus("ABERTO");
+                        vendaRegistro.setValorInicial(0.0);
+                        vendaRegistro.setSaldo(valorTotal);
+                        vendaRegistro.setDescricao(String.format("Venda: %s (Qtd: %d)", produto.getNome(), venda.quantidade()));
+                        vendaRegistro.setObservacoes(String.format("Preço unitário: R$ %.2f | Valor pago: R$ %.2f | Troco: R$ %.2f", produto.getPreco(), venda.valorRecebido(), troco));
+
+                        Caixa vendaSalva = caixaRepository.save(vendaRegistro);
+
+                        // 8️⃣ Retorna resposta com detalhes da venda
+                        VendaResponse vendaResponse = new VendaResponse(vendaSalva.getId(), produto.getNome(), venda.quantidade(), produto.getPreco(), valorTotal, venda.valorRecebido(), troco);
+
+                        Map<String, Object> sucesso = new java.util.HashMap<>();
+                        sucesso.put("sucesso", true);
+                        sucesso.put("venda", vendaResponse);
+                        sucesso.put("estoqueAtualizado", novaQuantidade);
+                        return sucesso;
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        Map<String, Object> erro = new java.util.HashMap<>();
+                        erro.put("sucesso", false);
+                        erro.put("erro", "Erro ao registrar venda: " + e.getMessage());
+                        return erro;
                 }
-
-                Produto produto = produtoOpt.get();
-
-                // 2️⃣ Valida estoque
-                if (!produtoService.temEstoqueSuficiente(produto, venda.quantidade())) {
-                        return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Estoque insuficiente",
-                                        "produtoNome", produto.getNome(),
-                                        "estoqueDisponivel",
-                                        produto.getQuantidade() != null ? produto.getQuantidade() : 0,
-                                        "quantidadeSolicitada", venda.quantidade());
-                }
-
-                // 3️⃣ Calcula valores
-                Double valorTotal = produto.getPreco() * venda.quantidade();
-                Double troco = venda.valorRecebido() - valorTotal;
-
-                // 4️⃣ Valida valor recebido
-                if (venda.valorRecebido() < valorTotal) {
-                        return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Valor recebido é insuficiente",
-                                        "valorTotal", valorTotal,
-                                        "valorRecebido", venda.valorRecebido(),
-                                        "falta", valorTotal - venda.valorRecebido());
-                }
-
-                // 5️⃣ Atualiza estoque do produto
-                Integer novaQuantidade = produto.getQuantidade() - venda.quantidade();
-                produtoService.atualizarEstoque(produto, novaQuantidade);
-
-                // 6️⃣ Registra movimento de saída no estoque
-                estoqueService.registrarMovimento(produto.getId(), "SAIDA", venda.quantidade());
-
-                // 7️⃣ Registra a venda no caixa
-                Caixa vendaRegistro = new Caixa();
-                vendaRegistro.setTipo("ENTRADA");
-                vendaRegistro.setData(LocalDate.now());
-                vendaRegistro.setDataAbertura(LocalDateTime.now());
-                vendaRegistro.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
-                vendaRegistro.setStatus("ABERTO");
-                vendaRegistro.setValorInicial(0.0); // Garantir que nunca seja null
-                vendaRegistro.setSaldo(valorTotal);
-                vendaRegistro.setDescricao(String.format(
-                                "Venda: %s (Qtd: %d)",
-                                produto.getNome(),
-                                venda.quantidade()));
-                vendaRegistro.setObservacoes(String.format(
-                                "Preço unitário: R$ %.2f | Valor pago: R$ %.2f | Troco: R$ %.2f",
-                                produto.getPreco(),
-                                venda.valorRecebido(),
-                                troco));
-
-                Caixa vendaSalva = caixaRepository.save(vendaRegistro);
-
-                // 8️⃣ Retorna resposta com detalhes da venda
-                VendaResponse vendaResponse = new VendaResponse(
-                                vendaSalva.getId(),
-                                produto.getNome(),
-                                venda.quantidade(),
-                                produto.getPreco(),
-                                valorTotal,
-                                venda.valorRecebido(),
-                                troco);
-
-                return Map.of(
-                                "sucesso", true,
-                                "venda", vendaResponse,
-                                "estoqueAtualizado", novaQuantidade);
         }
 
         // ========================================
@@ -212,67 +209,73 @@ public class CaixaService {
          * @return Map com detalhes do fechamento ou erro
          */
         public Map<String, Object> fecharCaixa() {
-                LocalDate hoje = LocalDate.now();
+                try {
+                        LocalDate hoje = LocalDate.now();
 
-                // Verifica se existe caixa aberto
-                Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
-                if (caixaAberto.isEmpty()) {
-                        return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Nenhum caixa aberto para fechar hoje");
+                        // Verifica se existe caixa aberto
+                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
+                        if (caixaAberto.isEmpty()) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Nenhum caixa aberto para fechar hoje");
+                                return erro;
+                        }
+
+                        // Verifica se já foi fechado
+                        Optional<Caixa> jaFechado = caixaRepository.findByDataAndTipoAndStatus(hoje, "FECHAMENTO", "FECHADO");
+                        if (jaFechado.isPresent()) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Caixa já foi fechado hoje");
+                                return erro;
+                        }
+
+                        // Busca todas as vendas do dia
+                        List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
+
+                        // Calcula total
+                        Double totalVendas = vendas.stream()
+                                        .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                                        .sum();
+
+                        // Registra fechamento
+                        Caixa fechamento = new Caixa();
+                        fechamento.setTipo("FECHAMENTO");
+                        fechamento.setData(hoje);
+                        fechamento.setDataFechamento(LocalDateTime.now());
+                        fechamento.setHorarioFechamento(LocalDateTime.now());
+                        fechamento.setStatus("FECHADO");
+                        fechamento.setValorInicial(0.0);
+                        fechamento.setValorFinal(totalVendas);
+                        fechamento.setSaldo(totalVendas);
+                        fechamento.setDescricao("Fechamento de caixa do dia");
+                        fechamento.setObservacoes(String.format("Total de vendas: %d | Total arrecadado: R$ %.2f", vendas.size(), totalVendas));
+
+                        Caixa fechamentoSalvo = caixaRepository.save(fechamento);
+
+                        // Atualiza status do caixa aberto
+                        Caixa caixa = caixaAberto.get();
+                        caixa.setStatus("FECHADO");
+                        caixa.setDataFechamento(LocalDateTime.now());
+                        caixa.setHorarioFechamento(LocalDateTime.now());
+                        caixa.setValorFinal(totalVendas);
+                        caixaRepository.save(caixa);
+
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("sucesso", true);
+                        resultado.put("mensagem", "Caixa fechado com sucesso!");
+                        resultado.put("totalVendas", vendas.size());
+                        resultado.put("totalArrecadado", totalVendas);
+                        resultado.put("data", hoje.toString());
+                        resultado.put("horarioFechamento", fechamentoSalvo.getDataFechamento() != null ? fechamentoSalvo.getDataFechamento().toString() : "");
+                        return resultado;
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        Map<String, Object> erro = new java.util.HashMap<>();
+                        erro.put("sucesso", false);
+                        erro.put("erro", "Erro ao fechar caixa: " + e.getMessage());
+                        return erro;
                 }
-
-                // Verifica se já foi fechado
-                Optional<Caixa> jaFechado = caixaRepository.findByDataAndTipoAndStatus(
-                                hoje, "FECHAMENTO", "FECHADO");
-                if (jaFechado.isPresent()) {
-                        return Map.of(
-                                        "sucesso", false,
-                                        "erro", "Caixa já foi fechado hoje");
-                }
-
-                // Busca todas as vendas do dia
-                List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
-
-                // Calcula total
-                Double totalVendas = vendas.stream()
-                                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
-                                .sum();
-
-                // Registra fechamento
-                Caixa fechamento = new Caixa();
-                fechamento.setTipo("FECHAMENTO");
-                fechamento.setData(hoje);
-                fechamento.setDataFechamento(LocalDateTime.now());
-                fechamento.setHorarioFechamento(LocalDateTime.now()); // Mantém por compatibilidade
-                fechamento.setStatus("FECHADO");
-                fechamento.setValorInicial(0.0); // Garantir que nunca seja null
-                fechamento.setValorFinal(totalVendas); // Saldo final do caixa
-                fechamento.setSaldo(totalVendas);
-                fechamento.setDescricao("Fechamento de caixa do dia");
-                fechamento.setObservacoes(String.format(
-                                "Total de vendas: %d | Total arrecadado: R$ %.2f",
-                                vendas.size(),
-                                totalVendas));
-
-                Caixa fechamentoSalvo = caixaRepository.save(fechamento);
-
-                // Atualiza status do caixa aberto
-                Caixa caixa = caixaAberto.get();
-                caixa.setStatus("FECHADO");
-                caixa.setDataFechamento(LocalDateTime.now());
-                caixa.setHorarioFechamento(LocalDateTime.now()); // Mantém por compatibilidade
-                caixa.setValorFinal(totalVendas);
-                caixaRepository.save(caixa);
-
-                Map<String, Object> resultado = new java.util.HashMap<>();
-                resultado.put("sucesso", true);
-                resultado.put("mensagem", "Caixa fechado com sucesso!");
-                resultado.put("totalVendas", vendas.size());
-                resultado.put("totalArrecadado", totalVendas);
-                resultado.put("data", hoje.toString());
-                resultado.put("horarioFechamento", fechamento.getDataFechamento() != null ? fechamento.getDataFechamento().toString() : "");
-                return resultado;
         }
 
         // ========================================

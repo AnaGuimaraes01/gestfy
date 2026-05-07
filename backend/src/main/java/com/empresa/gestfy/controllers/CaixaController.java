@@ -58,28 +58,35 @@ public class CaixaController {
         public ResponseEntity<Map<String, Object>> buscarProduto(
                         @RequestParam(required = true) String nome) {
 
-                // Valida se o nome foi informado
-                if (nome == null || nome.trim().isEmpty()) {
-                        return ResponseEntity.badRequest()
-                                        .body(Map.of(
-                                                        "erro", "Por favor, informe o nome do produto para buscar"));
+                try {
+                        // Valida se o nome foi informado
+                        if (nome == null || nome.trim().isEmpty()) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("erro", "Por favor, informe o nome do produto para buscar");
+                                return ResponseEntity.badRequest().body(erro);
+                        }
+
+                        // Busca produtos via service
+                        var produtos = caixaService.buscarProdutos(nome);
+
+                        // Se não encontrou nenhum produto
+                        if (produtos.isEmpty()) {
+                                Map<String, Object> resultado = new java.util.HashMap<>();
+                                resultado.put("erro", "Nenhum produto encontrado com o nome: " + nome);
+                                resultado.put("produtos", produtos);
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resultado);
+                        }
+
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("sucesso", true);
+                        resultado.put("total", produtos.size());
+                        resultado.put("produtos", produtos);
+                        return ResponseEntity.ok(resultado);
+                } catch (Exception e) {
+                        Map<String, Object> erro = new java.util.HashMap<>();
+                        erro.put("erro", "Erro ao buscar produtos: " + e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
                 }
-
-                // Busca produtos via service
-                var produtos = caixaService.buscarProdutos(nome);
-
-                // Se não encontrou nenhum produto
-                if (produtos.isEmpty()) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                        .body(Map.of(
-                                                        "erro", "Nenhum produto encontrado com o nome: " + nome,
-                                                        "produtos", produtos));
-                }
-
-                return ResponseEntity.ok(Map.of(
-                                "sucesso", true,
-                                "total", produtos.size(),
-                                "produtos", produtos));
         }
 
         // ========================================
