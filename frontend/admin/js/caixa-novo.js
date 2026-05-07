@@ -42,7 +42,9 @@ let vendas = [];
 // INICIALIZAÇÃO
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Ao carregar a página, verifica o status do caixa
     verificarStatusCaixa();
+    
     // Auto-buscar quando digita no campo
     const busca = document.getElementById('buscaProduto');
     let debounce;
