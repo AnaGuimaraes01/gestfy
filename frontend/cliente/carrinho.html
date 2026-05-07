@@ -124,7 +124,7 @@
             if (confirm("Tem certeza que deseja limpar o carrinho?")) {
                 localStorage.removeItem("carrinho");
                 carregarCarrinho();
-                msg.textContent = "🗑️ Carrinho limpo";
+                msg.textContent = "Carrinho limpo";
                 msg.style.display = "block";
                 setTimeout(() => msg.style.display = "none", 2000);
             }
