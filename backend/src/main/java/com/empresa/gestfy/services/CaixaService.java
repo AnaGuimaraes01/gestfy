@@ -53,7 +53,7 @@ public class CaixaService {
                 LocalDate hoje = LocalDate.now();
 
                 // Verifica se já existe um caixa aberto para hoje
-                Optional<Caixa> caixaExistente = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
+                Optional<Caixa> caixaExistente = caixaRepository.findByDataAndTipoAndStatus(hoje, "ABERTURA", "ABERTO");
                 if (caixaExistente.isPresent()) {
                         Caixa caixa = caixaExistente.get();
                         // Caixa já aberto - retornar com sucesso (recarregar interface)
@@ -173,7 +173,7 @@ public class CaixaService {
                         vendaRegistro.setData(LocalDate.now());
                         vendaRegistro.setDataAbertura(LocalDateTime.now());
                         vendaRegistro.setHorarioAbertura(LocalDateTime.now());
-                        vendaRegistro.setStatus("ABERTO");
+                        vendaRegistro.setStatus("CONCLUIDO");
                         vendaRegistro.setValorInicial(0.0);
                         vendaRegistro.setSaldo(valorTotal);
                         vendaRegistro.setDescricao(String.format("Venda: %s (Qtd: %d)", produto.getNome(), venda.quantidade()));
@@ -213,7 +213,7 @@ public class CaixaService {
                         LocalDate hoje = LocalDate.now();
 
                         // Verifica se existe caixa aberto
-                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
+                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndTipoAndStatus(hoje, "ABERTURA", "ABERTO");
                         if (caixaAberto.isEmpty()) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("sucesso", false);
@@ -337,7 +337,7 @@ public class CaixaService {
                 LocalDate hoje = LocalDate.now();
 
                 try {
-                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
+                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndTipoAndStatus(hoje, "ABERTURA", "ABERTO");
 
                         if (caixaAberto.isPresent()) {
                                 Caixa caixa = caixaAberto.get();
