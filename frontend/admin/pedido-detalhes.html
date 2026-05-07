@@ -252,13 +252,13 @@
             const resultado = document.getElementById('trocoResultado');
 
             if (isNaN(valorRecebido) || valorRecebido <= 0) {
-                resultado.innerHTML = '<p style="color: #f44336; font-weight: 600;">❌ Digite um valor válido</p>';
+                resultado.innerHTML = '<p style="color: #f44336; font-weight: 600;"> Digite um valor válido</p>';
                 return;
             }
 
             if (valorRecebido < valorPedido) {
                 resultado.innerHTML = `
-                    <p style="color: #f44336; font-weight: 600;">❌ Valor insuficiente!</p>
+                    <p style="color: #f44336; font-weight: 600;"> Valor insuficiente!</p>
                     <p style="font-size: 13px; color: #888;">Faltam: R$ ${(valorPedido - valorRecebido).toFixed(2)}</p>
                 `;
                 return;
