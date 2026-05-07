@@ -38,11 +38,11 @@
 
         // Status em português
         const statusMap = {
-            "RECEBIDO": { label: "Recebido", emoji: "📋", badge: "status-recebido" },
-            "EM_PREPARO": { label: "Em Preparo", emoji: "👨‍🍳", badge: "status-preparacao" },
-            "PRONTO_RETIRADA": { label: "Pronto para Retirada", emoji: "", badge: "status-pronto" },
-            "SAIU_ENTREGA": { label: "Saiu para Entrega", emoji: "🚗", badge: "status-entrega" },
-            "FINALIZADO": { label: "Finalizado", emoji: "🎉", badge: "status-finalizado" }
+            "RECEBIDO": { label: "Recebido", badge: "status-recebido" },
+            "EM_PREPARO": { label: "Em Preparo",  badge: "status-preparacao" },
+            "PRONTO_RETIRADA": { label: "Pronto para Retirada", badge: "status-pronto" },
+            "SAIU_ENTREGA": { label: "Saiu para Entrega",  badge: "status-entrega" },
+            "FINALIZADO": { label: "Finalizado",  badge: "status-finalizado" }
         };
 
         // Obter ID da URL ou localStorage
@@ -76,7 +76,7 @@
 
         // Exibir pedido
         function exibirPedido(pedido) {
-            const statusInfo = statusMap[pedido.status] || { label: pedido.status, emoji: "❓", badge: "status-recebido" };
+            const statusInfo = statusMap[pedido.status] || { label: pedido.status,  badge: "status-recebido" };
 
             let itensHTML = pedido.itens.map(item => `
                 <tr>
