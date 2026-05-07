@@ -57,13 +57,14 @@ public class CaixaService {
                 if (caixaExistente.isPresent()) {
                         Caixa caixa = caixaExistente.get();
                         // Caixa já aberto - retornar com sucesso (recarregar interface)
-                        return Map.of(
-                                        "sucesso", true,
-                                        "mensagem", "Caixa já está aberto para hoje",
-                                        "caixaId", caixa.getId(),
-                                        "jaAberto", true,
-                                        "data", caixa.getData(),
-                                        "horario", caixa.getDataAbertura());
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("sucesso", true);
+                        resultado.put("mensagem", "Caixa já está aberto para hoje");
+                        resultado.put("caixaId", caixa.getId());
+                        resultado.put("jaAberto", true);
+                        resultado.put("data", caixa.getData().toString());
+                        resultado.put("horario", caixa.getDataAbertura() != null ? caixa.getDataAbertura().toString() : "");
+                        return resultado;
                 }
 
                 // Cria novo registro de abertura
@@ -80,13 +81,14 @@ public class CaixaService {
 
                 Caixa salvo = caixaRepository.save(caixa);
 
-                return Map.of(
-                                "sucesso", true,
-                                "mensagem", "Caixa aberto com sucesso!",
-                                "caixaId", salvo.getId(),
-                                "jaAberto", false,
-                                "data", salvo.getData(),
-                                "horario", salvo.getDataAbertura());
+                Map<String, Object> resultado = new java.util.HashMap<>();
+                resultado.put("sucesso", true);
+                resultado.put("mensagem", "Caixa aberto com sucesso!");
+                resultado.put("caixaId", salvo.getId());
+                resultado.put("jaAberto", false);
+                resultado.put("data", salvo.getData().toString());
+                resultado.put("horario", salvo.getDataAbertura() != null ? salvo.getDataAbertura().toString() : "");
+                return resultado;
         }
 
         // ========================================
@@ -263,13 +265,14 @@ public class CaixaService {
                 caixa.setValorFinal(totalVendas);
                 caixaRepository.save(caixa);
 
-                return Map.of(
-                                "sucesso", true,
-                                "mensagem", "Caixa fechado com sucesso!",
-                                "totalVendas", vendas.size(),
-                                "totalArrecadado", totalVendas,
-                                "data", hoje,
-                                "horarioFechamento", fechamento.getDataFechamento());
+                Map<String, Object> resultado = new java.util.HashMap<>();
+                resultado.put("sucesso", true);
+                resultado.put("mensagem", "Caixa fechado com sucesso!");
+                resultado.put("totalVendas", vendas.size());
+                resultado.put("totalArrecadado", totalVendas);
+                resultado.put("data", hoje.toString());
+                resultado.put("horarioFechamento", fechamento.getDataFechamento() != null ? fechamento.getDataFechamento().toString() : "");
+                return resultado;
         }
 
         // ========================================
@@ -330,27 +333,40 @@ public class CaixaService {
         public Map<String, Object> obterStatus() {
                 LocalDate hoje = LocalDate.now();
 
-                Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
+                try {
+                        Optional<Caixa> caixaAberto = caixaRepository.findByDataAndStatus(hoje, "ABERTO");
 
-                if (caixaAberto.isPresent()) {
-                        Caixa caixa = caixaAberto.get();
-                        List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
-                        Double totalVendas = vendas.stream()
-                                        .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
-                                        .sum();
+                        if (caixaAberto.isPresent()) {
+                                Caixa caixa = caixaAberto.get();
+                                List<Caixa> vendas = caixaRepository.findByDataAndTipo(hoje, "ENTRADA");
+                                Double totalVendas = vendas.stream()
+                                                .mapToDouble(c -> c.getSaldo() != null ? c.getSaldo() : 0.0)
+                                                .sum();
 
-                        return Map.of(
-                                        "aberto", true,
-                                        "caixaId", caixa.getId(),
-                                        "horarioAbertura", caixa.getHorarioAbertura(),
-                                        "totalVendas", vendas.size(),
-                                        "totalArrecadado", totalVendas,
-                                        "data", hoje);
+                                Map<String, Object> resultado = new java.util.HashMap<>();
+                                resultado.put("aberto", true);
+                                resultado.put("caixaId", caixa.getId());
+                                resultado.put("horarioAbertura", caixa.getHorarioAbertura() != null ? caixa.getHorarioAbertura().toString() : "");
+                                resultado.put("totalVendas", vendas.size());
+                                resultado.put("totalArrecadado", totalVendas);
+                                resultado.put("data", hoje.toString());
+                                return resultado;
+                        }
+
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("aberto", false);
+                        resultado.put("mensagem", "Caixa fechado para hoje. Abra o caixa para começar.");
+                        resultado.put("data", hoje.toString());
+                        return resultado;
+                } catch (Exception e) {
+                        System.err.println("Erro em obterStatus: " + e.getMessage());
+                        e.printStackTrace();
+                        
+                        Map<String, Object> resultado = new java.util.HashMap<>();
+                        resultado.put("aberto", false);
+                        resultado.put("mensagem", "Erro ao verificar status do caixa");
+                        resultado.put("data", LocalDate.now().toString());
+                        return resultado;
                 }
-
-                return Map.of(
-                                "aberto", false,
-                                "mensagem", "Caixa fechado para hoje. Abra o caixa para começar.",
-                                "data", hoje);
         }
 }

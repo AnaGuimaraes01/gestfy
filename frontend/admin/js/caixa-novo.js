@@ -77,7 +77,25 @@ async function abrirCaixa() {
             headers: { 'Content-Type': 'application/json' }
         });
 
+        // Se falhar a requisição
+        if (!response.ok) {
+            console.error('Erro HTTP:', response.status);
+            if (response.status === 500) {
+                exibirMensagem('Erro no servidor. Tente novamente.', 'erro');
+            } else {
+                exibirMensagem('Erro ao abrir caixa', 'erro');
+            }
+            return;
+        }
+
         const data = await response.json();
+
+        // Validar resposta
+        if (!data || typeof data.sucesso === 'undefined') {
+            console.error('Resposta inválida:', data);
+            exibirMensagem('Resposta inválida do servidor', 'erro');
+            return;
+        }
 
         // Sempre vai ser sucesso=true agora
         if (data.sucesso === true) {
@@ -105,7 +123,7 @@ async function abrirCaixa() {
         }
 
     } catch (erro) {
-        console.error('Erro:', erro);
+        console.error('Erro ao abrir caixa:', erro);
         exibirMensagem('Erro ao conectar com o servidor. Verifique sua conexão.', 'erro');
     }
 }
@@ -417,6 +435,12 @@ async function verificarStatusCaixa() {
 
         const data = await response.json();
 
+        // Validar se há resposta correta
+        if (!data || typeof data.aberto === 'undefined') {
+            console.error('Resposta inválida:', data);
+            return;
+        }
+
         if (data.aberto === false) {
             // Caixa fechado - padrão inicial
             caixaAberto = false;
@@ -433,7 +457,7 @@ async function verificarStatusCaixa() {
         if (data.caixaId) {
             carregarCaixaAberto(data.caixaId);
             if (data.totalArrecadado) {
-                document.getElementById('totalDia').textContent = data.totalArrecadado.toFixed(2);
+                document.getElementById('totalDia').textContent = (data.totalArrecadado || 0).toFixed(2);
             }
         }
 
