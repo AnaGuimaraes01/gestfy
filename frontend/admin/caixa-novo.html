@@ -325,11 +325,144 @@
         }
 
         .resumo-linha.troco {
-            background: #e8f5e9;
-            padding: 10px;
+            background: linear-gradient(135deg, #b0305f, #d63a6f);
+            padding: 12px;
             border-radius: 4px;
             font-weight: bold;
-            color: #4caf50;
+            color: white;
+            margin-top: 8px;
+            border: 1px solid #7a0c35;
+        }
+
+        /* CARRINHO DE ITENS */
+        .carrinho-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .carrinho-container.ativo {
+            display: block;
+        }
+
+        .carrinho-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .carrinho-header h3 {
+            color: #b0305f;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .carrinho-header .badge {
+            background: #b0305f;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .carrinho-itens {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .carrinho-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .carrinho-item-info {
+            flex: 1;
+        }
+
+        .carrinho-item-nome {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .carrinho-item-detalhe {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .carrinho-item-valor {
+            font-weight: bold;
+            color: #b0305f;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .carrinho-item-remove {
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+
+        .carrinho-item-remove:hover {
+            background: #d32f2f;
+        }
+
+        .carrinho-totais {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .carrinho-total-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .carrinho-total-item label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .carrinho-total-item .valor {
+            font-weight: bold;
+            color: #b0305f;
+        }
+
+        .carrinho-botoes {
+            display: flex;
+            gap: 10px;
+        }
+
+        .carrinho-botoes button {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
         }
 
         /* HISTÓRICO DE VENDAS */
@@ -525,13 +658,26 @@
                         <span>Valor Total:</span>
                         <strong>R$ <span id="resumoTotal">0.00</span></strong>
                     </div>
-                    <div class="resumo-linha">
-                        <span>Valor recebido:</span>
-                        <strong>R$ <span id="resumoRecebido">0.00</span></strong>
+                </div>
+
+                <!-- CARRINHO DE ITENS -->
+                <div id="carrinhoContainer" class="carrinho-container">
+                    <div class="carrinho-header">
+                        <h3>Itens no Carrinho</h3>
+                        <span class="badge">
+                            <span id="carrinhoQtd">0</span> item(ns)
+                        </span>
                     </div>
-                    <div class="resumo-linha troco">
-                        <span> TROCO:</span>
-                        <strong>R$ <span id="resumoTroco">0.00</span></strong>
+                    <div id="carrinhoItens" class="carrinho-itens"></div>
+                    <div class="carrinho-totais">
+                        <div class="carrinho-total-item">
+                            <label>Total de Itens:</label>
+                            <span id="carrinhoTotalItens" class="valor">0</span>
+                        </div>
+                        <div class="carrinho-total-item">
+                            <label>Valor Total:</label>
+                            <span id="carrinhoValorTotal" class="valor">R$ 0.00</span>
+                        </div>
                     </div>
                 </div>
 
@@ -556,9 +702,26 @@
                     </div>
                 </div>
 
+                <!-- RESUMO COM TROCO -->
+                <div id="resumoTroco" class="resumo-venda" style="margin-top: 20px;">
+                    <div class="resumo-linha">
+                        <span>Valor Total da Venda:</span>
+                        <strong>R$ <span id="resumoTrocoTotal">0.00</span></strong>
+                    </div>
+                    <div class="resumo-linha">
+                        <span>Valor recebido:</span>
+                        <strong>R$ <span id="resumoTrocoRecebido">0.00</span></strong>
+                    </div>
+                    <div class="resumo-linha troco">
+                        <span>TROCO:</span>
+                        <strong>R$ <span id="resumoTrocoValor">0.00</span></strong>
+                    </div>
+                </div>
+
                 <!-- BOTÕES DE VENDA -->
-                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <button class="btn btn-success" onclick="confirmarVenda()">✓ Confirmar Venda</button>
+                <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <button class="btn btn-primary" id="btnAdicionarCarrinho" onclick="adicionarAoCarrinho()">✓ Adicionar ao Carrinho</button>
+                    <button class="btn btn-success" id="btnConfirmarVenda" onclick="confirmarVenda()" style="display: none;">✓ Confirmar Venda</button>
                     <button class="btn btn-secondary" onclick="limparFormulario()">↻ Limpar</button>
                 </div>
             </div>

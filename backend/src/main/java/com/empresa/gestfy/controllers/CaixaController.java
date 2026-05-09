@@ -31,9 +31,7 @@ public class CaixaController {
                 this.caixaService = caixaService;
         }
 
-        // ========================================
         // 1. ABERTURA DO CAIXA
-        // ========================================
         /**
          * Abre o caixa do dia.
          * POST /api/caixa/abrir
@@ -47,9 +45,8 @@ public class CaixaController {
                 return ResponseEntity.ok(resultado);
         }
 
-        // ========================================
         // 2. BUSCAR PRODUTOS POR NOME (PARCIAL)
-        // ========================================
+
         /**
          * Busca produtos pelo nome (busca parcial, case-insensitive).
          * GET /api/caixa/buscar-produto?nome=sorvete
@@ -59,7 +56,6 @@ public class CaixaController {
                         @RequestParam(required = true) String nome) {
 
                 try {
-                        // Valida se o nome foi informado
                         if (nome == null || nome.trim().isEmpty()) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("erro", "Por favor, informe o nome do produto para buscar");
@@ -69,7 +65,6 @@ public class CaixaController {
                         // Busca produtos via service
                         var produtos = caixaService.buscarProdutos(nome);
 
-                        // Se não encontrou nenhum produto
                         if (produtos.isEmpty()) {
                                 Map<String, Object> resultado = new java.util.HashMap<>();
                                 resultado.put("erro", "Nenhum produto encontrado com o nome: " + nome);
@@ -89,9 +84,7 @@ public class CaixaController {
                 }
         }
 
-        // ========================================
         // 3. REGISTRAR VENDA
-        // ========================================
         /**
          * Registra uma venda no caixa.
          * POST /api/caixa/vender
@@ -108,9 +101,7 @@ public class CaixaController {
                 }
         }
 
-        // ========================================
         // 4. FECHAR CAIXA DO DIA
-        // ========================================
         /**
          * Fecha o caixa do dia.
          * POST /api/caixa/fechar
@@ -126,9 +117,7 @@ public class CaixaController {
                 }
         }
 
-        // ========================================
         // 5. LISTAR VENDAS DO DIA
-        // ========================================
         /**
          * Lista todas as vendas registradas no dia.
          * GET /api/caixa/vendas-do-dia ***
@@ -138,9 +127,7 @@ public class CaixaController {
                 return ResponseEntity.ok(caixaService.listarVendasDoDia());
         }
 
-        // ========================================
         // 6. OBTER STATUS DO CAIXA
-        // ========================================
         /**
          * Verifica o status atual do caixa.
          * GET /api/caixa/status

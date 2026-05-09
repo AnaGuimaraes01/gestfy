@@ -12,6 +12,7 @@ let caixaAberto = false;
 let caixaId = null;
 let produtoSelecionado = null;
 let vendas = [];
+let carrinhoItens = []; // Novo: carrinho de itens
 
 // ============================================
 // DETECTAR AMBIENTE (localhost vs produção)
@@ -231,13 +232,11 @@ function selecionarProduto(produto) {
     document.getElementById('quantidade').value = 1;
     document.getElementById('valorTotal').value = produto.preco.toFixed(2);
 
-    // Mostrar resumo
+    // Mostrar resumo do produto selecionado
     document.getElementById('resumoProduto').textContent = produto.nome;
     document.getElementById('resumoPreco').textContent = produto.preco.toFixed(2);
     document.getElementById('resumoQtd').textContent = '1';
     document.getElementById('resumoTotal').textContent = produto.preco.toFixed(2);
-    document.getElementById('resumoRecebido').textContent = '0.00';
-    document.getElementById('resumoTroco').textContent = '0.00';
     document.getElementById('resumoVenda').classList.add('ativo');
 
     // Fechar lista de produtos
@@ -254,37 +253,150 @@ function selecionarProduto(produto) {
 // 5. CALCULAR TROCO
 // ============================================
 function calcularTroco() {
-    if (!produtoSelecionado) return;
+    if (carrinhoItens.length === 0) return;
 
-    let quantidade = parseInt(document.getElementById('quantidade').value) || 1;
     const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
 
-    // Garantir que quantidade é no mínimo 1
-    if (quantidade < 1) {
-        quantidade = 1;
-        document.getElementById('quantidade').value = '1';
+    // Calcular total do carrinho
+    const totalCarrinho = carrinhoItens.reduce((sum, item) => sum + item.total, 0);
+    const troco = valorRecebido - totalCarrinho;
+
+    // Atualizar resumo com troco
+    document.getElementById('resumoTrocoTotal').textContent = totalCarrinho.toFixed(2);
+    document.getElementById('resumoTrocoRecebido').textContent = valorRecebido.toFixed(2);
+    document.getElementById('resumoTrocoValor').textContent = troco.toFixed(2);
+
+    // Mostrar seção de troco
+    if (valorRecebido > 0 || carrinhoItens.length > 0) {
+        document.getElementById('resumoTroco').classList.add('ativo');
     }
 
-    const valorTotal = produtoSelecionado.preco * quantidade;
-    const troco = valorRecebido - valorTotal;
-
-    // Atualizar resumo
-    document.getElementById('resumoQtd').textContent = quantidade;
-    document.getElementById('resumoTotal').textContent = valorTotal.toFixed(2);
-    document.getElementById('resumoRecebido').textContent = valorRecebido.toFixed(2);
-    document.getElementById('resumoTroco').textContent = troco.toFixed(2);
-    document.getElementById('valorTotal').value = valorTotal.toFixed(2);
-
     // Avisar se valor insuficiente
-    const trocoElement = document.getElementById('resumoTroco').closest('.resumo-linha');
-    if (valorRecebido < valorTotal && valorRecebido > 0) {
-        trocoElement.style.color = '#f44336';
-        const falta = (valorTotal - valorRecebido).toFixed(2);
+    const trocoElement = document.getElementById('resumoTrocoValor').closest('.resumo-linha');
+    if (valorRecebido < totalCarrinho && valorRecebido > 0) {
+        trocoElement.classList.add('troco');
+        trocoElement.style.color = '#ff6b6b';
+        const falta = (totalCarrinho - valorRecebido).toFixed(2);
         exibirMensagem(`⚠️ Valor insuficiente! Falta: R$ ${falta}`, 'info');
-    } else if (valorRecebido >= valorTotal) {
-        trocoElement.style.color = '#4caf50';
+    } else if (valorRecebido >= totalCarrinho && carrinhoItens.length > 0) {
+        trocoElement.classList.add('troco');
+        trocoElement.style.color = 'white';
+    }
+}
+
+// ============================================
+// 5.5 ADICIONAR AO CARRINHO
+// ============================================
+function adicionarAoCarrinho() {
+    if (!caixaAberto) {
+        exibirMensagem('Caixa não está aberto!', 'erro');
+        return;
+    }
+
+    if (!produtoSelecionado) {
+        exibirMensagem('Selecione um produto!', 'erro');
+        return;
+    }
+
+    let quantidade = parseInt(document.getElementById('quantidade').value) || 1;
+
+    // Validações
+    if (quantidade <= 0) {
+        exibirMensagem('Quantidade deve ser maior que zero', 'erro');
+        return;
+    }
+
+    if (produtoSelecionado.estoque < quantidade) {
+        exibirMensagem(`❌ Quantidade disponível em estoque: ${produtoSelecionado.estoque}`, 'erro');
+        return;
+    }
+
+    // Verificar se o produto já está no carrinho
+    const itemExistente = carrinhoItens.find(item => item.id === produtoSelecionado.id);
+    
+    if (itemExistente) {
+        // Atualizar quantidade se já existe
+        itemExistente.quantidade += quantidade;
+        itemExistente.total = itemExistente.quantidade * itemExistente.preco;
     } else {
-        trocoElement.style.color = '#666';
+        // Adicionar novo item
+        carrinhoItens.push({
+            id: produtoSelecionado.id,
+            nome: produtoSelecionado.nome,
+            preco: produtoSelecionado.preco,
+            quantidade: quantidade,
+            total: produtoSelecionado.preco * quantidade
+        });
+    }
+
+    exibirMensagem(`✓ ${produtoSelecionado.nome} adicionado ao carrinho!`, 'sucesso');
+    exibirCarrinho();
+    
+    // Limpar seleção do formulário
+    document.getElementById('quantidade').value = '1';
+    document.getElementById('buscaProduto').value = '';
+    document.getElementById('buscaProduto').focus();
+    document.getElementById('produtosEncontrados').classList.remove('ativo');
+}
+
+// ============================================
+// 5.6 EXIBIR CARRINHO
+// ============================================
+function exibirCarrinho() {
+    const container = document.getElementById('carrinhoItens');
+    const carrinhoContainer = document.getElementById('carrinhoContainer');
+    const btnAdicionar = document.getElementById('btnAdicionarCarrinho');
+    const btnConfirmar = document.getElementById('btnConfirmarVenda');
+
+    if (carrinhoItens.length === 0) {
+        carrinhoContainer.classList.remove('ativo');
+        btnConfirmar.style.display = 'none';
+        btnAdicionar.style.display = 'block';
+        document.getElementById('resumoTroco').classList.remove('ativo');
+        document.getElementById('valorRecebido').value = '';
+        return;
+    }
+
+    container.innerHTML = '';
+    let totalItens = 0;
+    let valorTotal = 0;
+
+    carrinhoItens.forEach((item, index) => {
+        totalItens += item.quantidade;
+        valorTotal += item.total;
+
+        const div = document.createElement('div');
+        div.className = 'carrinho-item';
+        div.innerHTML = `
+            <div class="carrinho-item-info">
+                <div class="carrinho-item-nome">${item.nome}</div>
+                <div class="carrinho-item-detalhe">${item.quantidade}x R$ ${item.preco.toFixed(2)} = R$ ${item.total.toFixed(2)}</div>
+            </div>
+            <div class="carrinho-item-valor">R$ ${item.total.toFixed(2)}</div>
+            <button class="carrinho-item-remove" onclick="removerDoCarrinho(${index})">Remover</button>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById('carrinhoQtd').textContent = carrinhoItens.length;
+    document.getElementById('carrinhoTotalItens').textContent = totalItens;
+    document.getElementById('carrinhoValorTotal').textContent = `R$ ${valorTotal.toFixed(2)}`;
+
+    carrinhoContainer.classList.add('ativo');
+    btnConfirmar.style.display = 'block';
+    btnAdicionar.style.display = 'block';
+    calcularTroco();
+}
+
+// ============================================
+// 5.7 REMOVER DO CARRINHO
+// ============================================
+function removerDoCarrinho(index) {
+    if (index >= 0 && index < carrinhoItens.length) {
+        const nomeProduto = carrinhoItens[index].nome;
+        carrinhoItens.splice(index, 1);
+        exibirMensagem(`Removido: ${nomeProduto}`, 'info');
+        exibirCarrinho();
     }
 }
 
@@ -297,58 +409,64 @@ async function confirmarVenda() {
         return;
     }
 
-    if (!produtoSelecionado) {
-        exibirMensagem('Selecione um produto!', 'erro');
+    if (carrinhoItens.length === 0) {
+        exibirMensagem('Carrinho vazio! Adicione produtos primeiro.', 'erro');
         return;
     }
 
-    const quantidade = Math.max(1, parseInt(document.getElementById('quantidade').value) || 0);
     const valorRecebido = parseFloat(document.getElementById('valorRecebido').value) || 0;
-    const valorTotal = produtoSelecionado.preco * quantidade;
+    const totalCarrinho = carrinhoItens.reduce((sum, item) => sum + item.total, 0);
 
     // Validações
-    if (quantidade <= 0) {
-        exibirMensagem('Quantidade deve ser maior que zero', 'erro');
-        return;
-    }
-
-    if (valorRecebido < valorTotal) {
-        exibirMensagem(`❌ Valor insuficiente! Falta: R$ ${(valorTotal - valorRecebido).toFixed(2)}`, 'erro');
+    if (valorRecebido < totalCarrinho) {
+        exibirMensagem(`❌ Valor insuficiente! Falta: R$ ${(totalCarrinho - valorRecebido).toFixed(2)}`, 'erro');
         return;
     }
 
     try {
-        const response = await fetch(`${API_BASE}/vender`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                produtoId: produtoSelecionado.id,
-                quantidade: quantidade,
-                valorRecebido: valorRecebido
-            })
-        });
+        // Processar cada item do carrinho
+        let totalVendas = 0;
+        let trocoTotal = 0;
 
-        const data = await response.json();
+        for (let i = 0; i < carrinhoItens.length; i++) {
+            const item = carrinhoItens[i];
 
-        if (!response.ok) {
-            const erro = data.erro || 'Erro ao registrar venda';
-            exibirMensagem(`❌ ${erro}`, 'erro');
-            return;
+            const response = await fetch(`${API_BASE}/vender`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    produtoId: item.id,
+                    quantidade: item.quantidade,
+                    valorRecebido: i === carrinhoItens.length - 1 ? valorRecebido : 0
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const erro = data.erro || 'Erro ao registrar venda';
+                exibirMensagem(`❌ ${erro}`, 'erro');
+                return;
+            }
+
+            const venda = data.venda;
+            totalVendas += item.quantidade;
+            if (i === carrinhoItens.length - 1) {
+                trocoTotal = venda.troco;
+            }
+
+            vendas.push(venda);
         }
 
-        // ✓ VENDA REGISTRADA COM SUCESSO
-        const venda = data.venda;
-        const troco = venda.troco.toFixed(2);
+        // ✓ TODAS AS VENDAS REGISTRADAS COM SUCESSO
+        const troco = trocoTotal.toFixed(2);
 
         exibirMensagem(
-            `✓ VENDA CONFIRMADA!\n💰 Troco: R$ ${troco}`,
+            `✓ VENDAS CONFIRMADAS!\n📦 Total de itens: ${totalVendas}\n💰 Troco: R$ ${troco}`,
             'sucesso'
         );
 
-        // Adicionar à lista de vendas
-        vendas.push(venda);
-
-        // Limpar formulário
+        // Limpar
         setTimeout(() => {
             limparFormulario();
             atualizarTotalizadores();
@@ -369,9 +487,12 @@ function limparFormulario() {
     document.getElementById('valorTotal').value = '0.00';
     document.getElementById('valorRecebido').value = '';
     document.getElementById('resumoVenda').classList.remove('ativo');
+    document.getElementById('resumoTroco').classList.remove('ativo');
     document.getElementById('buscaProduto').value = '';
     document.getElementById('buscaProduto').focus();
     produtoSelecionado = null;
+    carrinhoItens = [];
+    exibirCarrinho();
 }
 
 // ============================================
