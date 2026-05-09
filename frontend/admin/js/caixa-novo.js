@@ -437,7 +437,7 @@ async function confirmarVenda() {
                 body: JSON.stringify({
                     produtoId: item.id,
                     quantidade: item.quantidade,
-                    valorRecebido: i === carrinhoItens.length - 1 ? valorRecebido : 0
+                    valorRecebido: valorRecebido
                 })
             });
 
