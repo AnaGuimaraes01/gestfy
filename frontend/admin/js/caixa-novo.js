@@ -12,11 +12,9 @@ let caixaAberto = false;
 let caixaId = null;
 let produtoSelecionado = null;
 let vendas = [];
-let vendaAtualItens = []; // Lista de produtos da venda atual (sem carrinho intermediário)
+let vendaAtualItens = []; 
 
-// ============================================
 // DETECTAR AMBIENTE (localhost vs produção)
-// ============================================
 (async function detectApi() {
     // Se não está em localhost, usa produção
     if (!window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')) {
@@ -39,11 +37,8 @@ let vendaAtualItens = []; // Lista de produtos da venda atual (sem carrinho inte
     }
 })();
 
-// ============================================
 // INICIALIZAÇÃO
-// ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Ao carregar a página, verifica o status do caixa
     verificarStatusCaixa();
     
     // Auto-buscar quando digita no campo
@@ -70,9 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ============================================
-// 1. ABRIR CAIXA
-// ============================================
+
 async function abrirCaixa() {
     try {
         const response = await fetch(`${API_BASE}/abrir`, {
@@ -100,7 +93,6 @@ async function abrirCaixa() {
             return;
         }
 
-        // Sempre vai ser sucesso=true agora
         if (data.sucesso === true) {
             caixaAberto = true;
             caixaId = data.caixaId;
@@ -146,9 +138,7 @@ function carregarCaixaAberto(id) {
     atualizarTotalizadores();
 }
 
-// ============================================
-// 2. BUSCAR PRODUTOS
-// ============================================
+
 async function buscarProduto() {
     const nomeBusca = document.getElementById('buscaProduto').value.trim();
 
@@ -174,7 +164,6 @@ async function buscarProduto() {
             return;
         }
 
-        // Exibir produtos encontrados
         exibirProdutos(data.produtos);
 
     } catch (erro) {
@@ -183,9 +172,6 @@ async function buscarProduto() {
     }
 }
 
-// ============================================
-// 3. EXIBIR PRODUTOS ENCONTRADOS
-// ============================================
 function exibirProdutos(produtos) {
     const container = document.getElementById('produtosEncontrados');
     container.innerHTML = '';
@@ -215,9 +201,6 @@ function exibirProdutos(produtos) {
     container.classList.add('ativo');
 }
 
-// ============================================
-// 4. SELECIONAR PRODUTO → ADICIONAR À VENDA
-// ============================================
 function selecionarProduto(produto) {
     // Validar estoque
     if (produto.estoque <= 0) {
@@ -225,7 +208,6 @@ function selecionarProduto(produto) {
         return;
     }
 
-    // ✓ Adicionar automaticamente à venda atual
     adicionarAoVendaAtual(produto);
 
     // Fechar lista de produtos
@@ -234,9 +216,6 @@ function selecionarProduto(produto) {
     document.getElementById('buscaProduto').focus();
 }
 
-// ============================================
-// 4.5 ADICIONAR PRODUTO À VENDA ATUAL
-// ============================================
 function adicionarAoVendaAtual(produto) {
     if (!caixaAberto) {
         exibirMensagem('Caixa não está aberto!', 'erro');
@@ -253,7 +232,7 @@ function adicionarAoVendaAtual(produto) {
             itemExistente.total = itemExistente.quantidade * itemExistente.preco;
             exibirMensagem(`✓ ${produto.nome}: agora ${itemExistente.quantidade}x`, 'sucesso');
         } else {
-            exibirMensagem(`❌ Estoque insuficiente de "${produto.nome}"`, 'erro');
+            exibirMensagem(`Estoque insuficiente de "${produto.nome}"`, 'erro');
             return;
         }
     } else {
@@ -272,9 +251,7 @@ function adicionarAoVendaAtual(produto) {
     exibirVendaAtual();
 }
 
-// ============================================
-// 5. CALCULAR TROCO
-// ============================================
+
 function calcularTroco() {
     if (vendaAtualItens.length === 0) return;
 
@@ -299,16 +276,13 @@ function calcularTroco() {
         trocoElement.style.color = '#ff6b6b';
         trocoElement.style.background = 'rgba(255, 107, 107, 0.1)';
         const falta = (totalVenda - valorRecebido).toFixed(2);
-        exibirMensagem(`⚠️ Valor insuficiente! Falta: R$ ${falta}`, 'info');
+        exibirMensagem(`Valor insuficiente! Falta: R$ ${falta}`, 'info');
     } else if (valorRecebido >= totalVenda && vendaAtualItens.length > 0) {
         trocoElement.style.color = '#4caf50';
         trocoElement.style.background = 'rgba(76, 175, 80, 0.1)';
     }
 }
 
-// ============================================
-// 5.5 EXIBIR VENDA ATUAL
-// ============================================
 function exibirVendaAtual() {
     const container = document.getElementById('vendaAtualItens');
     const vendaContainer = document.getElementById('vendaAtualContainer');
@@ -359,9 +333,6 @@ function exibirVendaAtual() {
     calcularTroco();
 }
 
-// ============================================
-// 5.7 REMOVER DO VENDA ATUAL
-// ============================================
 function removerDoVendaAtual(index) {
     if (index >= 0 && index < vendaAtualItens.length) {
         const nomeProduto = vendaAtualItens[index].nome;
@@ -371,9 +342,6 @@ function removerDoVendaAtual(index) {
     }
 }
 
-// ============================================
-// 5.8 ATUALIZAR QUANTIDADE DO ITEM
-// ============================================
 function atualizarQuantidade(index, novaQuantidade) {
     const qtd = parseInt(novaQuantidade) || 1;
     
@@ -389,9 +357,6 @@ function atualizarQuantidade(index, novaQuantidade) {
     }
 }
 
-// ============================================
-// 6. CONFIRMAR VENDA
-// ============================================
 async function confirmarVenda() {
     if (!caixaAberto) {
         exibirMensagem('Caixa não está aberto!', 'erro');
@@ -408,7 +373,7 @@ async function confirmarVenda() {
 
     // Validações
     if (valorRecebido < totalVenda) {
-        exibirMensagem(`❌ Valor insuficiente! Falta: R$ ${(totalVenda - valorRecebido).toFixed(2)}`, 'erro');
+        exibirMensagem(`Valor insuficiente! Falta: R$ ${(totalVenda - valorRecebido).toFixed(2)}`, 'erro');
         return;
     }
 
@@ -443,7 +408,7 @@ async function confirmarVenda() {
         const totalItens = data.venda.totalItens;
 
         exibirMensagem(
-            `✓ VENDA CONFIRMADA!\n📦 Total de itens: ${totalItens}\n💰 Troco: R$ ${troco}`,
+            `✓ VENDA CONFIRMADA!\n Total de itens: ${totalItens}\n Troco: R$ ${troco}`,
             'sucesso'
         );
 
@@ -459,9 +424,6 @@ async function confirmarVenda() {
     }
 }
 
-// ============================================
-// 7. LIMPAR FORMULÁRIO
-// ============================================
 function limparFormulario() {
     document.getElementById('valorRecebido').value = '';
     document.getElementById('valorTotalVenda').value = 'R$ 0.00';
@@ -474,9 +436,6 @@ function limparFormulario() {
     exibirVendaAtual();
 }
 
-// ============================================
-// 8. FECHAR CAIXA
-// ============================================
 async function fecharCaixa() {
     if (!confirm('Tem certeza que deseja fechar o caixa?\nEsta ação não pode ser desfeita!')) {
         return;
@@ -519,9 +478,6 @@ async function fecharCaixa() {
     }
 }
 
-// ============================================
-// 9. VERIFICAR STATUS DO CAIXA
-// ============================================
 async function verificarStatusCaixa() {
     try {
         const response = await fetch(`${API_BASE}/status`, {
@@ -570,9 +526,6 @@ async function verificarStatusCaixa() {
     }
 }
 
-// ============================================
-// 10. ATUALIZAR TOTALIZADORES
-// ============================================
 async function atualizarTotalizadores() {
     try {
         const response = await fetch(`${API_BASE}/vendas-do-dia`, {
@@ -604,13 +557,9 @@ async function atualizarTotalizadores() {
 
     } catch (erro) {
         console.error('Erro ao atualizar totalizadores:', erro);
-        // Não quebra a interface se houver erro
     }
 }
 
-// ============================================
-// 11. EXIBIR HISTÓRICO DE VENDAS
-// ============================================
 function exibirHistoricoVendas(vendas) {
     const container = document.getElementById('vendasLista');
     container.innerHTML = '';
@@ -643,9 +592,6 @@ function exibirHistoricoVendas(vendas) {
     });
 }
 
-// ============================================
-// 12. EXIBIR MENSAGENS
-// ============================================
 function exibirMensagem(texto, tipo) {
     const msg = document.getElementById('msg');
     msg.textContent = texto;

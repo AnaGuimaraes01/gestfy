@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * ClienteService
- * Responsável por operações CRUD de clientes.
- */
+//cliente service: operações crud de clientes
 @Service
 public class ClienteService {
 
@@ -23,9 +20,7 @@ public class ClienteService {
         this.clienteRepository = clienteRepository;
     }
 
-    /**
-     * Criar novo cliente
-     */
+    //criar novo cliente
     public ClienteDTO criar(ClienteRequest request) {
         Cliente cliente = new Cliente();
         cliente.setNome(request.nome());
@@ -37,9 +32,7 @@ public class ClienteService {
         return toDTO(cliente);
     }
 
-    /**
-     * Listar todos os clientes
-     */
+    //listar clientes
     public List<ClienteDTO> listar() {
         return clienteRepository.findAll()
                 .stream()
@@ -47,17 +40,13 @@ public class ClienteService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Buscar cliente por ID
-     */
+   //buscar cliente por id
     public Optional<ClienteDTO> buscarPorId(Long id) {
         return clienteRepository.findById(id)
                 .map(this::toDTO);
     }
 
-    /**
-     * Atualizar cliente
-     */
+    //atualizar cliente
     public ClienteDTO atualizar(Long id, ClienteRequest request) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
@@ -71,9 +60,6 @@ public class ClienteService {
         return toDTO(cliente);
     }
 
-    /**
-     * Remover cliente
-     */
     public void remover(Long id) {
         if (!clienteRepository.existsById(id)) {
             throw new RuntimeException("Cliente não encontrado");
@@ -81,9 +67,7 @@ public class ClienteService {
         clienteRepository.deleteById(id);
     }
 
-    /**
-     * Converter modelo para DTO
-     */
+//converter modelo para dto
     private ClienteDTO toDTO(Cliente cliente) {
         return new ClienteDTO(
                 cliente.getId(),

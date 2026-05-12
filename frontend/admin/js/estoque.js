@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     calcularResumo();
 });
 
-// CARREGAR PRODUTOS E MOSTRAR INVENTÁRIO
 async function carregarProdutos() {
     try {
         const response = await fetch(API_PRODUTOS);
@@ -27,7 +26,6 @@ async function carregarProdutos() {
     }
 }
 
-// EXIBIR INVENTÁRIO
 function exibirInventario(produtos) {
     if (!produtos || produtos.length === 0) {
         tabelaEstoque.innerHTML = `<tr><td colspan="5" style="text-align: center;">Nenhum produto encontrado</td></tr>`;
@@ -61,7 +59,6 @@ function exibirInventario(produtos) {
     });
 }
 
-// CALCULAR RESUMO
 function calcularResumo() {
     const totalProdutos = produtosCache.length;
     const emFalta = produtosCache.filter(p => !p.quantidade || p.quantidade <= 0).length;
@@ -72,7 +69,6 @@ function calcularResumo() {
     document.getElementById("estoqueBaixo").textContent = estoqueBaixo;
 }
 
-// FILTRAR ESTOQUE
 function filtrarEstoque() {
     const filtro = document.getElementById("filtroNome").value.toLowerCase();
     const filtrados = produtosCache.filter(p => 
@@ -81,7 +77,6 @@ function filtrarEstoque() {
     exibirInventario(filtrados);
 }
 
-// LIMPAR FILTROS
 function limparFiltros() {
     document.getElementById("filtroNome").value = "";
     exibirInventario(produtosCache);

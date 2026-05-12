@@ -16,11 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * EstoqueService
- * Responsável por gerenciar movimentações de estoque.
- * Separa a lógica de negócio da camada HTTP.
- */
+//EstoqueService: gerencia movimentações de estoque e separa a lógica de negócio da camada HTTP
+
 @Service
 public class EstoqueService {
 

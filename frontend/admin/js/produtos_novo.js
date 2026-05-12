@@ -7,7 +7,6 @@ const msg = document.getElementById("msg");
 
 let produtoEmEdicao = null;
 
-/*Listar Produtos*/
 async function listarProdutos() {
   try {
     console.log("Buscando produtos na API: ", API_URL);
@@ -61,9 +60,7 @@ async function listarProdutos() {
   }
 }
 
-/*
-   CADASTRAR OU ATUALIZAR PRODUTO
-*/
+//Cadastrar ou atualizar produto
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -134,9 +131,7 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-/* 
-   EDITAR PRODUTO
- */
+
 async function editarProduto(id) {
   try {
     const response = await fetch(`${API_URL}/${id}`);
@@ -156,7 +151,6 @@ async function editarProduto(id) {
     produtoEmEdicao = id;
     document.querySelector("button[type='submit']").textContent = "Atualizar Produto";
     
-    // Scroll para o formulário
     form.scrollIntoView({ behavior: "smooth" });
     
   } catch (error) {

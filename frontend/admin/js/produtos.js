@@ -66,9 +66,7 @@ async function listarProdutos() {
   }
 }
 
-/*
-   CADASTRAR/ATUALIZAR PRODUTO
-*/
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 

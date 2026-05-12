@@ -95,9 +95,7 @@ public class CaixaService {
                 return resultado;
         }
 
-        // ========================================
         // 2. BUSCA DE PRODUTOS
-        // ========================================
 
         /**
          * Busca produtos pelo nome.
@@ -110,9 +108,7 @@ public class CaixaService {
                 return produtoService.buscarPorNome(nome);
         }
 
-        // ========================================
         // 3. REGISTRO DE VENDA
-        // ========================================
 
         /**
          * Registra uma venda no caixa.
@@ -127,7 +123,7 @@ public class CaixaService {
         @Transactional
         public Map<String, Object> registrarVenda(VendaRequest venda) {
                 try {
-                        // 1️⃣ Busca o produto
+                        // Busca o produto
                         Optional<Produto> produtoOpt = produtoService.buscarProdutoModelo(venda.produtoId());
                         if (produtoOpt.isEmpty()) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
@@ -138,7 +134,7 @@ public class CaixaService {
 
                         Produto produto = produtoOpt.get();
 
-                        // 2️⃣ Valida estoque
+                        // Valida estoque
                         if (!produtoService.temEstoqueSuficiente(produto, venda.quantidade())) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("sucesso", false);
@@ -149,11 +145,11 @@ public class CaixaService {
                                 return erro;
                         }
 
-                        // 3️⃣ Calcula valores
+                        // Calcula valores
                         Double valorTotal = produto.getPreco() * venda.quantidade();
                         Double troco = venda.valorRecebido() - valorTotal;
 
-                        // 4️⃣ Valida valor recebido
+                        // Valida valor recebido
                         if (venda.valorRecebido() < valorTotal) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("sucesso", false);
@@ -164,14 +160,14 @@ public class CaixaService {
                                 return erro;
                         }
 
-                        // 5️⃣ Atualiza estoque do produto
+                        // Atualiza estoque do produto
                         Integer novaQuantidade = produto.getQuantidade() - venda.quantidade();
                         produtoService.atualizarEstoque(produto, novaQuantidade);
 
-                        // 6️⃣ Registra movimento de saída no estoque
+                        // Registra movimento de saída no estoque
                         estoqueService.registrarMovimento(produto.getId(), "SAIDA", venda.quantidade());
 
-                        // 7️⃣ Registra a venda no caixa
+                        //Registra a venda no caixa
                         Caixa vendaRegistro = new Caixa();
                         vendaRegistro.setTipo("ENTRADA");
                         vendaRegistro.setData(LocalDate.now());
@@ -185,7 +181,7 @@ public class CaixaService {
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 
-                        // 8️⃣ Retorna resposta com detalhes da venda
+                        // Retorna resposta com detalhes da venda
                         VendaResponse vendaResponse = new VendaResponse(vendaSalva.getId(), produto.getNome(), venda.quantidade(), produto.getPreco(), valorTotal, venda.valorRecebido(), troco);
 
                         Map<String, Object> sucesso = new java.util.HashMap<>();
@@ -202,9 +198,7 @@ public class CaixaService {
                 }
         }
 
-        // ========================================
         // 3.1 REGISTRO DE VENDA AGRUPADA
-        // ========================================
 
         /**
          * Registra uma venda agrupada com múltiplos itens.
@@ -216,7 +210,7 @@ public class CaixaService {
         @Transactional
         public Map<String, Object> registrarVendaAgrupada(VendaAgrupadaRequest venda) {
                 try {
-                        // 1️⃣ Validar lista de itens
+                        // Validar lista de itens
                         if (venda.itens() == null || venda.itens().isEmpty()) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("sucesso", false);
@@ -224,7 +218,7 @@ public class CaixaService {
                                 return erro;
                         }
 
-                        // 2️⃣ Processar cada item e validar
+                        // Processar cada item e validar
                         Double valorTotal = 0.0;
                         java.util.List<ItemVendaResponse> itensResposta = new java.util.ArrayList<>();
                         
@@ -272,7 +266,7 @@ public class CaixaService {
                                 estoqueService.registrarMovimento(produto.getId(), "SAIDA", itemRequest.quantidade());
                         }
 
-                        // 3️⃣ Valida valor recebido
+                        // Valida valor recebido
                         if (venda.valorRecebido() < valorTotal) {
                                 Map<String, Object> erro = new java.util.HashMap<>();
                                 erro.put("sucesso", false);
@@ -285,8 +279,8 @@ public class CaixaService {
 
                         Double troco = venda.valorRecebido() - valorTotal;
 
-                        // 4️⃣ Monta descrição detalhada da venda agrupada
-                        StringBuilder descricaoBuilder = new StringBuilder("Venda agrupada: ");
+                        // Monta descrição detalhada da venda agrupada
+                        StringBuilder descricaoBuilder = new StringBuilder("Venda: ");
                         StringBuilder observacoesBuilder = new StringBuilder();
                         
                         for (int i = 0; i < itensResposta.size(); i++) {
@@ -305,7 +299,7 @@ public class CaixaService {
                                 .append(" | Valor pago: R$ ").append(String.format("%.2f", venda.valorRecebido()))
                                 .append(" | Troco: R$ ").append(String.format("%.2f", troco));
 
-                        // 5️⃣ Registra a venda agrupada como uma única entrada no caixa
+                        // Registra a venda agrupada como uma única entrada no caixa
                         Caixa vendaRegistro = new Caixa();
                         vendaRegistro.setTipo("ENTRADA");
                         vendaRegistro.setData(LocalDate.now());
@@ -319,7 +313,7 @@ public class CaixaService {
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 
-                        // 6️⃣ Retorna resposta com detalhes da venda agrupada
+                        // Retorna resposta com detalhes da venda agrupada
                         VendaAgrupadaResponse vendaResponse = new VendaAgrupadaResponse(
                                 vendaSalva.getId(),
                                 itensResposta,
@@ -342,9 +336,7 @@ public class CaixaService {
                 }
         }
 
-        // ========================================
         // 4. FECHAMENTO DO CAIXA
-        // ========================================
 
         /**
          * Fecha o caixa do dia.
@@ -422,9 +414,7 @@ public class CaixaService {
                 }
         }
 
-        // ========================================
         // 5. CONSULTAS
-        // ========================================
 
         /**
          * Lista todas as vendas do dia
