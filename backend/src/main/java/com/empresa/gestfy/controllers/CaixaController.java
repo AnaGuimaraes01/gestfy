@@ -2,6 +2,7 @@ package com.empresa.gestfy.controllers;
 
 import com.empresa.gestfy.services.CaixaService;
 import com.empresa.gestfy.dto.caixa.VendaRequest;
+import com.empresa.gestfy.dto.caixa.VendaAgrupadaRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +94,23 @@ public class CaixaController {
         @PostMapping("/vender")
         public ResponseEntity<Map<String, Object>> registrarVenda(@Valid @RequestBody VendaRequest venda) {
                 Map<String, Object> resultado = caixaService.registrarVenda(venda);
+
+                if ((Boolean) resultado.get("sucesso")) {
+                        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+                } else {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resultado);
+                }
+        }
+
+        // 3.1 REGISTRAR VENDA AGRUPADA (múltiplos itens)
+        /**
+         * Registra uma venda agrupada com múltiplos itens no caixa.
+         * POST /api/caixa/vender-agrupada
+         * Body: { itens: [{produtoId, quantidade}, ...], valorRecebido }
+         */
+        @PostMapping("/vender-agrupada")
+        public ResponseEntity<Map<String, Object>> registrarVendaAgrupada(@Valid @RequestBody VendaAgrupadaRequest venda) {
+                Map<String, Object> resultado = caixaService.registrarVendaAgrupada(venda);
 
                 if ((Boolean) resultado.get("sucesso")) {
                         return ResponseEntity.status(HttpStatus.CREATED).body(resultado);

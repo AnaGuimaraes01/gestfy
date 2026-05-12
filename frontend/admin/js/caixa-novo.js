@@ -413,45 +413,37 @@ async function confirmarVenda() {
     }
 
     try {
-        // Processar cada item da venda
-        let totalVendas = 0;
-        let trocoTotal = 0;
+        // Montar payload para venda agrupada
+        const itens = vendaAtualItens.map(item => ({
+            produtoId: item.id,
+            quantidade: item.quantidade
+        }));
 
-        for (let i = 0; i < vendaAtualItens.length; i++) {
-            const item = vendaAtualItens[i];
+        const payload = {
+            itens: itens,
+            valorRecebido: valorRecebido
+        };
 
-            const response = await fetch(`${API_BASE}/vender`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    produtoId: item.id,
-                    quantidade: item.quantidade,
-                    valorRecebido: valorRecebido
-                })
-            });
+        const response = await fetch(`${API_BASE}/vender-agrupada`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (!response.ok) {
-                const erro = data.erro || 'Erro ao registrar venda';
-                exibirMensagem(`❌ ${erro}`, 'erro');
-                return;
-            }
-
-            const venda = data.venda;
-            totalVendas += item.quantidade;
-            if (i === vendaAtualItens.length - 1) {
-                trocoTotal = venda.troco;
-            }
-
-            vendas.push(venda);
+        if (!response.ok) {
+            const erro = data.erro || 'Erro ao registrar venda';
+            exibirMensagem(`❌ ${erro}`, 'erro');
+            return;
         }
 
-        // ✓ TODAS AS VENDAS REGISTRADAS COM SUCESSO
-        const troco = trocoTotal.toFixed(2);
+        // ✓ VENDA AGRUPADA CONFIRMADA
+        const troco = data.venda.troco.toFixed(2);
+        const totalItens = data.venda.totalItens;
 
         exibirMensagem(
-            `✓ VENDAS CONFIRMADAS!\n📦 Total de itens: ${totalVendas}\n💰 Troco: R$ ${troco}`,
+            `✓ VENDA CONFIRMADA!\n📦 Total de itens: ${totalItens}\n💰 Troco: R$ ${troco}`,
             'sucesso'
         );
 

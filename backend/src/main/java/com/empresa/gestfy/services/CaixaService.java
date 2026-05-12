@@ -3,6 +3,10 @@ package com.empresa.gestfy.services;
 import com.empresa.gestfy.dto.caixa.ProdutoBuscaResponse;
 import com.empresa.gestfy.dto.caixa.VendaRequest;
 import com.empresa.gestfy.dto.caixa.VendaResponse;
+import com.empresa.gestfy.dto.caixa.VendaAgrupadaRequest;
+import com.empresa.gestfy.dto.caixa.VendaAgrupadaResponse;
+import com.empresa.gestfy.dto.caixa.ItemVendaRequest;
+import com.empresa.gestfy.dto.caixa.ItemVendaResponse;
 import com.empresa.gestfy.models.Caixa;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.CaixaRepository;
@@ -194,6 +198,146 @@ public class CaixaService {
                         Map<String, Object> erro = new java.util.HashMap<>();
                         erro.put("sucesso", false);
                         erro.put("erro", "Erro ao registrar venda: " + e.getMessage());
+                        return erro;
+                }
+        }
+
+        // ========================================
+        // 3.1 REGISTRO DE VENDA AGRUPADA
+        // ========================================
+
+        /**
+         * Registra uma venda agrupada com múltiplos itens.
+         * Todos os itens são agrupados em uma única entrada no caixa.
+         * 
+         * @param venda VendaAgrupadaRequest com lista de itens e valor recebido
+         * @return Map com detalhes da venda agrupada ou erro
+         */
+        @Transactional
+        public Map<String, Object> registrarVendaAgrupada(VendaAgrupadaRequest venda) {
+                try {
+                        // 1️⃣ Validar lista de itens
+                        if (venda.itens() == null || venda.itens().isEmpty()) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "A venda deve conter pelo menos um item");
+                                return erro;
+                        }
+
+                        // 2️⃣ Processar cada item e validar
+                        Double valorTotal = 0.0;
+                        java.util.List<ItemVendaResponse> itensResposta = new java.util.ArrayList<>();
+                        
+                        for (ItemVendaRequest itemRequest : venda.itens()) {
+                                // Busca o produto
+                                Optional<Produto> produtoOpt = produtoService.buscarProdutoModelo(itemRequest.produtoId());
+                                if (produtoOpt.isEmpty()) {
+                                        Map<String, Object> erro = new java.util.HashMap<>();
+                                        erro.put("sucesso", false);
+                                        erro.put("erro", "Produto não encontrado com ID: " + itemRequest.produtoId());
+                                        return erro;
+                                }
+
+                                Produto produto = produtoOpt.get();
+
+                                // Valida estoque
+                                if (!produtoService.temEstoqueSuficiente(produto, itemRequest.quantidade())) {
+                                        Map<String, Object> erro = new java.util.HashMap<>();
+                                        erro.put("sucesso", false);
+                                        erro.put("erro", "Estoque insuficiente para: " + produto.getNome());
+                                        erro.put("produtoNome", produto.getNome());
+                                        erro.put("estoqueDisponivel", produto.getQuantidade() != null ? produto.getQuantidade() : 0);
+                                        erro.put("quantidadeSolicitada", itemRequest.quantidade());
+                                        return erro;
+                                }
+
+                                // Calcula subtotal do item
+                                Double subtotal = produto.getPreco() * itemRequest.quantidade();
+                                valorTotal += subtotal;
+
+                                // Adiciona à resposta
+                                itensResposta.add(new ItemVendaResponse(
+                                        produto.getId(),
+                                        produto.getNome(),
+                                        itemRequest.quantidade(),
+                                        produto.getPreco(),
+                                        subtotal
+                                ));
+
+                                // Atualiza estoque do produto
+                                Integer novaQuantidade = produto.getQuantidade() - itemRequest.quantidade();
+                                produtoService.atualizarEstoque(produto, novaQuantidade);
+
+                                // Registra movimento de saída no estoque
+                                estoqueService.registrarMovimento(produto.getId(), "SAIDA", itemRequest.quantidade());
+                        }
+
+                        // 3️⃣ Valida valor recebido
+                        if (venda.valorRecebido() < valorTotal) {
+                                Map<String, Object> erro = new java.util.HashMap<>();
+                                erro.put("sucesso", false);
+                                erro.put("erro", "Valor recebido é insuficiente");
+                                erro.put("valorTotal", valorTotal);
+                                erro.put("valorRecebido", venda.valorRecebido());
+                                erro.put("falta", valorTotal - venda.valorRecebido());
+                                return erro;
+                        }
+
+                        Double troco = venda.valorRecebido() - valorTotal;
+
+                        // 4️⃣ Monta descrição detalhada da venda agrupada
+                        StringBuilder descricaoBuilder = new StringBuilder("Venda agrupada: ");
+                        StringBuilder observacoesBuilder = new StringBuilder();
+                        
+                        for (int i = 0; i < itensResposta.size(); i++) {
+                                ItemVendaResponse item = itensResposta.get(i);
+                                if (i > 0) {
+                                        descricaoBuilder.append(" | ");
+                                        observacoesBuilder.append(" | ");
+                                }
+                                descricaoBuilder.append(item.getQuantidade()).append("x ").append(item.getNomeProduto());
+                                observacoesBuilder.append(item.getQuantidade()).append("x ")
+                                        .append(item.getNomeProduto()).append(" (R$ ")
+                                        .append(String.format("%.2f", item.getSubtotal())).append(")");
+                        }
+
+                        observacoesBuilder.append(" | Valor total: R$ ").append(String.format("%.2f", valorTotal))
+                                .append(" | Valor pago: R$ ").append(String.format("%.2f", venda.valorRecebido()))
+                                .append(" | Troco: R$ ").append(String.format("%.2f", troco));
+
+                        // 5️⃣ Registra a venda agrupada como uma única entrada no caixa
+                        Caixa vendaRegistro = new Caixa();
+                        vendaRegistro.setTipo("ENTRADA");
+                        vendaRegistro.setData(LocalDate.now());
+                        vendaRegistro.setDataAbertura(LocalDateTime.now());
+                        vendaRegistro.setHorarioAbertura(LocalDateTime.now());
+                        vendaRegistro.setStatus("CONCLUIDO");
+                        vendaRegistro.setValorInicial(0.0);
+                        vendaRegistro.setSaldo(valorTotal);
+                        vendaRegistro.setDescricao(descricaoBuilder.toString());
+                        vendaRegistro.setObservacoes(observacoesBuilder.toString());
+
+                        Caixa vendaSalva = caixaRepository.save(vendaRegistro);
+
+                        // 6️⃣ Retorna resposta com detalhes da venda agrupada
+                        VendaAgrupadaResponse vendaResponse = new VendaAgrupadaResponse(
+                                vendaSalva.getId(),
+                                itensResposta,
+                                valorTotal,
+                                venda.valorRecebido(),
+                                troco,
+                                venda.itens().size()
+                        );
+
+                        Map<String, Object> sucesso = new java.util.HashMap<>();
+                        sucesso.put("sucesso", true);
+                        sucesso.put("venda", vendaResponse);
+                        return sucesso;
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        Map<String, Object> erro = new java.util.HashMap<>();
+                        erro.put("sucesso", false);
+                        erro.put("erro", "Erro ao registrar venda agrupada: " + e.getMessage());
                         return erro;
                 }
         }
