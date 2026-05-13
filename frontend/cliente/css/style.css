@@ -11,23 +11,20 @@
   --cinza-card: #2b2b2b;
   --cinza-input: #1a1a1a;
   --cinza-texto: #bdbdbd;
-  --cinza-texto-claro: #888;
-  --branco: #ffffff;
+  --branco: #fff;
   --verde: #34a853;
   --vermelho: #ea4335;
   --amarelo: #fbbc04;
-  --btn-padding-mobile: 10px 14px;
-  --btn-padding-tablet: 12px 20px;
-  --btn-padding-desktop: 12px 28px;
 }
 
-/* =====================================================
+/* ====================================================
    RESET
 ===================================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  max-width: 100%;
 }
 
 html {
@@ -37,1423 +34,347 @@ html {
 body {
   background: var(--cinza-fundo);
   color: var(--branco);
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  line-height: 1.6;
+  overflow-x: hidden;
+  line-height: 1.5;
 }
 
-/* =====================================================
-   HEADER / NAVBAR
+/* ====================================================
+   HEADER
 ===================================================== */
 .admin-header {
   background: linear-gradient(135deg, var(--cinza-header), var(--preto));
-  padding: 20px;
-  text-align: center;
   border-bottom: 3px solid var(--rosa);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 18px;
+  text-align: center;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .logo {
-  max-width: 150px;
   width: 100%;
+  max-width: 140px;
   height: auto;
   margin: 0 auto 10px;
   display: block;
-  opacity: 0.95;
-  transition: opacity 0.3s ease;
-}
-
-.logo:hover {
-  opacity: 1;
 }
 
 .admin-header h1 {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  letter-spacing: -0.5px;
+  font-size: clamp(20px, 3vw, 28px);
 }
 
 .admin-header p {
-  font-size: 12px;
-  color: #d8a7b8;
-  font-weight: 500;
+  font-size: clamp(11px, 2vw, 14px);
+  color: var(--rosa-claro);
 }
 
-/* =====================================================
-   CONTAINER & LAYOUT
+/* ====================================================
+   CONTAINER
 ===================================================== */
 .container {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
   width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 main {
   flex: 1;
 }
 
-/* =====================================================
-   DASHBOARD GRID
+/* ====================================================
+   GRID LAYOUTS
 ===================================================== */
-.dashboard {
+.dashboard,
+.catalogo-grid,
+.stats-grid,
+.form-grid,
+.filter-grid {
   display: grid;
+  gap: 20px;
+}
+
+.dashboard {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-  animation: fadeIn 0.5s ease-in;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.catalogo-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-/* =====================================================
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.filter-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* ====================================================
    CARDS
 ===================================================== */
-.card {
+.card,
+.produto-card,
+.stat-card {
   background: linear-gradient(145deg, var(--cinza-card), #242424);
+  border: 1px solid #333;
   border-radius: 12px;
-  padding: 24px;
-  cursor: pointer;
-  border: 1px solid #3a3a3a;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  padding: 20px;
   overflow: hidden;
 }
 
-.card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 4px;
-  height: 100%;
-  background: transparent;
-  transition: background 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-8px);
+.card:hover,
+.produto-card:hover {
   border-color: var(--rosa);
-  box-shadow: 0 12px 32px rgba(176, 48, 96, 0.15);
+  transform: translateY(-4px);
+  transition: 0.3s ease;
 }
 
-.card:hover::before {
-  background: var(--rosa);
-}
-
-.card .icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-  transition: transform 0.3s ease;
-  display: block;
-}
-
-.card:hover .icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.card h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--branco);
-}
-
-.card p {
-  font-size: 13px;
-  color: var(--cinza-texto);
-}
-
-.card.card-destaque {
-  border: 2px solid var(--rosa);
-}
-
-/* =====================================================
-   RODAPÉ
+/* ====================================================
+   PRODUTOS
 ===================================================== */
-footer {
-  margin-top: auto;
-  background: linear-gradient(135deg, var(--cinza-header), var(--preto));
-  border-top: 1px solid #333;
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
+.produto-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.produto-card img,
+.produto-imagem {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.produto-info {
+  padding-top: 14px;
+}
+
+.produto-nome {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.produto-descricao {
+  font-size: 14px;
   color: var(--cinza-texto);
-  letter-spacing: 0.5px;
+  margin-bottom: 8px;
 }
 
-footer span {
-  color: var(--rosa);
-  font-weight: 600;
+.produto-preco {
+  font-size: 18px;
+  color: var(--amarelo);
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-/* =====================================================
-   BOTÕES RESPONSIVOS
+/* ====================================================
+   BOTÕES
 ===================================================== */
 button,
 .btn,
 .btn-carrinho {
-  min-height: 48px;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  font-weight: 600;
+  background: var(--rosa);
+  color: white;
   border: none;
-  width: auto;
-  white-space: nowrap;
+  border-radius: 8px;
+  padding: 14px 20px;
+  min-height: 46px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.3s ease;
 }
 
-/* Containers de Botões */
+button:hover,
+.btn:hover,
+.btn-carrinho:hover {
+  background: var(--rosa-escuro);
+}
+
 .btn-container,
 .button-group {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  align-items: center;
-  justify-content: flex-start;
 }
 
-.btn-container-center,
-.button-group-center {
-  justify-content: center;
-}
-
-.btn-container-end,
-.button-group-end {
-  justify-content: flex-end;
-}
-
-.btn-container-full {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-}
-
-.btn-container-full button,
-.btn-container-full .btn {
-  flex: 1;
-  min-width: 100px;
-}
-
-/* Botões expandidos para mobile */
-.btn-full,
-.btn-block {
-  width: 100% !important;
-  min-width: unset !important;
-  display: block;
-}
-
-/* Stack de botões em mobile */
-.btn-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.btn-stack button,
-.btn-stack .btn {
-  width: 100%;
-  min-width: unset;
-}
-
-/* =====================================================
-   RESPONSIVO - MOBILE FIRST
+/* ====================================================
+   INPUTS
 ===================================================== */
-
-/* Mobile Extra Pequeno (320px - 374px) */
-@media (max-width: 374px) {
-  html {
-    font-size: 14px;
-  }
-
-  .admin-header {
-    padding: 12px 8px;
-  }
-
-  .admin-header h1 {
-    font-size: 16px;
-    margin-bottom: 2px;
-  }
-
-  .admin-header p {
-    font-size: 10px;
-  }
-
-  .logo {
-    max-width: 100px;
-    margin-bottom: 8px;
-  }
-
-  .container {
-    margin: 16px auto;
-    padding: 0 8px;
-  }
-
-  .dashboard {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  .card h2 {
-    font-size: 16px;
-  }
-
-  .card p {
-    font-size: 11px;
-  }
-
-  .card .icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-  }
-
-  .section-title {
-    font-size: 16px;
-    margin: 20px 0 16px;
-    padding-left: 10px;
-  }
-
-  button,
-  .btn {
-    padding: 12px 16px;
-    font-size: 13px;
-    min-height: 44px;
-    min-width: auto;
-    width: 100%;
-  }
-
-  .btn-small {
-    padding: 8px 10px;
-    font-size: 11px;
-    min-height: 36px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .form-group label {
-    font-size: 11px;
-    margin-bottom: 4px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 10px;
-    font-size: 13px;
-  }
-
-  .form-group textarea {
-    min-height: 60px;
-  }
-
-  .tabela-pedidos,
-  .tabela-produtos,
-  .tabela-geral {
-    font-size: 11px;
-  }
-
-  .tabela-pedidos th,
-  .tabela-produtos th,
-  .tabela-geral th {
-    padding: 10px 6px;
-    font-size: 10px;
-  }
-
-  .tabela-pedidos td,
-  .tabela-produtos td,
-  .tabela-geral td {
-    padding: 8px 6px;
-    font-size: 11px;
-  }
-
-  .status-badge {
-    padding: 4px 8px;
-    font-size: 9px;
-  }
-
-  .msg,
-  .alert {
-    padding: 10px;
-    font-size: 12px;
-    margin: 12px 0;
-  }
-
-  .produto-item {
-    grid-template-columns: 50px 1fr;
-    gap: 8px;
-    padding: 8px;
-  }
-
-  .produto-thumb-container {
-    width: 50px;
-    height: 50px;
-  }
-
-  .produto-thumb-emoji {
-    font-size: 24px;
-  }
-
-  .produto-details strong {
-    font-size: 13px;
-  }
-
-  .descricao-small {
-    font-size: 11px;
-  }
-
-  .preco {
-    font-size: 14px;
-  }
-
-  .produto-actions {
-    grid-column: 1 / -1;
-    gap: 6px;
-  }
-
-  footer {
-    padding: 16px 8px;
-    font-size: 11px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin: 12px 0;
-  }
-
-  .produto-imagem {
-    height: 120px;
-    font-size: 32px;
-  }
-
-  .produto-card {
-    border-radius: 8px;
-  }
-
-  .produto-info {
-    padding: 12px;
-  }
-
-  .produto-nome {
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-
-  .produto-descricao {
-    font-size: 11px;
-    margin-bottom: 8px;
-  }
-
-  .produto-preco {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-
-  .btn-carrinho {
-    padding: 8px;
-    font-size: 12px;
-    min-height: 40px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .carrinho-resumo {
-    position: static;
-    top: auto;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin: 12px 0;
-  }
-
-  .stat-card {
-    padding: 16px;
-  }
-
-  .stat-value {
-    font-size: 24px;
-  }
-
-  .filter-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .barra-busca {
-    padding: 10px;
-    font-size: 13px;
-    margin-bottom: 16px;
-  }
-
-  .item-controles button {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
-
-  .item-controles {
-    gap: 6px;
-  }
-
-  .carrinho-item {
-    padding: 12px;
-    gap: 10px;
-  }
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: var(--cinza-input);
+  color: white;
+  font-size: 16px;
 }
 
-/* Mobile Pequeno (375px - 479px) */
-@media (min-width: 375px) and (max-width: 479px) {
-  html {
-    font-size: 14px;
-  }
-
-  .admin-header {
-    padding: 14px;
-  }
-
-  .admin-header h1 {
-    font-size: 18px;
-  }
-
-  .admin-header p {
-    font-size: 11px;
-  }
-
-  .logo {
-    max-width: 110px;
-  }
-
-  .container {
-    margin: 20px auto;
-    padding: 0 12px;
-  }
-
-  .dashboard {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .card {
-    padding: 16px;
-  }
-
-  .card h2 {
-    font-size: 17px;
-  }
-
-  .card p {
-    font-size: 12px;
-  }
-
-  .section-title {
-    font-size: 17px;
-    margin: 24px 0 16px;
-  }
-
-  button,
-  .btn {
-    padding: 12px 20px;
-    font-size: 14px;
-    min-height: 44px;
-    width: 100%;
-  }
-
-  .btn-small {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 11px;
-    font-size: 14px;
-  }
-
-  .form-group textarea {
-    min-height: 70px;
-  }
-
-  .tabela-pedidos,
-  .tabela-produtos {
-    font-size: 12px;
-  }
-
-  .tabela-pedidos th,
-  .tabela-produtos th {
-    padding: 12px 8px;
-    font-size: 11px;
-  }
-
-  .tabela-pedidos td,
-  .tabela-produtos td {
-    padding: 10px 8px;
-    font-size: 12px;
-  }
-
-  .status-badge {
-    padding: 5px 10px;
-    font-size: 10px;
-  }
-
-  .msg,
-  .alert {
-    padding: 12px;
-    font-size: 13px;
-  }
-
-  .produto-item {
-    grid-template-columns: 60px 1fr;
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .produto-thumb-container {
-    width: 60px;
-    height: 60px;
-  }
-
-  .produto-thumb-emoji {
-    font-size: 28px;
-  }
-
-  .produto-details strong {
-    font-size: 14px;
-  }
-
-  .descricao-small {
-    font-size: 12px;
-  }
-
-  .preco {
-    font-size: 15px;
-  }
-
-  .produto-actions {
-    grid-column: 1 / -1;
-    margin-top: 8px;
-  }
-
-  footer {
-    padding: 16px;
-    font-size: 12px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    margin: 16px 0;
-  }
-
-  .produto-imagem {
-    height: 130px;
-    font-size: 36px;
-  }
-
-  .produto-info {
-    padding: 14px;
-  }
-
-  .produto-nome {
-    font-size: 15px;
-  }
-
-  .produto-descricao {
-    font-size: 12px;
-  }
-
-  .produto-preco {
-    font-size: 17px;
-  }
-
-  .btn-carrinho {
-    padding: 10px;
-    font-size: 13px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .carrinho-resumo {
-    position: static;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-
-  .stat-value {
-    font-size: 26px;
-  }
-
-  .filter-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .barra-busca {
-    padding: 11px;
-    font-size: 14px;
-  }
-
-  .item-controles button {
-    width: 30px;
-    height: 30px;
-    font-size: 15px;
-  }
-
-  .carrinho-item {
-    padding: 14px;
-  }
+.barra-busca {
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-/* Tablet Pequeno (480px - 768px) */
-@media (min-width: 480px) and (max-width: 768px) {
-  html {
-    font-size: 15px;
-  }
-
-  .admin-header {
-    padding: 16px;
-  }
-
-  .admin-header h1 {
-    font-size: 22px;
-  }
-
-  .admin-header p {
-    font-size: 12px;
-  }
-
-  .logo {
-    max-width: 120px;
-  }
-
-  .container {
-    margin: 30px auto;
-    padding: 0 16px;
-  }
-
-  .dashboard {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .card {
-    padding: 20px;
-  }
-
-  .card h2 {
-    font-size: 18px;
-  }
-
-  .card p {
-    font-size: 13px;
-  }
-
-  .section-title {
-    font-size: 20px;
-    margin: 28px 0 18px;
-  }
-
-  button,
-  .btn {
-    padding: 12px 24px;
-    font-size: 15px;
-    min-height: 45px;
-    width: auto;
-  }
-
-  .btn-small {
-    padding: 9px 14px;
-    font-size: 13px;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .form-group textarea {
-    min-height: 80px;
-  }
-
-  .tabela-pedidos,
-  .tabela-produtos {
-    font-size: 13px;
-  }
-
-  .tabela-pedidos th,
-  .tabela-produtos th {
-    padding: 14px 10px;
-    font-size: 12px;
-  }
-
-  .tabela-pedidos td,
-  .tabela-produtos td {
-    padding: 12px 10px;
-    font-size: 13px;
-  }
-
-  .msg,
-  .alert {
-    padding: 13px;
-    font-size: 14px;
-  }
-
-  .produto-item {
-    grid-template-columns: 70px 1fr auto;
-    gap: 12px;
-    padding: 12px;
-  }
-
-  .produto-thumb-container {
-    width: 70px;
-    height: 70px;
-  }
-
-  .produto-thumb-emoji {
-    font-size: 32px;
-  }
-
-  .produto-details strong {
-    font-size: 15px;
-  }
-
-  .descricao-small {
-    font-size: 13px;
-  }
-
-  .preco {
-    font-size: 16px;
-  }
-
-  footer {
-    padding: 18px;
-    font-size: 13px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin: 18px 0;
-  }
-
-  .produto-imagem {
-    height: 140px;
-    font-size: 38px;
-  }
-
-  .produto-info {
-    padding: 15px;
-  }
-
-  .produto-nome {
-    font-size: 16px;
-  }
-
-  .produto-descricao {
-    font-size: 13px;
-  }
-
-  .produto-preco {
-    font-size: 18px;
-  }
-
-  .btn-carrinho {
-    padding: 10px;
-    font-size: 14px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr 320px;
-    gap: 18px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  .stat-value {
-    font-size: 28px;
-  }
-
-  .filter-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-
-  .barra-busca {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .item-controles button {
-    width: 32px;
-    height: 32px;
-  }
+/* ====================================================
+   CARRINHO
+===================================================== */
+.carrinho-container {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
 }
 
-/* Tablet Grande (769px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .admin-header {
-    padding: 18px;
-  }
-
-  .admin-header h1 {
-    font-size: 24px;
-  }
-
-  .logo {
-    max-width: 130px;
-  }
-
-  .container {
-    margin: 35px auto;
-    padding: 0 18px;
-  }
-
-  .dashboard {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-  }
-
-  .card {
-    padding: 22px;
-  }
-
-  .card h2 {
-    font-size: 19px;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr 340px;
-    gap: 20px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-  }
-
-  .filter-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-  }
-
-  .barra-busca {
-    padding: 13px;
-  }
+.carrinho-resumo {
+  position: sticky;
+  top: 20px;
 }
 
-/* Desktop (1025px+) */
-@media (min-width: 1025px) {
-  .dashboard {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr 350px;
-    gap: 20px;
-  }
-
-  button[type="submit"] {
-    grid-column: 1 / -1;
-  }
-
-  .filter-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 15px;
-  }
+/* ====================================================
+   TABELAS
+===================================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
-/* Orientação Paisagem em Pequenos Devices */
-@media (max-height: 500px) and (orientation: landscape) {
-  .admin-header {
-    padding: 10px;
-  }
-
-  .admin-header h1 {
-    margin-bottom: 2px;
-  }
-
-  .container {
-    margin: 16px auto;
-  }
-
-  .dashboard {
-    gap: 12px;
-  }
-
-  .card {
-    padding: 14px;
-  }
-
-  button,
-  .btn {
-    min-height: 40px;
-    padding: 10px 16px;
-  }
+th,
+td {
+  padding: 12px;
+  text-align: left;
 }
 
-/* Toque-friendly (Touch Devices) */
-@media (hover: none) and (pointer: coarse) {
-  button,
-  .btn,
-  .btn-small,
-  .btn-carrinho {
-    min-height: 48px;
-    min-width: 48px;
-    padding: 14px 20px;
-  }
-
-  .card,
-  .produto-card,
-  .stat-card {
-    transition: none;
-  }
-
-  .select-filter {
-    padding: 14px 12px;
-    font-size: 16px;
-  }
-
-  input,
-  textarea,
-  select {
-    padding: 14px 12px;
-    font-size: 16px;
-  }
-
-  .item-controles button {
-    min-width: 48px;
-    min-height: 48px;
-  }
+/* ====================================================
+   FOOTER
+===================================================== */
+footer {
+  margin-top: auto;
+  background: var(--cinza-header);
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--cinza-texto);
 }
 
-/* Modo Retrato em Pequenos Devices */
-@media (max-width: 480px) and (orientation: portrait) {
-  .admin-header {
-    padding: 14px;
-  }
-
-  .container {
-    padding: 0 12px;
-  }
-
-  .dashboard {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  button,
-  .btn,
-  .btn-carrinho {
-    width: 100%;
-    text-align: center;
-    padding: 14px 16px;
-  }
-
-  .btn-container,
-  .button-group {
-    flex-direction: column;
-  }
-
-  .btn-container button,
-  .btn-container .btn,
-  .button-group button,
-  .button-group .btn {
-    width: 100%;
-  }
-}
-
-/* Modo Paisagem em Pequenos Devices */
-@media (max-width: 480px) and (orientation: landscape) {
-  .admin-header {
-    padding: 10px;
-  }
-
-  .admin-header h1 {
-    font-size: 18px;
-  }
-
-  .admin-header p {
-    font-size: 10px;
-  }
-
-  .container {
-    margin: 12px auto;
-    padding: 0 10px;
-  }
-
-  .dashboard {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  .card h2 {
-    font-size: 15px;
-  }
-
-  button,
-  .btn {
-    padding: 10px 14px;
-    font-size: 13px;
-    min-height: 40px;
-  }
-
-  footer {
-    padding: 12px;
-    font-size: 10px;
-  }
-}
-
-/* iPad e Tablets em Retrato */
-@media (min-width: 481px) and (max-width: 1024px) and (orientation: portrait) {
-  .container {
-    padding: 0 18px;
-  }
-
-  .dashboard {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-  }
-}
-
-/* iPad e Tablets em Paisagem */
-@media (min-width: 481px) and (max-width: 1024px) and (orientation: landscape) {
-  .dashboard {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr 340px;
-    gap: 18px;
-  }
-}
-
-/* Melhorias para Notebooks (1025px+) */
-@media (min-width: 1025px) {
-  .container {
-    padding: 0 24px;
-  }
-
-  .dashboard {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-  }
-
-  .catalogo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-  }
-
-  .carrinho-container {
-    grid-template-columns: 1fr 360px;
-    gap: 24px;
-  }
-
-  button,
-  .btn {
-    padding: 12px 28px;
-    min-height: 48px;
-    width: auto;
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-  }
-}
-
-/* Modo Escuro Automático (Prefers Color Scheme) */
-@media (prefers-color-scheme: dark) {
-  body {
-    background: var(--cinza-fundo);
-  }
-}
-
-@media (prefers-color-scheme: light) {
-  body {
-    background: var(--cinza-fundo);
-    color: var(--branco);
-  }
-}
-
-/* Movimento Reduzido */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* Aumento de Contraste */
-@media (prefers-contrast: more) {
-  .card {
-    border-width: 2px;
-  }
-
-  button,
-  .btn {
-    border: 2px solid rgba(176, 48, 96, 0.5);
-  }
-}
-
-  .card,
-  .produto-card,
-  .stat-card {
-    transition: none;
-  }
-
-  .select-filter {
-    padding: 14px 12px;
-  }
-
-  input,
-  textarea,
-  select {
-    padding: 14px 12px;
-    font-size: 16px;
-  }
-
-  .barra-busca {
-    padding: 14px;
-    font-size: 16px;
-  }
-}
-
+/* ====================================================
+   TABLET
+===================================================== */
 @media (max-width: 768px) {
-  /* TYPOGRAPHY */
-  html {
-    font-size: 16px;
-  }
-  
-  body {
-    font-size: 16px;
-  }
-  
-  h1 {
-    font-size: 24px;
-  }
-  
-  h2 {
-    font-size: 20px;
-  }
-  
-  h3 {
-    font-size: 18px;
-  }
-  
-  p {
-    font-size: 15px;
-  }
-  
-  /* BUTTONS */
-  button,
-  .btn {
-    padding: 14px 20px;
-    font-size: 15px;
-    width: 100%;
-    margin: 8px 0;
-  }
-  
-  .btn-small {
-    padding: 12px 16px;
-    font-size: 13px;
-    width: auto;
-  }
-  
-  button[type="submit"] {
-    padding: 18px;
-    font-size: 16px;
-  }
-  
-  /* HEADER */
-  .admin-header {
+  .container {
     padding: 16px;
   }
-  
-  .admin-header h1 {
-    font-size: 22px;
-  }
-  
-  .admin-header p {
-    font-size: 13px;
-  }
-  
-  /* CONTAINER */
-  .container {
-    padding: 0 15px;
-    margin: 20px auto;
-  }
-  
-  /* INPUTS */
-  input[type="text"],
-  input[type="email"],
-  input[type="date"],
-  input[type="number"],
-  input[type="tel"],
-  select,
-  textarea {
-    font-size: 16px;
-    padding: 14px;
-    min-height: 44px;
-  }
-  
-  /* GRID */
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .catalogo-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-  }
 
+  .catalogo-grid,
+  .dashboard,
+  .stats-grid,
+  .form-grid,
+  .filter-grid,
   .carrinho-container {
     grid-template-columns: 1fr;
+  }
+
+  .produto-card img,
+  .produto-imagem {
+    height: 180px;
   }
 
   .carrinho-resumo {
     position: relative;
     top: 0;
   }
+
+  button,
+  .btn,
+  .btn-carrinho {
+    width: 100%;
+  }
+
+  .btn-container,
+  .button-group {
+    flex-direction: column;
+  }
 }
 
+/* ====================================================
+   MOBILE
+===================================================== */
 @media (max-width: 480px) {
-  /* EXTRA SMALL DEVICES */
-  html {
-    font-size: 15px;
-  }
-  
-  .admin-header {
+  .container {
     padding: 12px;
   }
-  
-  .admin-header h1 {
-    font-size: 20px;
+
+  .admin-header {
+    padding: 14px;
   }
-  
+
+  .logo {
+    max-width: 110px;
+  }
+
+  .produto-card img,
+  .produto-imagem {
+    height: 160px;
+  }
+
+  .card,
+  .produto-card {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
   h2 {
     font-size: 18px;
   }
-  
-  button,
-  .btn {
-    padding: 16px;
-    font-size: 15px;
-  }
-  
-  .container {
-    padding: 0 12px;
-  }
-  
-  input,
-  select,
-  textarea {
-    font-size: 16px;
-  }
-  
-  table {
+
+  p {
     font-size: 14px;
+  }
+
+  button,
+  .btn,
+  .btn-carrinho {
+    padding: 14px;
+    font-size: 14px;
+  }
+}
+
+/* ====================================================
+   NOTEBOOK GRANDE
+===================================================== */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1350px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
+/* ====================================================
+   ACESSIBILIDADE
+===================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
   }
 }
