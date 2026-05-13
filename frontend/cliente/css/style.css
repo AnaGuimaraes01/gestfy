@@ -1,4 +1,4 @@
-/* =====================================================
+/* ====================================================
    VARIÁVEIS
 ===================================================== */
 :root {
@@ -16,6 +16,9 @@
   --verde: #34a853;
   --vermelho: #ea4335;
   --amarelo: #fbbc04;
+  --btn-padding-mobile: 10px 14px;
+  --btn-padding-tablet: 12px 20px;
+  --btn-padding-desktop: 12px 28px;
 }
 
 /* =====================================================
@@ -196,6 +199,78 @@ footer {
 footer span {
   color: var(--rosa);
   font-weight: 600;
+}
+
+/* =====================================================
+   BOTÕES RESPONSIVOS
+===================================================== */
+button,
+.btn,
+.btn-carrinho {
+  min-height: 48px;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Containers de Botões */
+.btn-container,
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-container-center,
+.button-group-center {
+  justify-content: center;
+}
+
+.btn-container-end,
+.button-group-end {
+  justify-content: flex-end;
+}
+
+.btn-container-full {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-container-full button,
+.btn-container-full .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Botões expandidos para mobile */
+.btn-full,
+.btn-block {
+  width: 100% !important;
+  min-width: unset !important;
+  display: block;
+}
+
+/* Stack de botões em mobile */
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-stack button,
+.btn-stack .btn {
+  width: 100%;
+  min-width: unset;
 }
 
 /* =====================================================
@@ -990,10 +1065,230 @@ footer span {
 @media (hover: none) and (pointer: coarse) {
   button,
   .btn,
-  .btn-small {
+  .btn-small,
+  .btn-carrinho {
     min-height: 48px;
     min-width: 48px;
+    padding: 14px 20px;
   }
+
+  .card,
+  .produto-card,
+  .stat-card {
+    transition: none;
+  }
+
+  .select-filter {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+
+  .item-controles button {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
+/* Modo Retrato em Pequenos Devices */
+@media (max-width: 480px) and (orientation: portrait) {
+  .admin-header {
+    padding: 14px;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  button,
+  .btn,
+  .btn-carrinho {
+    width: 100%;
+    text-align: center;
+    padding: 14px 16px;
+  }
+
+  .btn-container,
+  .button-group {
+    flex-direction: column;
+  }
+
+  .btn-container button,
+  .btn-container .btn,
+  .button-group button,
+  .button-group .btn {
+    width: 100%;
+  }
+}
+
+/* Modo Paisagem em Pequenos Devices */
+@media (max-width: 480px) and (orientation: landscape) {
+  .admin-header {
+    padding: 10px;
+  }
+
+  .admin-header h1 {
+    font-size: 18px;
+  }
+
+  .admin-header p {
+    font-size: 10px;
+  }
+
+  .container {
+    margin: 12px auto;
+    padding: 0 10px;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .card h2 {
+    font-size: 15px;
+  }
+
+  button,
+  .btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  footer {
+    padding: 12px;
+    font-size: 10px;
+  }
+}
+
+/* iPad e Tablets em Retrato */
+@media (min-width: 481px) and (max-width: 1024px) and (orientation: portrait) {
+  .container {
+    padding: 0 18px;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+/* iPad e Tablets em Paisagem */
+@media (min-width: 481px) and (max-width: 1024px) and (orientation: landscape) {
+  .dashboard {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr 340px;
+    gap: 18px;
+  }
+}
+
+/* Melhorias para Notebooks (1025px+) */
+@media (min-width: 1025px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+  }
+
+  button,
+  .btn {
+    padding: 12px 28px;
+    min-height: 48px;
+    width: auto;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Modo Escuro Automático (Prefers Color Scheme) */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: var(--cinza-fundo);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  body {
+    background: var(--cinza-fundo);
+    color: var(--branco);
+  }
+}
+
+/* Movimento Reduzido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Aumento de Contraste */
+@media (prefers-contrast: more) {
+  .card {
+    border-width: 2px;
+  }
+
+  button,
+  .btn {
+    border: 2px solid rgba(176, 48, 96, 0.5);
+  }
+}
 
   .card,
   .produto-card,

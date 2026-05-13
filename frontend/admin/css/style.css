@@ -16,6 +16,9 @@
   --verde: #34a853;
   --vermelho: #ea4335;
   --amarelo: #fbbc04;
+  --btn-padding-mobile: 10px 14px;
+  --btn-padding-tablet: 12px 20px;
+  --btn-padding-desktop: 12px 28px;
 }
 
 /* =====================================================
@@ -1096,6 +1099,7 @@ footer span {
   font-size: 14px;
   transition: all 0.3s ease;
   font-family: inherit;
+  width: 100%;
 }
 
 .form-group input::placeholder,
@@ -1117,6 +1121,19 @@ footer span {
   min-height: 80px;
 }
 
+/* Seção Title Responsiva */
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--branco);
+  margin: 32px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--rosa);
+  letter-spacing: -0.5px;
+  position: relative;
+}
+}
+
 /* =====================================================
    BOTÕES
 ===================================================== */
@@ -1125,7 +1142,7 @@ button,
   background: linear-gradient(135deg, var(--rosa), #d4436a);
   border: none;
   color: var(--branco);
-  padding: 14px 28px;
+  padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 16px;
@@ -1136,6 +1153,8 @@ button,
   display: inline-block;
   min-height: 48px;
   min-width: 120px;
+  width: auto;
+  white-space: nowrap;
 }
 
 button:hover,
@@ -1164,6 +1183,60 @@ button:active {
 
 .btn-danger:hover {
   background: #d23321;
+}
+
+/* Containers de Botões */
+.btn-container,
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-container-center,
+.button-group-center {
+  justify-content: center;
+}
+
+.btn-container-end,
+.button-group-end {
+  justify-content: flex-end;
+}
+
+.btn-container-full {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-container-full button,
+.btn-container-full .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Botões expandidos para mobile */
+.btn-full,
+.btn-block {
+  width: 100% !important;
+  min-width: unset !important;
+  display: block;
+}
+
+/* Stack de botões em mobile */
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-stack button,
+.btn-stack .btn {
+  width: 100%;
+  min-width: unset;
 }
 
 .btn-success {
@@ -1195,6 +1268,7 @@ button[type="submit"] {
   margin: 20px 0;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  -webkit-overflow-scrolling: touch;
 }
 
 .tabela-pedidos,
@@ -1203,6 +1277,7 @@ button[type="submit"] {
   width: 100%;
   border-collapse: collapse;
   background: var(--cinza-card);
+  min-width: 600px;
 }
 
 .tabela-pedidos th,
@@ -1217,6 +1292,10 @@ button[type="submit"] {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--rosa);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .tabela-pedidos td,
@@ -1226,6 +1305,7 @@ button[type="submit"] {
   font-size: 14px;
   color: var(--cinza-texto);
   border-bottom: 1px solid #3a3a3a;
+  word-break: break-word;
 }
 
 .tabela-pedidos tr:hover,
@@ -1241,6 +1321,7 @@ button[type="submit"] {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
 }
 
 .status-recebido {
