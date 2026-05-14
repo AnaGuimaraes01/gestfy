@@ -77,7 +77,7 @@
 
             let itensHTML = pedido.itens.map(item => `
                 <tr>
-                    <td>${item.produtoNome}</td>
+                    <td>${item.nomeProduto}</td>
                     <td style="text-align: center;">${item.quantidade}</td>
                     <td style="text-align: right;">R$ ${parseFloat(item.precoUnitario).toFixed(2)}</td>
                     <td style="text-align: right;">R$ ${parseFloat(item.subtotal).toFixed(2)}</td>
