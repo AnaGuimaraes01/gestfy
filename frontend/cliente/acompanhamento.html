@@ -38,11 +38,11 @@
 
         // Status em português
         const statusMap = {
-            "RECEBIDO": { label: "Recebido", badge: "status-recebido" },
-            "EM_PREPARO": { label: "Em Preparo",  badge: "status-preparacao" },
-            "PRONTO_RETIRADA": { label: "Pronto para Retirada", badge: "status-pronto" },
-            "SAIU_ENTREGA": { label: "Saiu para Entrega",  badge: "status-entrega" },
-            "FINALIZADO": { label: "Finalizado",  badge: "status-finalizado" }
+            "RECEBIDO": { label: "Recebido", badge: "status-recebido", emoji: "📋" },
+            "EM_PREPARO": { label: "Em Preparo",  badge: "status-preparacao", emoji: "👨‍🍳" },
+            "PRONTO_RETIRADA": { label: "Pronto para Retirada", badge: "status-pronto", emoji: "✅" },
+            "SAIU_ENTREGA": { label: "Saiu para Entrega",  badge: "status-entrega", emoji: "🚗" },
+            "FINALIZADO": { label: "Finalizado",  badge: "status-finalizado", emoji: "🎉" }
         };
 
         // Obter ID da URL ou localStorage
@@ -94,8 +94,12 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
                         <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
                             <p style="font-size: 12px; color: #888; margin-bottom: 4px;">CLIENTE</p>
-                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.clienteNome}</p>
-                            <p style="font-size: 13px; color: #bdbdbd;"> Phone: ${pedido.clienteTelefone}</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${pedido.nomeCliente}</p>
+                            <p style="font-size: 13px; color: #bdbdbd;">📞 ${pedido.telefone}</p>
+                        </div>
+                        <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
+                            <p style="font-size: 12px; color: #888; margin-bottom: 4px;">DATA & HORA</p>
+                            <p style="font-size: 16px; font-weight: 600; color: white;">${new Date(pedido.data).toLocaleString('pt-BR')}</p>
                         </div>
                         <div style="background: #1a1a1a; padding: 16px; border-radius: 8px;">
                             <p style="font-size: 12px; color: #888; margin-bottom: 4px;">FORMA DE RECEBIMENTO</p>
