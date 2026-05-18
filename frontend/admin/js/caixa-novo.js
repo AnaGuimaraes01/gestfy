@@ -578,9 +578,18 @@ function exibirHistoricoVendas(vendas) {
             const observacoes = venda.observacoes || '';
             const saldo = venda.saldo || 0;
             
+            // Formatar hora correta se existir data
+            let horaFormatada = '';
+            if (venda.data) {
+                const data = new Date(venda.data);
+                const horas = String(data.getHours()).padStart(2, '0');
+                const minutos = String(data.getMinutes()).padStart(2, '0');
+                horaFormatada = ` às ${horas}:${minutos}`;
+            }
+            
             div.innerHTML = `
                 <div class="venda-detalhes">
-                    <div class="venda-produto">${descricao}</div>
+                    <div class="venda-produto">${descricao}${horaFormatada}</div>
                     <div class="venda-info">${observacoes}</div>
                 </div>
                 <div class="venda-valor">R$ ${(saldo).toFixed(2)}</div>

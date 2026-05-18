@@ -415,6 +415,33 @@ td {
   text-align: left;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.btn-small {
+  background: var(--rosa);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  min-height: auto;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.btn-small:hover {
+  background: var(--rosa-escuro);
+}
+
 /* ====================================================
    FOOTER
 ===================================================== */
@@ -542,6 +569,11 @@ footer {
 
   .resumo-total {
     font-size: 16px;
+  }
+
+  .btn-small {
+    width: 100%;
+    padding: 10px 12px;
   }
 
   h1 {

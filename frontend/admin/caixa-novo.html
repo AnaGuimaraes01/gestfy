@@ -204,6 +204,17 @@
             padding: 12px 30px;
         }
 
+        @media (max-width: 768px) {
+            .busca-container {
+                flex-direction: column;
+            }
+
+            .busca-container button {
+                width: 100%;
+                padding: 12px;
+            }
+        }
+
         /* LISTA DE PRODUTOS ENCONTRADOS */
         .produtos-encontrados {
             background: var(--cinza-card);
@@ -621,9 +632,12 @@
 <body>
     <div class="container">
         <!-- CABEÇALHO -->
-        <div class="header">
-            <h1> CAIXA</h1>
-            <p>Sistema de vendas em dinheiro</p>
+        <div class="header" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" style="position: absolute; left: 0; color: var(--rosa); text-decoration: none; font-size: 20px; cursor: pointer;">←</a>
+            <div style="flex: 1; text-align: center;">
+                <h1> CAIXA</h1>
+                <p>Sistema de vendas em dinheiro</p>
+            </div>
         </div>
 
         <!-- MENSAGENS -->
