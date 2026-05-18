@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrinho de Compras - Gestfy</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="admin-header">
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="carrinho-resumo">
-                    <h3 style="margin-bottom: 16px; color: var(--rosa);">Resumo</h3>
+                    <h3 class="section-title" style="margin-bottom: 16px; color: var(--rosa); margin-top: 0;">Resumo</h3>
                     <div class="resumo-item">
                         <span>Subtotal:</span>
                         <span id="subtotal">R$ 0,00</span>
@@ -39,10 +39,10 @@
                         <span id="total">R$ 0,00</span>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                        <button class="btn" onclick="irParaPagamento()" style="width: 100%; text-align: center;">
+                        <button class="btn" onclick="irParaPagamento()">
                              Finalizar Pedido
                         </button>
-                        <button class="btn-secondary" onclick="limparCarrinho()" style="width: 100%;">
+                        <button class="btn-secondary" onclick="limparCarrinho()">
                              Limpar Carrinho
                         </button>
                     </div>

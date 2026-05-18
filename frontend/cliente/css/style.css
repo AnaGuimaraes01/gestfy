@@ -193,12 +193,34 @@ button,
   font-size: 15px;
   font-weight: 600;
   transition: 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  gap: 6px;
 }
 
 button:hover,
 .btn:hover,
 .btn-carrinho:hover {
   background: var(--rosa-escuro);
+}
+
+.btn-secondary {
+  background: #666;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  min-height: 46px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: #777;
 }
 
 .btn-container,
@@ -229,17 +251,151 @@ select {
 }
 
 /* ====================================================
+   MENSAGENS
+===================================================== */
+.msg {
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #2a4a2a;
+  color: var(--verde);
+  border: 1px solid var(--verde);
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+/* ====================================================
    CARRINHO
 ===================================================== */
 .carrinho-container {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 20px;
+  align-items: start;
+}
+
+.carrinho-itens {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--branco);
+}
+
+.carrinho-item {
+  background: linear-gradient(145deg, var(--cinza-card), #242424);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: border-color 0.3s ease;
+}
+
+.carrinho-item:hover {
+  border-color: var(--rosa);
+}
+
+.item-info {
+  flex: 1;
+  min-width: 150px;
+}
+
+.item-nome {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--branco);
+}
+
+.item-preco {
+  font-size: 14px;
+  color: var(--amarelo);
+  font-weight: 500;
+}
+
+.item-controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.item-controles button {
+  padding: 8px 12px;
+  min-height: auto;
+  font-size: 14px;
+  width: auto;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.item-controles button:first-child,
+.item-controles button:nth-child(3) {
+  background: #666;
+  color: white;
+  border: 1px solid #555;
+}
+
+.item-controles button:first-child:hover,
+.item-controles button:nth-child(3):hover {
+  background: #777;
+  border-color: #666;
+}
+
+.item-controles button:last-child {
+  background: #ea4335;
+}
+
+.item-controles button:last-child:hover {
+  background: #c5221f;
+}
+
+.item-controles span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  font-weight: 600;
+  color: var(--branco);
 }
 
 .carrinho-resumo {
   position: sticky;
   top: 20px;
+  background: linear-gradient(145deg, var(--cinza-card), #242424);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.resumo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: var(--cinza-texto);
+}
+
+.resumo-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--amarelo);
+  padding-top: 12px;
+  border-top: 1px solid #444;
+  margin-bottom: 16px;
 }
 
 /* ====================================================
@@ -298,9 +454,23 @@ footer {
     top: 0;
   }
 
+  .carrinho-item {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .item-controles {
+    flex-direction: row;
+    margin-top: 8px;
+  }
+
   button,
   .btn,
   .btn-carrinho {
+    width: 100%;
+  }
+
+  .btn-secondary {
     width: 100%;
   }
 
@@ -334,6 +504,44 @@ footer {
   .card,
   .produto-card {
     padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .carrinho-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .item-info {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .item-controles {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 0;
+  }
+
+  .item-controles button {
+    flex: 1;
+    padding: 10px 8px;
+  }
+
+  .carrinho-resumo {
+    padding: 16px;
+  }
+
+  .resumo-item {
+    font-size: 13px;
+  }
+
+  .resumo-total {
+    font-size: 16px;
   }
 
   h1 {
