@@ -1,6 +1,7 @@
 package com.empresa.gestfy.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.empresa.gestfy.config.DataHoraBrasil;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -44,7 +45,7 @@ public class Pedido {
 
     // Construtor padrão
     public Pedido() {
-        this.data = LocalDateTime.now();
+        this.data = DataHoraBrasil.agora();
     }
 
     // ======================

@@ -1,5 +1,6 @@
 package com.empresa.gestfy.services;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.dto.estoque.EstoqueDTO;
 import com.empresa.gestfy.dto.estoque.EstoqueRequest;
 import com.empresa.gestfy.models.Estoque;
@@ -43,7 +44,7 @@ public class EstoqueService {
         estoque.setProduto(produto);
         estoque.setTipoMovimento(request.tipoMovimento());
         estoque.setQuantidade(request.quantidade());
-        estoque.setDataMovimento(LocalDateTime.now());
+        estoque.setDataMovimento(DataHoraBrasil.agora());
 
         Estoque salvo = estoqueRepository.save(estoque);
         return toDTO(salvo);
@@ -64,7 +65,7 @@ public class EstoqueService {
         Estoque movimento = new Estoque();
         movimento.setProduto(produto);
         movimento.setTipoMovimento(tipoMovimento);
-        movimento.setDataMovimento(LocalDateTime.now());
+        movimento.setDataMovimento(DataHoraBrasil.agora());
         movimento.setQuantidade(quantidade);
         return estoqueRepository.save(movimento);
     }

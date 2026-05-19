@@ -1,5 +1,6 @@
 package com.empresa.gestfy.services;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.models.Pedido;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.CaixaRepository;
@@ -166,7 +167,7 @@ public class RelatorioService {
      * Total de pedidos por período
      */
     public Map<String, Object> totalPedidosPorPeriodo(Integer dias) {
-        LocalDateTime dataLimite = LocalDateTime.now().minusDays(dias);
+        LocalDateTime dataLimite = DataHoraBrasil.agora().minusDays(dias);
 
         List<Pedido> pedidos = pedidoRepository.findAll()
                 .stream()

@@ -1,5 +1,6 @@
 package com.empresa.gestfy.services;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.dto.pedido.PedidoDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
@@ -80,7 +81,7 @@ public class PedidoService {
         pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setEndereco(request.endereco());
         pedido.setStatus("RECEBIDO");
-        pedido.setData(LocalDateTime.now());
+        pedido.setData(DataHoraBrasil.agora());
 
         // 3. Validar e processar itens
         List<PedidoItem> itens = new ArrayList<>();
@@ -110,7 +111,7 @@ public class PedidoService {
             movimento.setProduto(produto);
             movimento.setTipoMovimento("SAIDA");
             movimento.setQuantidade(item.getQuantidade());
-            movimento.setDataMovimento(LocalDateTime.now());
+            movimento.setDataMovimento(DataHoraBrasil.agora());
             estoqueRepository.save(movimento);
 
             // Adicionar item ao pedido
@@ -178,8 +179,8 @@ public class PedidoService {
         Caixa registro = new Caixa();
         registro.setTipo("ENTRADA");
         registro.setData(LocalDate.now());
-        registro.setDataAbertura(LocalDateTime.now());
-        registro.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
+        registro.setDataAbertura(DataHoraBrasil.agora());
+        registro.setHorarioAbertura(DataHoraBrasil.agora()); // Mantém por compatibilidade
         registro.setStatus("ABERTO");
         registro.setValorInicial(0.0); // Garantir que nunca seja null
         registro.setSaldo(pedido.getTotal());

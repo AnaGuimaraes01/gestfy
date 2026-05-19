@@ -1,5 +1,6 @@
 package com.empresa.gestfy.models;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -172,7 +173,7 @@ public class Caixa {
             this.valorInicial = 0.0;
         }
         if (this.dataAbertura == null) {
-            this.dataAbertura = LocalDateTime.now();
+            this.dataAbertura = DataHoraBrasil.agora();
         }
         if (this.status == null) {
             this.status = "ABERTO";
