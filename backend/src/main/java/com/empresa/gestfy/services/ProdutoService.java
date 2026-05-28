@@ -21,10 +21,13 @@ public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
     private final EstoqueService estoqueService;
+    private final CategoriaService categoriaService;
 
-    public ProdutoService(ProdutoRepository produtoRepository, EstoqueService estoqueService) {
+    public ProdutoService(ProdutoRepository produtoRepository, EstoqueService estoqueService,
+            CategoriaService categoriaService) {
         this.produtoRepository = produtoRepository;
         this.estoqueService = estoqueService;
+        this.categoriaService = categoriaService;
     }
 
     // ========================================
@@ -35,12 +38,18 @@ public class ProdutoService {
      * Criar novo produto
      */
     public ProdutoDTO criar(ProdutoRequest request) {
+        // Validar e buscar categoria
+        com.empresa.gestfy.models.Categoria categoria = categoriaService.buscarCategoriaModelo(request.categoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
         Produto produto = new Produto(
                 request.nome(),
                 request.descricao(),
                 request.preco(),
                 request.urlFoto(),
                 request.quantidade());
+
+        produto.setCategoria(categoria);
 
         Produto salvo = produtoRepository.save(produto);
 
@@ -83,11 +92,16 @@ public class ProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
+        // Validar e buscar categoria
+        com.empresa.gestfy.models.Categoria categoria = categoriaService.buscarCategoriaModelo(request.categoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
         produto.setNome(request.nome());
         produto.setDescricao(request.descricao());
         produto.setPreco(request.preco());
         produto.setUrlFoto(request.urlFoto());
         produto.setQuantidade(request.quantidade());
+        produto.setCategoria(categoria);
 
         Produto atualizado = produtoRepository.save(produto);
         return toDTO(atualizado);
@@ -101,6 +115,21 @@ public class ProdutoService {
             throw new RuntimeException("Produto não encontrado");
         }
         produtoRepository.deleteById(id);
+    }
+
+    /**
+     * Listar produtos por categoria
+     */
+    public List<ProdutoDTO> listarPorCategoria(Long categoriaId) {
+        // Validar se categoria existe
+        if (!categoriaId.equals(null) && categoriaId > 0) {
+            return produtoRepository.findAll()
+                    .stream()
+                    .filter(p -> p.getCategoria() != null && p.getCategoria().getId().equals(categoriaId))
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
+        return List.of();
     }
 
     // ========================================
@@ -168,6 +197,7 @@ public class ProdutoService {
                 produto.getDescricao(),
                 produto.getPreco(),
                 produto.getUrlFoto(),
-                produto.getQuantidade());
+                produto.getQuantidade(),
+                produto.getCategoria() != null ? produto.getCategoria().getId() : null);
     }
 }

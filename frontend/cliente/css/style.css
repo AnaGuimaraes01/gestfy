@@ -219,6 +219,38 @@ button:hover,
   transition: 0.3s ease;
 }
 
+/* ====================================================
+   CATEGORIAS
+===================================================== */
+.btn-categoria {
+  background: var(--cinza-card);
+  color: var(--cinza-texto);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-categoria:hover {
+  border-color: var(--rosa);
+  color: var(--rosa-claro);
+}
+
+.btn-categoria-ativo {
+  background: var(--rosa);
+  border-color: var(--rosa);
+  color: var(--branco);
+}
+
+.btn-categoria-ativo:hover {
+  background: var(--rosa-escuro);
+  border-color: var(--rosa-escuro);
+}
+
 .btn-secondary:hover {
   background: #777;
 }

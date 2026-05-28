@@ -61,6 +61,16 @@ public class ProdutoController {
     }
 
     /**
+     * Listar produtos por categoria
+     * GET /api/produtos/categoria/{categoriaId}
+     */
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<ProdutoDTO>> listarPorCategoria(@PathVariable Long categoriaId) {
+        List<ProdutoDTO> produtos = produtoService.listarPorCategoria(categoriaId);
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
      * Buscar produto por ID
      * GET /api/produtos/{id}
      */
