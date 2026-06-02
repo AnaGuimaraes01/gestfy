@@ -71,6 +71,36 @@ public class ProdutoController {
     }
 
     /**
+     * Produtos em promoção
+     * GET /api/produtos/destaque/promocoes
+     */
+    @GetMapping("/destaque/promocoes")
+    public ResponseEntity<List<ProdutoDTO>> listarPromocoes() {
+        List<ProdutoDTO> produtos = produtoService.listarPromocoes();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
+     * Produtos mais vendidos
+     * GET /api/produtos/destaque/vendidos
+     */
+    @GetMapping("/destaque/vendidos")
+    public ResponseEntity<List<ProdutoDTO>> listarMaisVendidos() {
+        List<ProdutoDTO> produtos = produtoService.listarMaisVendidos();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
+     * Produtos mais populares (visualizados)
+     * GET /api/produtos/destaque/populares
+     */
+    @GetMapping("/destaque/populares")
+    public ResponseEntity<List<ProdutoDTO>> listarMaisPopulares() {
+        List<ProdutoDTO> produtos = produtoService.listarMaisPopulares();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
      * Buscar produto por ID
      * GET /api/produtos/{id}
      */

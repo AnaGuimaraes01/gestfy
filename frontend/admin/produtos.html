@@ -47,6 +47,14 @@
           <option value="">Selecione uma categoria</option>
         </select>
       </div>
+      <div class="form-group">
+        <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
+          <input id="emPromo" type="checkbox"> Em Promoção?
+        </label>
+      </div>
+      <div class="form-group" id="grupoPrecoPromo" style="display: none;">
+        <input id="precoPromo" placeholder="Preço Promocional" type="number" step="0.01">
+      </div>
       <div style="grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap;">
         <button type="submit" id="btnSalvar" class="btn-full-mobile">Salvar Produto</button>
         <button type="button" id="btnCancelar" onclick="cancelarEdicao()" style="display: none; background: #666; flex: 1;" class="btn-full-mobile">Cancelar Edição</button>

@@ -50,6 +50,8 @@ public class ProdutoService {
                 request.quantidade());
 
         produto.setCategoria(categoria);
+        produto.setEmPromo(request.emPromo() != null ? request.emPromo() : false);
+        produto.setPrecoPromo(request.precoPromo());
 
         Produto salvo = produtoRepository.save(produto);
 
@@ -102,6 +104,8 @@ public class ProdutoService {
         produto.setUrlFoto(request.urlFoto());
         produto.setQuantidade(request.quantidade());
         produto.setCategoria(categoria);
+        produto.setEmPromo(request.emPromo() != null ? request.emPromo() : false);
+        produto.setPrecoPromo(request.precoPromo());
 
         Produto atualizado = produtoRepository.save(produto);
         return toDTO(atualizado);
@@ -130,6 +134,43 @@ public class ProdutoService {
                     .collect(Collectors.toList());
         }
         return List.of();
+    }
+
+    /**
+     * Listar produtos em promoção
+     */
+    public List<ProdutoDTO> listarPromocoes() {
+        return produtoRepository.findAll()
+                .stream()
+                .filter(p -> p.getEmPromo() != null && p.getEmPromo())
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Listar produtos mais vendidos (top 6)
+     */
+    public List<ProdutoDTO> listarMaisVendidos() {
+        return produtoRepository.findAll()
+                .stream()
+                .sorted((a, b) -> Long.compare(b.getVendas() != null ? b.getVendas() : 0L, 
+                                              a.getVendas() != null ? a.getVendas() : 0L))
+                .limit(6)
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Listar produtos mais populares/visualizados (top 6)
+     */
+    public List<ProdutoDTO> listarMaisPopulares() {
+        return produtoRepository.findAll()
+                .stream()
+                .sorted((a, b) -> Long.compare(b.getVisualizacoes() != null ? b.getVisualizacoes() : 0L, 
+                                              a.getVisualizacoes() != null ? a.getVisualizacoes() : 0L))
+                .limit(6)
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     // ========================================
@@ -198,6 +239,10 @@ public class ProdutoService {
                 produto.getPreco(),
                 produto.getUrlFoto(),
                 produto.getQuantidade(),
-                produto.getCategoria() != null ? produto.getCategoria().getId() : null);
+                produto.getCategoria() != null ? produto.getCategoria().getId() : null,
+                produto.getEmPromo(),
+                produto.getPrecoPromo(),
+                produto.getVisualizacoes(),
+                produto.getVendas());
     }
 }

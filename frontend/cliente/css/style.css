@@ -106,6 +106,14 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.catalogo-grid-destaque {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
 .stats-grid {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }

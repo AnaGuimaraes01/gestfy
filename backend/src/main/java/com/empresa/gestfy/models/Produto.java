@@ -15,6 +15,10 @@ public class Produto {
     private Double preco;
     private String urlFoto;
     private Integer quantidade;
+    private Boolean emPromo = false;
+    private Double precoPromo;
+    private Long visualizacoes = 0L;
+    private Long vendas = 0L;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -85,5 +89,37 @@ public class Produto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public Boolean getEmPromo() {
+        return emPromo;
+    }
+
+    public void setEmPromo(Boolean emPromo) {
+        this.emPromo = emPromo;
+    }
+
+    public Double getPrecoPromo() {
+        return precoPromo;
+    }
+
+    public void setPrecoPromo(Double precoPromo) {
+        this.precoPromo = precoPromo;
+    }
+
+    public Long getVisualizacoes() {
+        return visualizacoes;
+    }
+
+    public void setVisualizacoes(Long visualizacoes) {
+        this.visualizacoes = visualizacoes;
+    }
+
+    public Long getVendas() {
+        return vendas;
+    }
+
+    public void setVendas(Long vendas) {
+        this.vendas = vendas;
     }
 }

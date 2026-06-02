@@ -8,10 +8,21 @@ const msg = document.getElementById("msg");
 const btnSalvar = document.getElementById("btnSalvar");
 const btnCancelar = document.getElementById("btnCancelar");
 const categoriaSelect = document.getElementById("categoria");
+const checkboxPromo = document.getElementById("emPromo");
+const grupoPrecoPromo = document.getElementById("grupoPrecoPromo");
+const inputPrecoPromo = document.getElementById("precoPromo");
 
 // ID do produto em edição (null = novo produto)
 let produtoEmEdicao = null;
 let categoriasMapa = {}; // Armazenar categorias para lookup rápido
+
+// Mostrar/ocultar campo de preço promocional
+checkboxPromo.addEventListener("change", () => {
+  grupoPrecoPromo.style.display = checkboxPromo.checked ? "block" : "none";
+  if (!checkboxPromo.checked) {
+    inputPrecoPromo.value = "";
+  }
+});
 
 // Carregar categorias no select
 async function carregarCategorias() {
@@ -127,7 +138,9 @@ form.addEventListener("submit", async (e) => {
     preco: parseFloat(preco.value),
     urlFoto: urlFoto.value.trim() || null,
     quantidade: parseInt(quantidade.value),
-    categoriaId: parseInt(categoriaSelect.value)
+    categoriaId: parseInt(categoriaSelect.value),
+    emPromo: checkboxPromo.checked,
+    precoPromo: checkboxPromo.checked && inputPrecoPromo.value ? parseFloat(inputPrecoPromo.value) : null
   };
 
   try {
@@ -198,6 +211,11 @@ async function editarProduto(id) {
     document.getElementById("quantidade").value = produto.quantidade || 0;
     document.getElementById("urlFoto").value = produto.urlFoto || "";
     document.getElementById("categoria").value = produto.categoriaId || "";
+    document.getElementById("emPromo").checked = produto.emPromo || false;
+    document.getElementById("precoPromo").value = produto.precoPromo || "";
+    
+    // Mostrar/ocultar campo de preço promocional
+    grupoPrecoPromo.style.display = produto.emPromo ? "block" : "none";
     
     // Marcar que estamos em edição
     produtoEmEdicao = id;
@@ -223,6 +241,9 @@ async function editarProduto(id) {
 function cancelarEdicao() {
   produtoEmEdicao = null;
   form.reset();
+  checkboxPromo.checked = false;
+  inputPrecoPromo.value = "";
+  grupoPrecoPromo.style.display = "none";
   btnSalvar.textContent = "Salvar Produto";
   btnCancelar.style.display = "none";
   msg.textContent = "";

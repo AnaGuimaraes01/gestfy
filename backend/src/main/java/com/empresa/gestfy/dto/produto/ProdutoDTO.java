@@ -7,5 +7,9 @@ public record ProdutoDTO(
                 Double preco,
                 String urlFoto,
                 Integer quantidade,
-                Long categoriaId) {
+                Long categoriaId,
+                Boolean emPromo,
+                Double precoPromo,
+                Long visualizacoes,
+                Long vendas) {
 }

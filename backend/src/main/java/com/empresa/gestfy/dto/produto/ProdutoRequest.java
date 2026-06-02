@@ -16,7 +16,11 @@ public record ProdutoRequest(
 
                 @NotNull(message = "A quantidade é obrigatória") @Positive(message = "A quantidade deve ser maior que zero") Integer quantidade,
 
-                @NotNull(message = "A categoria é obrigatória") Long categoriaId
+                @NotNull(message = "A categoria é obrigatória") Long categoriaId,
+
+                Boolean emPromo,
+
+                Double precoPromo
 
 ) {
 }

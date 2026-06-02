@@ -24,12 +24,41 @@
                 <a href="carrinho.html" class="btn" style="white-space: nowrap; display: flex; align-items: center; padding: 12px 24px;"> Ver Carrinho</a>
             </div>
 
-            <div id="categoriasNav" style="margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn-categoria btn-categoria-ativo" data-categoria="0" onclick="filtrarPorCategoria(0)">Todas</button>
-            </div>
-
             <div id="mensagem" class="msg" style="display: none;"></div>
 
+            <!-- Seção: Promoções em Destaque -->
+            <section id="secaoPromocoes" style="margin-bottom: 30px; display: none;">
+                <h2 style="margin-bottom: 15px; color: #ff5722;">🎉 Em Promoção</h2>
+                <div id="promotoesContainer" class="catalogo-grid-destaque">
+                    <!-- Produtos em promoção carregados aqui -->
+                </div>
+            </section>
+
+            <!-- Seção: Mais Vendidos -->
+            <section id="secaoVendidos" style="margin-bottom: 30px; display: none;">
+                <h2 style="margin-bottom: 15px; color: #2196f3;">⭐ Mais Vendidos</h2>
+                <div id="vendidosContainer" class="catalogo-grid-destaque">
+                    <!-- Produtos mais vendidos carregados aqui -->
+                </div>
+            </section>
+
+            <!-- Seção: Mais Populares (Pesquisados) -->
+            <section id="secaoPopulares" style="margin-bottom: 30px; display: none;">
+                <h2 style="margin-bottom: 15px; color: #4caf50;">👥 Mais Populares</h2>
+                <div id="popularesContainer" class="catalogo-grid-destaque">
+                    <!-- Produtos mais populares carregados aqui -->
+                </div>
+            </section>
+
+            <!-- Navegação de Categorias -->
+            <div style="margin-bottom: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <h2 style="margin-bottom: 15px;">Categorias</h2>
+                <div id="categoriasNav" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-categoria btn-categoria-ativo" data-categoria="0" onclick="filtrarPorCategoria(0)">Todas</button>
+                </div>
+            </div>
+
+            <!-- Grid de Produtos por Categoria -->
             <div id="produtosContainer" class="catalogo-grid">
                 <!-- Produtos serão carregados aqui -->
             </div>

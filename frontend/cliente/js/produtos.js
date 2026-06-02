@@ -22,8 +22,105 @@ const msg = document.getElementById("mensagem");
 const buscaInput = document.getElementById("buscaInput");
 const categoriasNav = document.getElementById("categoriasNav");
 
+// Containers de destaque
+const promotoesContainer = document.getElementById("promotoesContainer");
+const vendidosContainer = document.getElementById("vendidosContainer");
+const popularesContainer = document.getElementById("popularesContainer");
+const secaoPromocoes = document.getElementById("secaoPromocoes");
+const secaoVendidos = document.getElementById("secaoVendidos");
+const secaoPopulares = document.getElementById("secaoPopulares");
+
 let todosProdutos = [];
 let categoriaAtiva = 0; // 0 = todas as categorias
+
+// Função para criar card de destaque
+function criarCardDestaque(produto) {
+    const card = document.createElement("div");
+    card.className = "produto-card";
+    let precoExibir = produto.preco;
+    let precoPromo = "";
+    
+    if (produto.emPromo && produto.precoPromo) {
+        precoPromo = `<p style="color: #4caf50; font-size: 1.1em; font-weight: bold;">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>`;
+        precoExibir = `<p class="produto-preco" style="text-decoration: line-through; color: #999;">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+    } else {
+        precoExibir = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+    }
+    
+    card.innerHTML = `
+        <div class="produto-imagem">
+            ${produto.emPromo ? '<span style="position: absolute; top: 8px; right: 8px; background: #ff5722; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">PROMOÇÃO</span>' : ''}
+            <img src="${produto.urlFoto || '/images/placeholder.png'}" alt="${produto.nome}" onerror="this.style.display='none'">
+        </div>
+        <div class="produto-info">
+            <h3 class="produto-nome">${produto.nome}</h3>
+            <p class="produto-descricao">${produto.descricao || "Sem descrição"}</p>
+            ${precoExibir}
+            ${precoPromo}
+            <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
+                 Adicionar
+            </button>
+        </div>
+    `;
+    return card;
+}
+
+// Carregar produtos em promoção
+async function carregarPromocoes() {
+    try {
+        const response = await fetch(`${API_URL}/destaque/promocoes`);
+        if (!response.ok) throw new Error("Erro ao buscar promoções");
+        
+        const promocoes = await response.json();
+        if (promocoes.length > 0) {
+            promotoesContainer.innerHTML = "";
+            promocoes.forEach(produto => {
+                promotoesContainer.appendChild(criarCardDestaque(produto));
+            });
+            secaoPromocoes.style.display = "block";
+        }
+    } catch (error) {
+        console.error("Erro ao carregar promoções:", error);
+    }
+}
+
+// Carregar mais vendidos
+async function carregarMaisVendidos() {
+    try {
+        const response = await fetch(`${API_URL}/destaque/vendidos`);
+        if (!response.ok) throw new Error("Erro ao buscar mais vendidos");
+        
+        const vendidos = await response.json();
+        if (vendidos.length > 0) {
+            vendidosContainer.innerHTML = "";
+            vendidos.forEach(produto => {
+                vendidosContainer.appendChild(criarCardDestaque(produto));
+            });
+            secaoVendidos.style.display = "block";
+        }
+    } catch (error) {
+        console.error("Erro ao carregar mais vendidos:", error);
+    }
+}
+
+// Carregar mais populares
+async function carregarMaisPopulares() {
+    try {
+        const response = await fetch(`${API_URL}/destaque/populares`);
+        if (!response.ok) throw new Error("Erro ao buscar populares");
+        
+        const populares = await response.json();
+        if (populares.length > 0) {
+            popularesContainer.innerHTML = "";
+            populares.forEach(produto => {
+                popularesContainer.appendChild(criarCardDestaque(produto));
+            });
+            secaoPopulares.style.display = "block";
+        }
+    } catch (error) {
+        console.error("Erro ao carregar populares:", error);
+    }
+}
 
 // Carregar categorias e criar botões
 async function carregarCategorias() {
@@ -98,15 +195,27 @@ function exibirProdutos(produtos) {
     produtos.forEach(produto => {
         const card = document.createElement("div");
         card.className = "produto-card";
+        let precoExibir = produto.preco;
+        let precoPromo = "";
+        
+        if (produto.emPromo && produto.precoPromo) {
+            precoPromo = `<p style="color: #4caf50; font-size: 1.1em; font-weight: bold;">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>`;
+            precoExibir = `<p class="produto-preco" style="text-decoration: line-through; color: #999;">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+        } else {
+            precoExibir = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+        }
+        
         card.innerHTML = `
             <div class="produto-imagem">
+                ${produto.emPromo ? '<span style="position: absolute; top: 8px; right: 8px; background: #ff5722; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">PROMOÇÃO</span>' : ''}
                 <img src="${produto.urlFoto || '/images/placeholder.png'}" alt="${produto.nome}" onerror="this.style.display='none'">
             </div>
             <div class="produto-info">
                 <h3 class="produto-nome">${produto.nome}</h3>
                 <p class="produto-descricao">${produto.descricao || "Sem descrição"}</p>
-                <p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
-                <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.preco})">
+                ${precoExibir}
+                ${precoPromo}
+                <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
                      Adicionar
                 </button>
             </div>
@@ -154,6 +263,9 @@ function adicionarCarrinho(id, nome, preco) {
     setTimeout(() => msg.style.display = "none", 2000);
 }
 
-// Carregar categorias e produtos na página
+// Carregar dados na página
 carregarCategorias();
 carregarProdutos();
+carregarPromocoes();
+carregarMaisVendidos();
+carregarMaisPopulares();
