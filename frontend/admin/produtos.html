@@ -47,6 +47,12 @@
           <option value="">Selecione uma categoria</option>
         </select>
       </div>
+      <!-- Nova Categoria -->
+      <div style="grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid #444;">
+        <input id="novaCategoria" placeholder="Digite o nome de uma nova categoria" style="flex: 1; min-width: 200px;">
+        <button type="button" id="btnCriarCategoria" class="btn" style="white-space: nowrap;">➕ Criar Categoria</button>
+      </div>
+      <div id="msgCategoria" class="msg" style="grid-column: 1 / -1; display: none; margin-top: 8px;"></div>
       <div class="form-group">
         <label style="display: flex; gap: 8px; align-items: center; cursor: pointer;">
           <input id="emPromo" type="checkbox"> Em Promoção?

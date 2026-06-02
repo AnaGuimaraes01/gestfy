@@ -11,6 +11,9 @@ const categoriaSelect = document.getElementById("categoria");
 const checkboxPromo = document.getElementById("emPromo");
 const grupoPrecoPromo = document.getElementById("grupoPrecoPromo");
 const inputPrecoPromo = document.getElementById("precoPromo");
+const novaCategoria = document.getElementById("novaCategoria");
+const btnCriarCategoria = document.getElementById("btnCriarCategoria");
+const msgCategoria = document.getElementById("msgCategoria");
 
 // ID do produto em edição (null = novo produto)
 let produtoEmEdicao = null;
@@ -21,6 +24,61 @@ checkboxPromo.addEventListener("change", () => {
   grupoPrecoPromo.style.display = checkboxPromo.checked ? "block" : "none";
   if (!checkboxPromo.checked) {
     inputPrecoPromo.value = "";
+  }
+});
+
+// CRIAR NOVA CATEGORIA
+btnCriarCategoria.addEventListener("click", async () => {
+  const nome = novaCategoria.value.trim();
+  
+  if (!nome) {
+    msgCategoria.textContent = "⚠️ Digite o nome da categoria";
+    msgCategoria.style.color = "#ff9800";
+    msgCategoria.style.display = "block";
+    return;
+  }
+
+  try {
+    msgCategoria.style.display = "none";
+    const response = await fetch(API_CATEGORIAS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome })
+    });
+
+    if (!response.ok) {
+      const erro = await response.json();
+      throw new Error(erro.message || "Erro ao criar categoria");
+    }
+
+    const categoria = await response.json();
+    
+    // Adicionar ao select
+    const option = document.createElement("option");
+    option.value = categoria.id;
+    option.textContent = categoria.nome;
+    categoriaSelect.appendChild(option);
+    
+    // Atualizar mapa
+    categoriasMapa[categoria.id] = categoria.nome;
+    
+    // Limpar input
+    novaCategoria.value = "";
+    
+    // Mostrar mensagem de sucesso
+    msgCategoria.textContent = `✅ Categoria "${nome}" criada com sucesso!`;
+    msgCategoria.style.color = "#4caf50";
+    msgCategoria.style.display = "block";
+    
+    setTimeout(() => {
+      msgCategoria.style.display = "none";
+    }, 3000);
+    
+  } catch (error) {
+    console.error(error);
+    msgCategoria.textContent = "❌ Erro: " + error.message;
+    msgCategoria.style.color = "#f44";
+    msgCategoria.style.display = "block";
   }
 });
 
