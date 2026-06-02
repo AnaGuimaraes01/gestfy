@@ -11,6 +11,7 @@ const categoriaSelect = document.getElementById("categoria");
 
 // ID do produto em edição (null = novo produto)
 let produtoEmEdicao = null;
+let categoriasMapa = {}; // Armazenar categorias para lookup rápido
 
 // Carregar categorias no select
 async function carregarCategorias() {
@@ -26,6 +27,9 @@ async function carregarCategorias() {
       option.value = categoria.id;
       option.textContent = categoria.nome;
       categoriaSelect.appendChild(option);
+      
+      // Armazenar em mapa para lookup na listagem
+      categoriasMapa[categoria.id] = categoria.nome;
     });
   } catch (error) {
     console.error("Erro ao carregar categorias:", error);
@@ -74,6 +78,7 @@ async function listarProdutos() {
           <p class="descricao-small">${produto.descricao || "Sem descrição"}</p>
           <span class="preco">R$ ${parseFloat(produto.preco).toFixed(2)}</span>
           <span class="quantidade">Qtd: ${produto.quantidade ?? 0}</span>
+          <span class="categoria" style="color: #666; font-size: 0.9em; display: block; margin-top: 5px;">📁 ${categoriasMapa[produto.categoriaId] || "Sem categoria"}</span>
           <small style="color: #999; display: block; margin-top: 5px;">ID: ${produto.id}</small>
         </div>
         <div class="produto-actions">
