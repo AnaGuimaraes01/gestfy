@@ -1,11 +1,34 @@
 let API_URL = "https://gestfy-backend.onrender.com/api/produtos";
-(async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/produtos', { signal: c.signal }); clearTimeout(t); if (r && r.ok) API_URL = 'http://localhost:8080/api/produtos'; } catch (e) {} })();
+let API_CATEGORIAS = "https://gestfy-backend.onrender.com/api/categorias";
+(async function() { try { const c = new AbortController(); const t = setTimeout(() => c.abort(), 200); const r = await fetch('http://localhost:8080/api/produtos', { signal: c.signal }); clearTimeout(t); if (r && r.ok) { API_URL = 'http://localhost:8080/api/produtos'; API_CATEGORIAS = 'http://localhost:8080/api/categorias'; } } catch (e) {} })();
 
 const produtosList = document.getElementById("produtosList");
 const form = document.getElementById("produtoForm");
 const msg = document.getElementById("msg");
+const selectCategoria = document.getElementById("categoria");
 
 let produtoEmEdicao = null;
+
+// Carregar categorias no select
+async function carregarCategorias() {
+  try {
+    const response = await fetch(API_CATEGORIAS);
+    if (!response.ok) throw new Error("Erro ao buscar categorias");
+    
+    const categorias = await response.json();
+    selectCategoria.innerHTML = '<option value="">Selecione uma categoria</option>';
+    
+    categorias.forEach(cat => {
+      const option = document.createElement("option");
+      option.value = cat.id;
+      option.textContent = cat.nome;
+      selectCategoria.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar categorias:", error);
+    msg.textContent = "Erro ao carregar categorias";
+  }
+}
 
 async function listarProdutos() {
   try {
@@ -77,13 +100,18 @@ form.addEventListener("submit", async (e) => {
     msg.textContent = " Quantidade deve ser maior que 0";
     return;
   }
+  if (!selectCategoria.value) {
+    msg.textContent = " Categoria é obrigatória";
+    return;
+  }
 
   const produto = {
     nome: nome.value.trim(),
     descricao: descricao.value.trim(),
     preco: parseFloat(preco.value),
     urlFoto: urlFoto.value.trim() || null,
-    quantidade: parseInt(quantidade.value)
+    quantidade: parseInt(quantidade.value),
+    categoriaId: parseInt(selectCategoria.value)
   };
 
   try {
@@ -116,7 +144,9 @@ form.addEventListener("submit", async (e) => {
     msg.textContent = mensagem;
     msg.style.color = "#34a853";
     form.reset();
+    selectCategoria.value = "";
     produtoEmEdicao = null;
+    document.getElementById("btnCancelar").style.display = "none";
     
     // Atualizar label do botão
     document.querySelector("button[type='submit']").textContent = "Salvar Produto";
@@ -147,9 +177,11 @@ async function editarProduto(id) {
     document.getElementById("preco").value = produto.preco;
     document.getElementById("urlFoto").value = produto.urlFoto || "";
     document.getElementById("quantidade").value = produto.quantidade;
+    document.getElementById("categoria").value = produto.categoriaId;
     
     produtoEmEdicao = id;
     document.querySelector("button[type='submit']").textContent = "Atualizar Produto";
+    document.getElementById("btnCancelar").style.display = "block";
     
     form.scrollIntoView({ behavior: "smooth" });
     
@@ -159,4 +191,14 @@ async function editarProduto(id) {
   }
 }
 
+function cancelarEdicao() {
+  form.reset();
+  produtoEmEdicao = null;
+  selectCategoria.value = "";
+  document.querySelector("button[type='submit']").textContent = "Salvar Produto";
+  document.getElementById("btnCancelar").style.display = "none";
+  msg.textContent = "";
+}
+
+carregarCategorias();
 listarProdutos();
