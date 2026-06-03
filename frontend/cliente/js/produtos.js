@@ -37,28 +37,29 @@ let categoriaAtiva = 0; // 0 = todas as categorias
 function criarCardDestaque(produto) {
     const card = document.createElement("div");
     card.className = "produto-card";
-    let precoExibir = produto.preco;
-    let precoPromo = "";
+    
+    let precoHtml = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+    let badgePromo = "";
     
     if (produto.emPromo && produto.precoPromo) {
-        precoPromo = `<p style="color: #4caf50; font-size: 1.1em; font-weight: bold;">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>`;
-        precoExibir = `<p class="produto-preco" style="text-decoration: line-through; color: #999;">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
-    } else {
-        precoExibir = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+        precoHtml = `
+            <p class="produto-preco-original">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+            <p class="produto-preco-promo">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>
+        `;
+        badgePromo = '<span class="badge-promo">PROMOÇÃO</span>';
     }
     
     card.innerHTML = `
         <div class="produto-imagem">
-            ${produto.emPromo ? '<span style="position: absolute; top: 8px; right: 8px; background: #ff5722; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">PROMOÇÃO</span>' : ''}
+            ${badgePromo}
             <img src="${produto.urlFoto || '/images/placeholder.png'}" alt="${produto.nome}" onerror="this.style.display='none'">
         </div>
         <div class="produto-info">
             <h3 class="produto-nome">${produto.nome}</h3>
-            <p class="produto-descricao">${produto.descricao || "Sem descrição"}</p>
-            ${precoExibir}
-            ${precoPromo}
-            <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
-                 Adicionar
+            <p class="produto-descricao">${produto.descricao || ""}</p>
+            ${precoHtml}
+            <button class="btn-carrinho-card" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
+                Adicionar ao Carrinho
             </button>
         </div>
     `;
@@ -188,35 +189,36 @@ function exibirProdutos(produtos) {
     container.innerHTML = "";
     
     if (produtos.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">Nenhum produto encontrado</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.6); padding: 40px 20px;">Nenhum produto encontrado</p>';
         return;
     }
 
     produtos.forEach(produto => {
         const card = document.createElement("div");
         card.className = "produto-card";
-        let precoExibir = produto.preco;
-        let precoPromo = "";
+        
+        let precoHtml = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+        let badgePromo = "";
         
         if (produto.emPromo && produto.precoPromo) {
-            precoPromo = `<p style="color: #4caf50; font-size: 1.1em; font-weight: bold;">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>`;
-            precoExibir = `<p class="produto-preco" style="text-decoration: line-through; color: #999;">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
-        } else {
-            precoExibir = `<p class="produto-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>`;
+            precoHtml = `
+                <p class="produto-preco-original">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+                <p class="produto-preco-promo">R$ ${parseFloat(produto.precoPromo).toFixed(2)}</p>
+            `;
+            badgePromo = '<span class="badge-promo">PROMOÇÃO</span>';
         }
         
         card.innerHTML = `
             <div class="produto-imagem">
-                ${produto.emPromo ? '<span style="position: absolute; top: 8px; right: 8px; background: #ff5722; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold;">PROMOÇÃO</span>' : ''}
+                ${badgePromo}
                 <img src="${produto.urlFoto || '/images/placeholder.png'}" alt="${produto.nome}" onerror="this.style.display='none'">
             </div>
             <div class="produto-info">
                 <h3 class="produto-nome">${produto.nome}</h3>
-                <p class="produto-descricao">${produto.descricao || "Sem descrição"}</p>
-                ${precoExibir}
-                ${precoPromo}
-                <button class="btn-carrinho" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
-                     Adicionar
+                <p class="produto-descricao">${produto.descricao || ""}</p>
+                ${precoHtml}
+                <button class="btn-carrinho-card" onclick="adicionarCarrinho(${produto.id}, '${produto.nome}', ${produto.emPromo && produto.precoPromo ? produto.precoPromo : produto.preco})">
+                    Adicionar ao Carrinho
                 </button>
             </div>
         `;

@@ -14,48 +14,58 @@
 
     <main>
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 20px; gap: 12px; flex-wrap: wrap;">
+            <!-- Search e Carrinho -->
+            <div class="catalogo-top">
                 <input 
                     type="text" 
                     id="buscaInput" 
                     class="barra-busca" 
-                    placeholder="Buscar produtos por nome..." 
-                    style="flex: 1; min-width: 200px; margin: 0;">
-                <a href="carrinho.html" class="btn" style="white-space: nowrap; display: flex; align-items: center; padding: 12px 24px;"> Ver Carrinho</a>
+                    placeholder="Buscar produtos..." 
+                >
+                <a href="carrinho.html" class="btn btn-carrinho">
+                    <span>Carrinho</span>
+                </a>
             </div>
 
             <div id="mensagem" class="msg" style="display: none;"></div>
 
-            <!-- Seção: Promoções em Destaque -->
-            <section id="secaoPromocoes" style="margin-bottom: 30px; display: none;">
-                <h2 style="margin-bottom: 15px; color: #ff5722;">🎉 Em Promoção</h2>
+            <!-- Seção: Em Promoção -->
+            <section id="secaoPromocoes" class="destaque-section" style="display: none;">
+                <div class="destaque-header">
+                    <h2>Em Promoção</h2>
+                </div>
                 <div id="promotoesContainer" class="catalogo-grid-destaque">
                     <!-- Produtos em promoção carregados aqui -->
                 </div>
             </section>
 
             <!-- Seção: Mais Vendidos -->
-            <section id="secaoVendidos" style="margin-bottom: 30px; display: none;">
-                <h2 style="margin-bottom: 15px; color: #2196f3;">⭐ Mais Vendidos</h2>
+            <section id="secaoVendidos" class="destaque-section" style="display: none;">
+                <div class="destaque-header">
+                    <h2>Mais Vendidos</h2>
+                </div>
                 <div id="vendidosContainer" class="catalogo-grid-destaque">
                     <!-- Produtos mais vendidos carregados aqui -->
                 </div>
             </section>
 
-            <!-- Seção: Mais Populares (Pesquisados) -->
-            <section id="secaoPopulares" style="margin-bottom: 30px; display: none;">
-                <h2 style="margin-bottom: 15px; color: #4caf50;">👥 Mais Populares</h2>
+            <!-- Seção: Mais Populares -->
+            <section id="secaoPopulares" class="destaque-section" style="display: none;">
+                <div class="destaque-header">
+                    <h2>Mais Populares</h2>
+                </div>
                 <div id="popularesContainer" class="catalogo-grid-destaque">
                     <!-- Produtos mais populares carregados aqui -->
                 </div>
             </section>
 
-            <!-- Navegação de Categorias -->
-            <div style="margin-bottom: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
-                <h2 style="margin-bottom: 15px;">Categorias</h2>
-                <div id="categoriasNav" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="btn-categoria btn-categoria-ativo" data-categoria="0" onclick="filtrarPorCategoria(0)">Todas</button>
-                </div>
+            <!-- Divisor e Categorias -->
+            <div class="categorias-divisor">
+                <h2>Categorias</h2>
+            </div>
+            
+            <div id="categoriasNav" class="categorias-nav">
+                <button class="btn-categoria btn-categoria-ativo" data-categoria="0" onclick="filtrarPorCategoria(0)">Todas</button>
             </div>
 
             <!-- Grid de Produtos por Categoria -->

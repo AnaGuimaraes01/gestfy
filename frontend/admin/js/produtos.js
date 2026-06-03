@@ -13,6 +13,9 @@ const grupoPrecoPromo = document.getElementById("grupoPrecoPromo");
 const inputPrecoPromo = document.getElementById("precoPromo");
 const novaCategoria = document.getElementById("novaCategoria");
 const btnCriarCategoria = document.getElementById("btnCriarCategoria");
+const btnToggleCriarCategoria = document.getElementById("btnToggleCriarCategoria");
+const btnCancelarCategoria = document.getElementById("btnCancelarCategoria");
+const criarCategoriaBox = document.getElementById("criarCategoriaBox");
 const msgCategoria = document.getElementById("msgCategoria");
 
 // ID do produto em edição (null = novo produto)
@@ -27,19 +30,35 @@ checkboxPromo.addEventListener("change", () => {
   }
 });
 
+// Toggle: mostrar/ocultar box de criar categoria
+btnToggleCriarCategoria.addEventListener("click", (e) => {
+  e.preventDefault();
+  const isHidden = criarCategoriaBox.style.display === "none";
+  criarCategoriaBox.style.display = isHidden ? "flex" : "none";
+  novaCategoria.focus();
+});
+
+// Cancelar criação de categoria
+btnCancelarCategoria.addEventListener("click", (e) => {
+  e.preventDefault();
+  criarCategoriaBox.style.display = "none";
+  novaCategoria.value = "";
+  msgCategoria.style.display = "none";
+});
+
 // CRIAR NOVA CATEGORIA
-btnCriarCategoria.addEventListener("click", async () => {
+btnCriarCategoria.addEventListener("click", async (e) => {
+  e.preventDefault();
   const nome = novaCategoria.value.trim();
   
   if (!nome) {
-    msgCategoria.textContent = "⚠️ Digite o nome da categoria";
-    msgCategoria.style.color = "#ff9800";
+    msgCategoria.textContent = "Digite o nome da categoria";
+    msgCategoria.className = "msg-categoria info";
     msgCategoria.style.display = "block";
     return;
   }
 
   try {
-    msgCategoria.style.display = "none";
     const response = await fetch(API_CATEGORIAS, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -58,6 +77,7 @@ btnCriarCategoria.addEventListener("click", async () => {
     option.value = categoria.id;
     option.textContent = categoria.nome;
     categoriaSelect.appendChild(option);
+    categoriaSelect.value = categoria.id;
     
     // Atualizar mapa
     categoriasMapa[categoria.id] = categoria.nome;
@@ -66,18 +86,20 @@ btnCriarCategoria.addEventListener("click", async () => {
     novaCategoria.value = "";
     
     // Mostrar mensagem de sucesso
-    msgCategoria.textContent = `✅ Categoria "${nome}" criada com sucesso!`;
-    msgCategoria.style.color = "#4caf50";
+    msgCategoria.textContent = `Categoria "${nome}" criada com sucesso`;
+    msgCategoria.className = "msg-categoria success";
     msgCategoria.style.display = "block";
     
+    // Fechar box após 2 segundos
     setTimeout(() => {
+      criarCategoriaBox.style.display = "none";
       msgCategoria.style.display = "none";
-    }, 3000);
+    }, 2000);
     
   } catch (error) {
     console.error(error);
-    msgCategoria.textContent = "❌ Erro: " + error.message;
-    msgCategoria.style.color = "#f44";
+    msgCategoria.textContent = "Erro: " + error.message;
+    msgCategoria.className = "msg-categoria error";
     msgCategoria.style.display = "block";
   }
 });

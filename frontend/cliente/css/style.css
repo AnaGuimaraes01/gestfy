@@ -109,9 +109,350 @@ main {
 .catalogo-grid-destaque {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  overflow-x: auto;
-  padding-bottom: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+/* ====================================================
+   CATÁLOGO CLIENTE - LAYOUT PROFISSIONAL
+===================================================== */
+
+.catalogo-top {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+  align-items: stretch;
+}
+
+.barra-busca {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 16px;
+  border: 1px solid var(--rosa);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--branco);
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.barra-busca::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.barra-busca:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--rosa-claro);
+}
+
+.btn-carrinho {
+  padding: 12px 28px;
+  background: var(--rosa);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  transition: all 0.3s;
+  min-width: 140px;
+}
+
+.btn-carrinho:hover {
+  background: var(--rosa-escuro);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(176, 48, 96, 0.3);
+}
+
+/* Seções de Destaque */
+.destaque-section {
+  margin-bottom: 50px;
+}
+
+.destaque-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--rosa);
+}
+
+.destaque-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.destaque-section:nth-child(2) .destaque-header {
+  border-color: #ff5722;
+}
+
+.destaque-section:nth-child(3) .destaque-header {
+  border-color: #2196f3;
+}
+
+.destaque-section:nth-child(4) .destaque-header {
+  border-color: #4caf50;
+}
+
+/* Categorias */
+.categorias-divisor {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 50px 0 30px 0;
+  padding: 30px 0 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.categorias-divisor h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.categorias-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.btn-categoria {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--cinza-texto);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-categoria:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-categoria-ativo {
+  background: var(--rosa);
+  color: white;
+  border-color: var(--rosa);
+}
+
+.btn-categoria-ativo:hover {
+  background: var(--rosa-escuro);
+  border-color: var(--rosa-escuro);
+}
+
+/* Card de Produto Melhorado */
+.produto-card {
+  background: var(--cinza-card);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.produto-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.produto-imagem {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.produto-imagem img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.produto-card:hover .produto-imagem img {
+  transform: scale(1.05);
+}
+
+/* Badge de Promoção */
+.produto-imagem .badge-promo {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #ff5722;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 10;
+}
+
+.produto-info {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.produto-nome {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  color: var(--branco);
+}
+
+.produto-descricao {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.produto-preco {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--rosa);
+  margin: 0 0 4px 0;
+}
+
+.produto-preco-original {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: line-through;
+  margin: 0 0 8px 0;
+}
+
+.produto-preco-promo {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4caf50;
+  margin: 0 0 12px 0;
+}
+
+.btn-carrinho-card {
+  background: var(--rosa);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  margin-top: auto;
+}
+
+.btn-carrinho-card:hover {
+  background: var(--rosa-escuro);
+  transform: scale(1.02);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .catalogo-top {
+    flex-direction: column;
+  }
+
+  .barra-busca {
+    width: 100%;
+  }
+
+  .btn-carrinho {
+    width: 100%;
+  }
+
+  .destaque-header h2 {
+    font-size: 18px;
+  }
+
+  .categorias-divisor h2 {
+    font-size: 18px;
+  }
+
+  .btn-categoria {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .catalogo-grid-destaque {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .produto-card {
+    border-radius: 8px;
+  }
+
+  .produto-info {
+    padding: 12px;
+  }
+
+  .produto-nome {
+    font-size: 13px;
+  }
+
+  .produto-descricao {
+    font-size: 11px;
+  }
+
+  .produto-preco {
+    font-size: 16px;
+  }
+
+  .btn-carrinho-card {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalogo-grid,
+  .catalogo-grid-destaque {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .produto-nome {
+    font-size: 12px;
+  }
+
+  .produto-descricao {
+    display: none;
+  }
+
+  .produto-preco {
+    font-size: 14px;
+  }
+
+  .btn-categoria {
+    padding: 8px 12px;
+    font-size: 11px;
+  }
 }
 
 .stats-grid {
