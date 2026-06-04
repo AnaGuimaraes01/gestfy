@@ -103,8 +103,9 @@ public class PedidoService {
             item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
             item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
 
-            // Descontar quantidade
-            Integer novaQuantidade = produto.getQuantidade() - item.getQuantidade();
+            // Descontar quantidade - SEGURO CONTRA NULL
+            Integer quantidadeAtual = produto.getQuantidade() != null ? produto.getQuantidade() : 0;
+            Integer novaQuantidade = quantidadeAtual - item.getQuantidade();
             produto.setQuantidade(novaQuantidade);
             produtoRepository.save(produto);
 
