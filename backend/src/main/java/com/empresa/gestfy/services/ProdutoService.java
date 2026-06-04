@@ -21,10 +21,13 @@ public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
     private final EstoqueService estoqueService;
+    private final CategoriaService categoriaService;
 
-    public ProdutoService(ProdutoRepository produtoRepository, EstoqueService estoqueService) {
+    public ProdutoService(ProdutoRepository produtoRepository, EstoqueService estoqueService,
+            CategoriaService categoriaService) {
         this.produtoRepository = produtoRepository;
         this.estoqueService = estoqueService;
+        this.categoriaService = categoriaService;
     }
 
     // ========================================
@@ -35,12 +38,20 @@ public class ProdutoService {
      * Criar novo produto
      */
     public ProdutoDTO criar(ProdutoRequest request) {
+        // Validar e buscar categoria
+        com.empresa.gestfy.models.Categoria categoria = categoriaService.buscarCategoriaModelo(request.categoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
         Produto produto = new Produto(
                 request.nome(),
                 request.descricao(),
                 request.preco(),
                 request.urlFoto(),
                 request.quantidade());
+
+        produto.setCategoria(categoria);
+        produto.setEmPromo(request.emPromo() != null ? request.emPromo() : false);
+        produto.setPrecoPromo(request.precoPromo());
 
         Produto salvo = produtoRepository.save(produto);
 
@@ -83,11 +94,18 @@ public class ProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
+        // Validar e buscar categoria
+        com.empresa.gestfy.models.Categoria categoria = categoriaService.buscarCategoriaModelo(request.categoriaId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+
         produto.setNome(request.nome());
         produto.setDescricao(request.descricao());
         produto.setPreco(request.preco());
         produto.setUrlFoto(request.urlFoto());
         produto.setQuantidade(request.quantidade());
+        produto.setCategoria(categoria);
+        produto.setEmPromo(request.emPromo() != null ? request.emPromo() : false);
+        produto.setPrecoPromo(request.precoPromo());
 
         Produto atualizado = produtoRepository.save(produto);
         return toDTO(atualizado);
@@ -101,6 +119,58 @@ public class ProdutoService {
             throw new RuntimeException("Produto não encontrado");
         }
         produtoRepository.deleteById(id);
+    }
+
+    /**
+     * Listar produtos por categoria
+     */
+    public List<ProdutoDTO> listarPorCategoria(Long categoriaId) {
+        // Validar se categoria existe
+        if (!categoriaId.equals(null) && categoriaId > 0) {
+            return produtoRepository.findAll()
+                    .stream()
+                    .filter(p -> p.getCategoria() != null && p.getCategoria().getId().equals(categoriaId))
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
+    /**
+     * Listar produtos em promoção
+     */
+    public List<ProdutoDTO> listarPromocoes() {
+        return produtoRepository.findAll()
+                .stream()
+                .filter(p -> p.getEmPromo() != null && p.getEmPromo())
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Listar produtos mais vendidos (top 6)
+     */
+    public List<ProdutoDTO> listarMaisVendidos() {
+        return produtoRepository.findAll()
+                .stream()
+                .sorted((a, b) -> Long.compare(b.getVendas() != null ? b.getVendas() : 0L,
+                        a.getVendas() != null ? a.getVendas() : 0L))
+                .limit(6)
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Listar produtos mais populares/visualizados (top 6)
+     */
+    public List<ProdutoDTO> listarMaisPopulares() {
+        return produtoRepository.findAll()
+                .stream()
+                .sorted((a, b) -> Long.compare(b.getVisualizacoes() != null ? b.getVisualizacoes() : 0L,
+                        a.getVisualizacoes() != null ? a.getVisualizacoes() : 0L))
+                .limit(6)
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     // ========================================
@@ -168,6 +238,39 @@ public class ProdutoService {
                 produto.getDescricao(),
                 produto.getPreco(),
                 produto.getUrlFoto(),
-                produto.getQuantidade());
+                produto.getQuantidade(),
+                produto.getCategoria() != null ? produto.getCategoria().getId() : null,
+                produto.getEmPromo(),
+                produto.getPrecoPromo(),
+                produto.getVisualizacoes(),
+                produto.getVendas());
+    }
+
+    /**
+     * Incrementar visualizações do produto
+     */
+    public ProdutoDTO incrementarVisualizacoes(Long id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        Long visualizacoes = produto.getVisualizacoes() != null ? produto.getVisualizacoes() : 0L;
+        produto.setVisualizacoes(visualizacoes + 1);
+
+        Produto atualizado = produtoRepository.save(produto);
+        return toDTO(atualizado);
+    }
+
+    /**
+     * Incrementar vendas do produto
+     */
+    public ProdutoDTO incrementarVendas(Long id, Integer quantidade) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        Long vendas = produto.getVendas() != null ? produto.getVendas() : 0L;
+        produto.setVendas(vendas + quantidade);
+
+        Produto atualizado = produtoRepository.save(produto);
+        return toDTO(atualizado);
     }
 }

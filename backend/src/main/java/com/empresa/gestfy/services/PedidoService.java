@@ -1,5 +1,6 @@
 package com.empresa.gestfy.services;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.dto.pedido.PedidoDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemDTO;
 import com.empresa.gestfy.dto.pedido.PedidoItemRequest;
@@ -67,8 +68,10 @@ public class PedidoService {
                     Cliente novoCliente = new Cliente();
                     novoCliente.setNome(request.nomeCliente());
                     novoCliente.setTelefone(request.telefoneCliente());
-                    novoCliente.setEmail("");
-                    novoCliente.setEndereco("");
+                    // Gerar email único baseado no telefone para evitar constraint violations
+                    String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
+                    novoCliente.setEmail(emailUnico);
+                    novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
                     return clienteRepository.save(novoCliente);
                 });
 
@@ -80,7 +83,7 @@ public class PedidoService {
         pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setEndereco(request.endereco());
         pedido.setStatus("RECEBIDO");
-        pedido.setData(LocalDateTime.now());
+        pedido.setData(DataHoraBrasil.agora());
 
         // 3. Validar e processar itens
         List<PedidoItem> itens = new ArrayList<>();
@@ -100,8 +103,9 @@ public class PedidoService {
             item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
             item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
 
-            // Descontar quantidade
-            Integer novaQuantidade = produto.getQuantidade() - item.getQuantidade();
+            // Descontar quantidade - SEGURO CONTRA NULL
+            Integer quantidadeAtual = produto.getQuantidade() != null ? produto.getQuantidade() : 0;
+            Integer novaQuantidade = quantidadeAtual - item.getQuantidade();
             produto.setQuantidade(novaQuantidade);
             produtoRepository.save(produto);
 
@@ -110,7 +114,7 @@ public class PedidoService {
             movimento.setProduto(produto);
             movimento.setTipoMovimento("SAIDA");
             movimento.setQuantidade(item.getQuantidade());
-            movimento.setDataMovimento(LocalDateTime.now());
+            movimento.setDataMovimento(DataHoraBrasil.agora());
             estoqueRepository.save(movimento);
 
             // Adicionar item ao pedido
@@ -182,8 +186,8 @@ public class PedidoService {
         Caixa registro = new Caixa();
         registro.setTipo("ENTRADA");
         registro.setData(LocalDate.now());
-        registro.setDataAbertura(LocalDateTime.now());
-        registro.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
+        registro.setDataAbertura(DataHoraBrasil.agora());
+        registro.setHorarioAbertura(DataHoraBrasil.agora()); // Mantém por compatibilidade
         registro.setStatus("ABERTO");
         registro.setValorInicial(0.0); // Garantir que nunca seja null
         registro.setSaldo(pedido.getTotal());
