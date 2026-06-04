@@ -246,6 +246,12 @@
                 
                 const pedido = await resPedido.json();
 
+                // Incrementar vendas para cada produto
+                carrinho.forEach(item => {
+                    const endpoint = `${API_PEDIDOS.replace('/pedidos', '/produtos')}/${item.id}/incrementar-vendas/${item.quantidade}`;
+                    fetch(endpoint, { method: 'PUT' }).catch(() => {});
+                });
+
                 // Sucesso
                 localStorage.removeItem("carrinho");
                 msg.textContent = `Pedido #${pedido.id} criado com sucesso!`;

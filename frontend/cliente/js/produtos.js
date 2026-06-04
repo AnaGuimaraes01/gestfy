@@ -177,6 +177,12 @@ async function carregarProdutos() {
         
         todosProdutos = await response.json();
         exibirProdutos(todosProdutos);
+
+        // Incrementar visualizações para cada produto
+        todosProdutos.forEach(produto => {
+            const endpoint = `${API_URL}/${produto.id}/incrementar-visualizacoes`;
+            fetch(endpoint, { method: 'PUT' }).catch(() => {});
+        });
     } catch (error) {
         console.error(error);
         msg.textContent = "Erro ao carregar produtos";

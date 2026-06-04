@@ -140,4 +140,34 @@ public class ProdutoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    /**
+     * Incrementar visualizações do produto
+     * PUT /api/produtos/{id}/incrementar-visualizacoes
+     */
+    @PutMapping("/{id}/incrementar-visualizacoes")
+    public ResponseEntity<ProdutoDTO> incrementarVisualizacoes(@PathVariable Long id) {
+        try {
+            ProdutoDTO produto = produtoService.incrementarVisualizacoes(id);
+            return ResponseEntity.ok(produto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Incrementar vendas do produto
+     * PUT /api/produtos/{id}/incrementar-vendas/{quantidade}
+     */
+    @PutMapping("/{id}/incrementar-vendas/{quantidade}")
+    public ResponseEntity<ProdutoDTO> incrementarVendas(
+            @PathVariable Long id,
+            @PathVariable Integer quantidade) {
+        try {
+            ProdutoDTO produto = produtoService.incrementarVendas(id, quantidade);
+            return ResponseEntity.ok(produto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

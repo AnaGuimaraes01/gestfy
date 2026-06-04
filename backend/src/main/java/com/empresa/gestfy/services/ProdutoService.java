@@ -153,8 +153,8 @@ public class ProdutoService {
     public List<ProdutoDTO> listarMaisVendidos() {
         return produtoRepository.findAll()
                 .stream()
-                .sorted((a, b) -> Long.compare(b.getVendas() != null ? b.getVendas() : 0L, 
-                                              a.getVendas() != null ? a.getVendas() : 0L))
+                .sorted((a, b) -> Long.compare(b.getVendas() != null ? b.getVendas() : 0L,
+                        a.getVendas() != null ? a.getVendas() : 0L))
                 .limit(6)
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -166,8 +166,8 @@ public class ProdutoService {
     public List<ProdutoDTO> listarMaisPopulares() {
         return produtoRepository.findAll()
                 .stream()
-                .sorted((a, b) -> Long.compare(b.getVisualizacoes() != null ? b.getVisualizacoes() : 0L, 
-                                              a.getVisualizacoes() != null ? a.getVisualizacoes() : 0L))
+                .sorted((a, b) -> Long.compare(b.getVisualizacoes() != null ? b.getVisualizacoes() : 0L,
+                        a.getVisualizacoes() != null ? a.getVisualizacoes() : 0L))
                 .limit(6)
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -244,5 +244,33 @@ public class ProdutoService {
                 produto.getPrecoPromo(),
                 produto.getVisualizacoes(),
                 produto.getVendas());
+    }
+
+    /**
+     * Incrementar visualizações do produto
+     */
+    public ProdutoDTO incrementarVisualizacoes(Long id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        Long visualizacoes = produto.getVisualizacoes() != null ? produto.getVisualizacoes() : 0L;
+        produto.setVisualizacoes(visualizacoes + 1);
+
+        Produto atualizado = produtoRepository.save(produto);
+        return toDTO(atualizado);
+    }
+
+    /**
+     * Incrementar vendas do produto
+     */
+    public ProdutoDTO incrementarVendas(Long id, Integer quantidade) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        Long vendas = produto.getVendas() != null ? produto.getVendas() : 0L;
+        produto.setVendas(vendas + quantidade);
+
+        Produto atualizado = produtoRepository.save(produto);
+        return toDTO(atualizado);
     }
 }

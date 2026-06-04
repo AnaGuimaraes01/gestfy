@@ -68,8 +68,10 @@ public class PedidoService {
                     Cliente novoCliente = new Cliente();
                     novoCliente.setNome(request.nomeCliente());
                     novoCliente.setTelefone(request.telefoneCliente());
-                    novoCliente.setEmail("");
-                    novoCliente.setEndereco("");
+                    // Gerar email único baseado no telefone para evitar constraint violations
+                    String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
+                    novoCliente.setEmail(emailUnico);
+                    novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
                     return clienteRepository.save(novoCliente);
                 });
 
