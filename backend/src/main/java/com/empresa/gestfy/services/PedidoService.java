@@ -125,28 +125,32 @@ public class PedidoService {
     }
 
     /**
-     * Listar todos os pedidos
+     * Listar todos os pedidos com relacionamentos carregados
+     * @Transactional garante que os dados LAZY sejam carregados dentro da transação
      */
+    @Transactional(readOnly = true)
     public List<PedidoDTO> listar() {
-        return pedidoRepository.findAll()
+        return pedidoRepository.findAllWithRelationships()
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Buscar pedido por ID
+     * Buscar pedido por ID com relacionamentos carregados
      */
+    @Transactional(readOnly = true)
     public Optional<PedidoDTO> buscarPorId(Long id) {
-        return pedidoRepository.findById(id)
+        return pedidoRepository.findByIdWithRelationships(id)
                 .map(this::toDTO);
     }
 
     /**
-     * Atualizar status do pedido
+     * Atualizar status do pedido com relacionamentos carregados
      */
+    @Transactional
     public PedidoDTO atualizarStatus(Long id, String novoStatus) {
-        Pedido pedido = pedidoRepository.findById(id)
+        Pedido pedido = pedidoRepository.findByIdWithRelationships(id)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
         String statusAnterior = pedido.getStatus();
@@ -193,19 +197,36 @@ public class PedidoService {
 
     /**
      * Converter modelo para DTO
+     * Garante que todos os dados necessários estão disponíveis
      */
     private PedidoDTO toDTO(Pedido pedido) {
-        List<PedidoItemDTO> itensDTO = pedido.getItens().stream()
-                .map(item -> new PedidoItemDTO(
-                        item.getId(),
-                        item.getProduto().getId(),
-                        item.getProduto().getNome(),
-                        item.getPrecoUnitario(),
-                        item.getQuantidade(),
-                        item.getPrecoUnitario() * item.getQuantidade() // subtotal
-                ))
+        // Validações de segurança
+        if (pedido == null) {
+            throw new RuntimeException("Pedido não pode ser nulo");
+        }
+        if (pedido.getCliente() == null) {
+            throw new RuntimeException("Cliente não pode ser nulo no pedido: " + pedido.getId());
+        }
+
+        // Converter itens do pedido
+        List<PedidoItemDTO> itensDTO = (pedido.getItens() != null ? pedido.getItens() : new ArrayList<>())
+                .stream()
+                .map(item -> {
+                    if (item.getProduto() == null) {
+                        throw new RuntimeException("Produto não pode ser nulo no item: " + item.getId());
+                    }
+                    return new PedidoItemDTO(
+                            item.getId(),
+                            item.getProduto().getId(),
+                            item.getProduto().getNome(),
+                            item.getPrecoUnitario(),
+                            item.getQuantidade(),
+                            item.getPrecoUnitario() * item.getQuantidade() // subtotal
+                    );
+                })
                 .collect(Collectors.toList());
 
+        // Construir DTO com dados seguros
         return new PedidoDTO(
                 pedido.getId(),
                 pedido.getCliente().getNome(),
@@ -214,8 +235,9 @@ public class PedidoService {
                 pedido.getFormaPagamento(),
                 pedido.getFormaRecebimento(),
                 pedido.getStatus(),
-                pedido.getTotal(),
+                pedido.getTotal(), // Agora seguro, pois itens estão carregados
                 pedido.getData(),
-                itensDTO);
+                itensDTO
+        );
     }
 }

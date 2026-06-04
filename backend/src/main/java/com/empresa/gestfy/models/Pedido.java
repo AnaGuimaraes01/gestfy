@@ -1,5 +1,6 @@
 package com.empresa.gestfy.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -24,9 +25,6 @@ public class Pedido {
     private String formaRecebimento; // RETIRADA ou ENTREGA
     private String endereco;
     private String status;
-
-    @Column(nullable = false)
-    private Double total = 0.0;
 
     // AVISO: NÃO inicializar aqui para evitar falha no DDL
     @Column(nullable = false)
@@ -84,7 +82,7 @@ public class Pedido {
     }
 
     public String getEndereco() {
- return endereco;
+        return endereco;
     }
 
     public void setEndereco(String endereco) {
@@ -100,15 +98,14 @@ public class Pedido {
     }
 
     public Double getTotal() {
+        if (itens == null || itens.isEmpty()) {
+            return 0.0;
+        }
         return itens.stream()
                 .mapToDouble(item ->
                         item.getPrecoUnitario() * item.getQuantidade()
                 )
                 .sum();
-    }
-
-    public void setTotal(Double total) {
-        this.total = total;
     }
 
     public LocalDateTime getData() {
