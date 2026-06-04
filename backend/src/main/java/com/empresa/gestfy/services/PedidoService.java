@@ -213,7 +213,8 @@ public class PedidoService {
         }
 
         // Converter itens do pedido
-        List<PedidoItemDTO> itensDTO = (pedido.getItens() != null ? pedido.getItens() : new ArrayList<>())
+        List<PedidoItem> itens = pedido.getItens() != null ? pedido.getItens() : new ArrayList<>();
+        List<PedidoItemDTO> itensDTO = itens
                 .stream()
                 .map(item -> {
                     if (item.getProduto() == null) {

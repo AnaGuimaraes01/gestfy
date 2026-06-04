@@ -1,6 +1,5 @@
 package com.empresa.gestfy.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.empresa.gestfy.config.DataHoraBrasil;
 import jakarta.persistence.*;
@@ -30,6 +29,9 @@ public class Pedido {
     // AVISO: NÃO inicializar aqui para evitar falha no DDL
     @Column(nullable = false)
     private LocalDateTime data;
+
+    // Campo para compatibilidade com setTotal() em PedidoService.criar()
+    private Double total = 0.0;
 
     // Itens do pedido
     @OneToMany(
@@ -115,6 +117,10 @@ public class Pedido {
 
     public void setData(LocalDateTime data) {
         this.data = data;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
     public List<PedidoItem> getItens() {
