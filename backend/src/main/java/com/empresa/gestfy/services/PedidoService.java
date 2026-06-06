@@ -60,76 +60,175 @@ public class PedidoService {
      */
     @Transactional
     public PedidoDTO criar(PedidoRequest request) {
-        // 1. Buscar ou criar cliente
-        Cliente cliente = clienteRepository.findAll().stream()
-                .filter(c -> c.getTelefone() != null && c.getTelefone().equals(request.telefoneCliente()))
-                .findFirst()
-                .orElseGet(() -> {
-                    Cliente novoCliente = new Cliente();
-                    novoCliente.setNome(request.nomeCliente());
-                    novoCliente.setTelefone(request.telefoneCliente());
-                    // Gerar email único baseado no telefone para evitar constraint violations
-                    String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
-                    novoCliente.setEmail(emailUnico);
-                    novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
-                    return clienteRepository.save(novoCliente);
-                });
+        try {
+            System.out.println("\n=== INICIANDO CRIAÇÃO DE PEDIDO ===");
+            System.out.println("Cliente: " + request.nomeCliente());
+            System.out.println("Telefone: " + request.telefoneCliente());
+            System.out.println("Itens: " + (request.itens() != null ? request.itens().size() : 0));
 
-        // 2. Criar pedido
-        Pedido pedido = new Pedido();
-        pedido.setCliente(cliente);
-        // Forçar pagamento somente em dinheiro conforme regra do sistema
-        pedido.setFormaPagamento("DINHEIRO");
-        pedido.setFormaRecebimento(request.formaRecebimento());
-        pedido.setEndereco(request.endereco());
-        pedido.setStatus("RECEBIDO");
-        pedido.setData(DataHoraBrasil.agora());
-
-        // 3. Validar e processar itens
-        List<PedidoItem> itens = new ArrayList<>();
-        Double totalPedido = 0.0;
-
-        for (PedidoItemRequest itemReq : request.itens()) {
-            Produto produto = produtoRepository.findById(itemReq.getIdProduto())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + itemReq.getIdProduto()));
-
-            if (produto.getQuantidade() == null || produto.getQuantidade() < itemReq.getQuantidade()) {
-                throw new RuntimeException("Quantidade insuficiente do produto: " + produto.getNome());
+            // 1. Buscar ou criar cliente
+            System.out.println("\n[PASSO 1] Buscando ou criando cliente...");
+            Cliente cliente = null;
+            try {
+                cliente = clienteRepository.findAll().stream()
+                        .filter(c -> c.getTelefone() != null && c.getTelefone().equals(request.telefoneCliente()))
+                        .findFirst()
+                        .orElseGet(() -> {
+                            System.out.println("  → Cliente não encontrado, criando novo...");
+                            Cliente novoCliente = new Cliente();
+                            novoCliente.setNome(request.nomeCliente());
+                            novoCliente.setTelefone(request.telefoneCliente());
+                            // Gerar email único baseado no telefone para evitar constraint violations
+                            String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
+                            novoCliente.setEmail(emailUnico);
+                            novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
+                            Cliente salvo = clienteRepository.save(novoCliente);
+                            System.out.println("  → Cliente criado com ID: " + salvo.getId());
+                            return salvo;
+                        });
+                System.out.println("✓ Cliente obtido: ID=" + cliente.getId() + ", Nome=" + cliente.getNome());
+            } catch (Exception e) {
+                System.out.println(
+                        "✗ ERRO ao buscar/criar cliente: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Erro ao processar cliente: " + e.getMessage(), e);
             }
 
-            PedidoItem item = new PedidoItem();
-            item.setPedido(pedido);
-            item.setProduto(produto);
-            item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
-            item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
+            if (cliente == null) {
+                throw new RuntimeException("Cliente não pode ser nulo");
+            }
 
-            // Descontar quantidade - SEGURO CONTRA NULL
-            Integer quantidadeAtual = produto.getQuantidade() != null ? produto.getQuantidade() : 0;
-            Integer novaQuantidade = quantidadeAtual - item.getQuantidade();
-            produto.setQuantidade(novaQuantidade);
-            produtoRepository.save(produto);
+            // 2. Criar pedido
+            System.out.println("\n[PASSO 2] Criando entidade Pedido...");
+            Pedido pedido = new Pedido();
+            pedido.setCliente(cliente);
+            // Forçar pagamento somente em dinheiro conforme regra do sistema
+            pedido.setFormaPagamento("DINHEIRO");
+            pedido.setFormaRecebimento(request.formaRecebimento());
+            pedido.setEndereco(request.endereco());
+            pedido.setStatus("RECEBIDO");
+            LocalDateTime agora = DataHoraBrasil.agora();
+            System.out.println("  → Data/Hora: " + agora);
+            pedido.setData(agora);
+            System.out.println("✓ Pedido criado em memória");
 
-            // Registrar saída no estoque
-            Estoque movimento = new Estoque();
-            movimento.setProduto(produto);
-            movimento.setTipoMovimento("SAIDA");
-            movimento.setQuantidade(item.getQuantidade());
-            movimento.setDataMovimento(DataHoraBrasil.agora());
-            estoqueRepository.save(movimento);
+            // 3. Validar e processar itens
+            System.out.println("\n[PASSO 3] Processando " + request.itens().size() + " itens do pedido...");
+            List<PedidoItem> itens = new ArrayList<>();
+            Double totalPedido = 0.0;
 
-            // Adicionar item ao pedido
-            pedido.addItem(item);
-            totalPedido += item.getPrecoUnitario() * item.getQuantidade();
+            for (int i = 0; i < request.itens().size(); i++) {
+                PedidoItemRequest itemReq = request.itens().get(i);
+                System.out.println("\n  [Item " + (i + 1) + "]");
+                System.out.println("    ID Produto: " + itemReq.getIdProduto());
+                System.out.println("    Quantidade solicitada: " + itemReq.getQuantidade());
+
+                try {
+                    Produto produto = produtoRepository.findById(itemReq.getIdProduto())
+                            .orElseThrow(
+                                    () -> new RuntimeException("Produto não encontrado: ID " + itemReq.getIdProduto()));
+
+                    System.out.println("    ✓ Produto encontrado: " + produto.getNome());
+                    System.out.println("    Quantidade em estoque: "
+                            + (produto.getQuantidade() != null ? produto.getQuantidade() : "NULL"));
+                    System.out.println("    Preço: " + (produto.getPreco() != null ? produto.getPreco() : "NULL"));
+                    System.out.println("    Categoria ID: "
+                            + (produto.getCategoria() != null ? produto.getCategoria().getId() : "NULL"));
+
+                    if (produto.getQuantidade() == null || produto.getQuantidade() < itemReq.getQuantidade()) {
+                        System.out.println("    ✗ ERRO: Quantidade insuficiente");
+                        throw new RuntimeException("Quantidade insuficiente do produto: " + produto.getNome());
+                    }
+
+                    PedidoItem item = new PedidoItem();
+                    item.setPedido(pedido);
+                    item.setProduto(produto);
+                    item.setQuantidade(itemReq.getQuantidade() != null ? itemReq.getQuantidade() : 1);
+                    item.setPrecoUnitario(produto.getPreco() != null ? produto.getPreco() : 0.0);
+
+                    // Descontar quantidade - SEGURO CONTRA NULL
+                    Integer quantidadeAtual = produto.getQuantidade() != null ? produto.getQuantidade() : 0;
+                    Integer novaQuantidade = quantidadeAtual - item.getQuantidade();
+                    produto.setQuantidade(novaQuantidade);
+
+                    try {
+                        System.out.println("    → Atualizando quantidade do produto...");
+                        produtoRepository.save(produto);
+                        System.out.println("    ✓ Produto salvo com nova quantidade: " + novaQuantidade);
+                    } catch (Exception e) {
+                        System.out.println("    ✗ ERRO ao salvar produto: " + e.getClass().getSimpleName() + " - "
+                                + e.getMessage());
+                        e.printStackTrace();
+                        throw new RuntimeException("Erro ao atualizar estoque do produto: " + e.getMessage(), e);
+                    }
+
+                    // Registrar saída no estoque
+                    try {
+                        System.out.println("    → Registrando movimento de estoque...");
+                        Estoque movimento = new Estoque();
+                        movimento.setProduto(produto);
+                        movimento.setTipoMovimento("SAIDA");
+                        movimento.setQuantidade(item.getQuantidade());
+                        movimento.setDataMovimento(DataHoraBrasil.agora());
+                        estoqueRepository.save(movimento);
+                        System.out.println("    ✓ Movimento de estoque registrado");
+                    } catch (Exception e) {
+                        System.out.println("    ✗ ERRO ao registrar movimento de estoque: "
+                                + e.getClass().getSimpleName() + " - " + e.getMessage());
+                        e.printStackTrace();
+                        throw new RuntimeException("Erro ao registrar movimento de estoque: " + e.getMessage(), e);
+                    }
+
+                    // Adicionar item ao pedido
+                    pedido.addItem(item);
+                    totalPedido += item.getPrecoUnitario() * item.getQuantidade();
+                    System.out.println("    ✓ Item adicionado ao pedido");
+
+                } catch (RuntimeException e) {
+                    System.out.println("    ✗ ERRO ao processar item: " + e.getMessage());
+                    throw e;
+                }
+            }
+
+            System.out.println("\n[PASSO 4] Finalizando pedido...");
+            System.out.println("  Total do pedido: " + totalPedido);
+            pedido.setTotal(totalPedido);
+
+            try {
+                System.out.println("  → Salvando pedido no banco...");
+                Pedido salvo = pedidoRepository.save(pedido);
+                System.out.println("✓ Pedido salvo com ID: " + salvo.getId());
+
+                System.out.println("\n[PASSO 5] Recarregando pedido com relacionamentos...");
+                Pedido pedidoRecarregado = pedidoRepository.findByIdWithRelationships(salvo.getId())
+                        .orElseThrow(() -> new RuntimeException("Erro ao recarregar pedido após salvar"));
+                System.out.println("✓ Pedido recarregado com sucesso");
+
+                System.out.println("\n[PASSO 6] Convertendo para DTO...");
+                PedidoDTO dto = toDTO(pedidoRecarregado);
+                System.out.println("✓ Conversão para DTO realizada com sucesso");
+                System.out.println("=== CRIAÇÃO DE PEDIDO FINALIZADA COM SUCESSO ===");
+                return dto;
+
+            } catch (Exception e) {
+                System.out.println("✗ ERRO ao salvar pedido ou converter para DTO: " + e.getClass().getSimpleName()
+                        + " - " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Erro ao salvar pedido: " + e.getMessage(), e);
+            }
+
+        } catch (Exception e) {
+            System.out.println("\n✗ ERRO GERAL NA CRIAÇÃO DE PEDIDO:");
+            System.out.println("  Tipo: " + e.getClass().getSimpleName());
+            System.out.println("  Mensagem: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao criar pedido: " + e.getMessage(), e);
         }
-
-        pedido.setTotal(totalPedido);
-
-        Pedido salvo = pedidoRepository.save(pedido);
-        return toDTO(salvo);
     }
 
     /**
      * Listar todos os pedidos com relacionamentos carregados
+     * 
      * @Transactional garante que os dados LAZY sejam carregados dentro da transação
      */
     @Transactional(readOnly = true)
@@ -203,46 +302,87 @@ public class PedidoService {
      * Converter modelo para DTO
      * Garante que todos os dados necessários estão disponíveis
      */
+    @Transactional(readOnly = true)
     private PedidoDTO toDTO(Pedido pedido) {
-        // Validações de segurança
-        if (pedido == null) {
-            throw new RuntimeException("Pedido não pode ser nulo");
-        }
-        if (pedido.getCliente() == null) {
-            throw new RuntimeException("Cliente não pode ser nulo no pedido: " + pedido.getId());
-        }
+        try {
+            System.out.println("\n  [toDTO] Iniciando conversão para DTO...");
 
-        // Converter itens do pedido
-        List<PedidoItem> itens = pedido.getItens() != null ? pedido.getItens() : new ArrayList<>();
-        List<PedidoItemDTO> itensDTO = itens
-                .stream()
-                .map(item -> {
-                    if (item.getProduto() == null) {
-                        throw new RuntimeException("Produto não pode ser nulo no item: " + item.getId());
-                    }
-                    return new PedidoItemDTO(
-                            item.getId(),
-                            item.getProduto().getId(),
-                            item.getProduto().getNome(),
-                            item.getPrecoUnitario(),
-                            item.getQuantidade(),
-                            item.getPrecoUnitario() * item.getQuantidade() // subtotal
-                    );
-                })
-                .collect(Collectors.toList());
+            // Validações de segurança
+            if (pedido == null) {
+                System.out.println("  ✗ [toDTO] ERRO: Pedido é nulo");
+                throw new RuntimeException("Pedido não pode ser nulo");
+            }
 
-        // Construir DTO com dados seguros
-        return new PedidoDTO(
-                pedido.getId(),
-                pedido.getCliente().getNome(),
-                pedido.getCliente().getTelefone(),
-                pedido.getEndereco(),
-                pedido.getFormaPagamento(),
-                pedido.getFormaRecebimento(),
-                pedido.getStatus(),
-                pedido.getTotal(), // Agora seguro, pois itens estão carregados
-                pedido.getData(),
-                itensDTO
-        );
+            System.out.println("  [toDTO] Pedido ID: " + pedido.getId());
+
+            if (pedido.getCliente() == null) {
+                System.out.println("  ✗ [toDTO] ERRO: Cliente é nulo no pedido " + pedido.getId());
+                throw new RuntimeException("Cliente não pode ser nulo no pedido: " + pedido.getId());
+            }
+
+            System.out.println("  [toDTO] Cliente: " + pedido.getCliente().getNome());
+
+            // Converter itens do pedido
+            List<PedidoItem> itens = pedido.getItens() != null ? pedido.getItens() : new ArrayList<>();
+            System.out.println("  [toDTO] Itens do pedido: " + itens.size());
+
+            List<PedidoItemDTO> itensDTO = itens
+                    .stream()
+                    .map(item -> {
+                        try {
+                            if (item == null) {
+                                System.out.println("  ✗ [toDTO] ERRO: Item é nulo");
+                                throw new RuntimeException("Item não pode ser nulo");
+                            }
+
+                            if (item.getProduto() == null) {
+                                System.out.println("  ✗ [toDTO] ERRO: Produto é nulo no item " + item.getId());
+                                throw new RuntimeException("Produto não pode ser nulo no item: " + item.getId());
+                            }
+
+                            Produto prod = item.getProduto();
+                            System.out.println("    [toDTO Item] ID: " + item.getId() + ", Produto: " + prod.getNome() +
+                                    ", Categoria ID: "
+                                    + (prod.getCategoria() != null ? prod.getCategoria().getId() : "NULL"));
+
+                            return new PedidoItemDTO(
+                                    item.getId(),
+                                    item.getProduto().getId(),
+                                    item.getProduto().getNome(),
+                                    item.getPrecoUnitario(),
+                                    item.getQuantidade(),
+                                    item.getPrecoUnitario() * item.getQuantidade() // subtotal
+                            );
+                        } catch (Exception e) {
+                            System.out.println("  ✗ [toDTO] ERRO ao converter item: " + e.getClass().getSimpleName()
+                                    + " - " + e.getMessage());
+                            e.printStackTrace();
+                            throw new RuntimeException("Erro ao converter item para DTO: " + e.getMessage(), e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            // Construir DTO com dados seguros
+            System.out.println("  [toDTO] Total do pedido: " + pedido.getTotal());
+            System.out.println("  ✓ [toDTO] Conversão concluída com sucesso");
+
+            return new PedidoDTO(
+                    pedido.getId(),
+                    pedido.getCliente().getNome(),
+                    pedido.getCliente().getTelefone(),
+                    pedido.getEndereco(),
+                    pedido.getFormaPagamento(),
+                    pedido.getFormaRecebimento(),
+                    pedido.getStatus(),
+                    pedido.getTotal(), // Agora seguro, pois itens estão carregados
+                    pedido.getData(),
+                    itensDTO);
+        } catch (Exception e) {
+            System.out.println("\n  ✗ [toDTO] ERRO GERAL NA CONVERSÃO:");
+            System.out.println("    Tipo: " + e.getClass().getSimpleName());
+            System.out.println("    Mensagem: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao converter pedido para DTO: " + e.getMessage(), e);
+        }
     }
 }
