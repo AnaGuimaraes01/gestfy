@@ -13,7 +13,6 @@ public class Caixa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(name = "tipo")
     private String tipo;
 
@@ -58,6 +57,10 @@ public class Caixa {
     // Observações adicionais
     @Column(name = "observacoes")
     private String observacoes;
+
+    // Origem do registro: CAIXA (venda presencial) ou PEDIDO_ONLINE
+    @Column(name = "origem")
+    private String origem;
 
     public Caixa() {
         this.valorInicial = 0.0;
@@ -167,6 +170,14 @@ public class Caixa {
         this.observacoes = observacoes;
     }
 
+    public String getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.valorInicial == null) {
@@ -177,6 +188,9 @@ public class Caixa {
         }
         if (this.status == null) {
             this.status = "ABERTO";
+        }
+        if (this.origem == null) {
+            this.origem = "CAIXA"; // Padrão para venda presencial
         }
     }
 }

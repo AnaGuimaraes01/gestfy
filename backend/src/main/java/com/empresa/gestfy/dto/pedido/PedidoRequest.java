@@ -7,19 +7,21 @@ import java.util.List;
 
 public record PedidoRequest(
 
-        // CLIENTE - Dados fornecidos no momento do pedido
-        @NotBlank(message = "Nome do cliente é obrigatório") String nomeCliente,
+                // CLIENTE - Dados fornecidos no momento do pedido
+                @NotBlank(message = "Nome do cliente é obrigatório") String nomeCliente,
 
-        @NotBlank(message = "Telefone do cliente é obrigatório") 
-        @Pattern(regexp = "^[0-9\\-\\(\\)\\s]+$", message = "Telefone inválido") 
-        String telefoneCliente,
+                @NotBlank(message = "Telefone do cliente é obrigatório") @Pattern(regexp = "^[0-9\\-\\(\\)\\s]+$", message = "Telefone inválido") String telefoneCliente,
 
-        // PEDIDO
-        @NotBlank(message = "Forma de pagamento é obrigatória") String formaPagamento,
+                // PEDIDO
+                @NotBlank(message = "Forma de pagamento é obrigatória") String formaPagamento,
 
-        @NotBlank(message = "Forma de recebimento é obrigatória (RETIRADA ou ENTREGA)") String formaRecebimento,
+                @NotBlank(message = "Forma de recebimento é obrigatória (RETIRADA ou ENTREGA)") String formaRecebimento,
 
-        String endereco,
+                String endereco,
 
-        @NotEmpty(message = "Pedido deve ter pelo menos um item") List<PedidoItemRequest> itens
-) {}
+                @NotEmpty(message = "Pedido deve ter pelo menos um item") List<PedidoItemRequest> itens,
+
+                // TROCO (opcional)
+                Boolean precisaTroco,
+                Double valorTroco) {
+}

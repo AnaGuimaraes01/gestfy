@@ -107,10 +107,17 @@ public class PedidoService {
             pedido.setFormaRecebimento(request.formaRecebimento());
             pedido.setEndereco(request.endereco());
             pedido.setStatus("RECEBIDO");
+            // Registrar informações de troco
+            pedido.setPrecisaTroco(request.precisaTroco() != null ? request.precisaTroco() : false);
+            pedido.setValorTroco(request.valorTroco());
             LocalDateTime agora = DataHoraBrasil.agora();
             System.out.println("  → Data/Hora: " + agora);
             pedido.setData(agora);
             System.out.println("✓ Pedido criado em memória");
+            System.out.println("  Precisa troco? " + pedido.getPrecisaTroco());
+            if (pedido.getPrecisaTroco()) {
+                System.out.println("  Valor do troco: R$ " + pedido.getValorTroco());
+            }
 
             // 3. Validar e processar itens
             System.out.println("\n[PASSO 3] Processando " + request.itens().size() + " itens do pedido...");
@@ -257,14 +264,24 @@ public class PedidoService {
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
         String statusAnterior = pedido.getStatus();
+        System.out.println("\n=== ATUALIZAÇÃO DE STATUS DO PEDIDO #" + id + " ===");
+        System.out.println("Status anterior: " + statusAnterior);
+        System.out.println("Novo status: " + novoStatus);
+
         pedido.setStatus(novoStatus);
 
-        // Se o pedido é finalizado e era "EM PREPARACAO", registra no caixa
-        if ("FINALIZADO".equals(novoStatus) && "EM_PREPARACAO".equals(statusAnterior)) {
+        // Registrar no caixa SOMENTE quando transiciona para FINALIZADO (apenas uma
+        // vez)
+        if ("FINALIZADO".equals(novoStatus) && !"FINALIZADO".equals(statusAnterior)) {
+            System.out.println("[CAIXA] Registrando pedido no caixa...");
             registrarNoCaixa(pedido);
+        } else if ("FINALIZADO".equals(novoStatus) && "FINALIZADO".equals(statusAnterior)) {
+            System.out.println("[CAIXA] Pedido já estava finalizado - ignorando duplicação");
         }
 
         Pedido atualizado = pedidoRepository.save(pedido);
+        System.out.println("✓ Status atualizado com sucesso");
+        System.out.println("=== FIM DA ATUALIZAÇÃO ===\n");
         return toDTO(atualizado);
     }
 
@@ -279,23 +296,61 @@ public class PedidoService {
     }
 
     /**
-     * Registrar pedido no caixa como entrada
+     * Registrar pedido no caixa como entrada financeira
+     * Regras:
+     * - Somente quando pedido é FINALIZADO
+     * - Registra apenas uma vez (verifica duplicidade)
+     * - Origem: PEDIDO_ONLINE
      */
     private void registrarNoCaixa(Pedido pedido) {
+        System.out.println("\n  [registrarNoCaixa] Iniciando registro do pedido #" + pedido.getId() + " no caixa");
+
+        // VERIFICAÇÃO DE DUPLICIDADE
+        if (pedido.getCaixaRegistroId() != null) {
+            System.out.println("  ✓ Pedido já foi registrado no caixa (ID: " + pedido.getCaixaRegistroId() + ")");
+            System.out.println("  → Ignorando duplicação");
+            return;
+        }
+
+        // CRIAR NOVO REGISTRO NO CAIXA
         Caixa registro = new Caixa();
         registro.setTipo("ENTRADA");
         registro.setData(LocalDate.now());
         registro.setDataAbertura(DataHoraBrasil.agora());
-        registro.setHorarioAbertura(DataHoraBrasil.agora()); // Mantém por compatibilidade
-        registro.setStatus("ABERTO");
-        registro.setValorInicial(0.0); // Garantir que nunca seja null
+        registro.setHorarioAbertura(DataHoraBrasil.agora()); // Compatibilidade
+        registro.setStatus("CONCLUIDO");
+        registro.setValorInicial(0.0);
         registro.setSaldo(pedido.getTotal());
-        registro.setDescricao(
-                String.format("Pedido: #%d - Cliente: %s", pedido.getId(), pedido.getCliente().getNome()));
-        registro.setObservacoes(String.format("Forma de pagamento: %s | Forma de recebimento: %s",
-                pedido.getFormaPagamento(), pedido.getFormaRecebimento()));
 
-        caixaRepository.save(registro);
+        // Descrição com informações do pedido
+        registro.setDescricao(
+                String.format("Pedido Online: #%d - Cliente: %s", pedido.getId(), pedido.getCliente().getNome()));
+
+        // Observações com detalhes do pedido
+        StringBuilder obs = new StringBuilder();
+        obs.append("Forma de pagamento: ").append(pedido.getFormaPagamento());
+        obs.append(" | Forma de recebimento: ").append(pedido.getFormaRecebimento());
+        if (pedido.getPrecisaTroco() != null && pedido.getPrecisaTroco()) {
+            obs.append(" | Troco: R$ ").append(String.format("%.2f", pedido.getValorTroco()));
+        }
+        registro.setObservacoes(obs.toString());
+
+        // ORIGEM DO REGISTRO (importante para rastreamento)
+        registro.setOrigem("PEDIDO_ONLINE");
+
+        System.out.println("  → Salvando registro no caixa...");
+        System.out.println("    Valor: R$ " + String.format("%.2f", pedido.getTotal()));
+        System.out.println("    Origem: PEDIDO_ONLINE");
+
+        Caixa registroSalvo = caixaRepository.save(registro);
+
+        // RASTREAMENTO: Guardar ID do registro de caixa no pedido para evitar
+        // duplicidade
+        pedido.setCaixaRegistroId(registroSalvo.getId());
+        pedidoRepository.save(pedido);
+
+        System.out.println("  ✓ Registro criado no caixa com ID: " + registroSalvo.getId());
+        System.out.println("  ✓ Rastreamento guardado no pedido");
     }
 
     /**

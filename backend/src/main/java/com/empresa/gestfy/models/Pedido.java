@@ -33,13 +33,19 @@ public class Pedido {
     // Campo para compatibilidade com setTotal() em PedidoService.criar()
     private Double total = 0.0;
 
+    // Campos para troco (pedido online)
+    @Column(name = "precisa_troco")
+    private Boolean precisaTroco = false;
+
+    @Column(name = "valor_troco")
+    private Double valorTroco;
+
+    // Rastreamento de registro no caixa (evita duplicidade)
+    @Column(name = "caixa_registro_id")
+    private Long caixaRegistroId;
+
     // Itens do pedido
-    @OneToMany(
-            mappedBy = "pedido",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<PedidoItem> itens = new ArrayList<>();
 
@@ -105,9 +111,7 @@ public class Pedido {
             return 0.0;
         }
         return itens.stream()
-                .mapToDouble(item ->
-                        item.getPrecoUnitario() * item.getQuantidade()
-                )
+                .mapToDouble(item -> item.getPrecoUnitario() * item.getQuantidade())
                 .sum();
     }
 
@@ -134,5 +138,37 @@ public class Pedido {
     public void addItem(PedidoItem item) {
         itens.add(item);
         item.setPedido(this);
+    }
+
+    // ======================
+    // GETTERS E SETTERS - TROCO
+    // ======================
+
+    public Boolean getPrecisaTroco() {
+        return precisaTroco;
+    }
+
+    public void setPrecisaTroco(Boolean precisaTroco) {
+        this.precisaTroco = precisaTroco;
+    }
+
+    public Double getValorTroco() {
+        return valorTroco;
+    }
+
+    public void setValorTroco(Double valorTroco) {
+        this.valorTroco = valorTroco;
+    }
+
+    // ======================
+    // GETTERS E SETTERS - RASTREAMENTO
+    // ======================
+
+    public Long getCaixaRegistroId() {
+        return caixaRegistroId;
+    }
+
+    public void setCaixaRegistroId(Long caixaRegistroId) {
+        this.caixaRegistroId = caixaRegistroId;
     }
 }
