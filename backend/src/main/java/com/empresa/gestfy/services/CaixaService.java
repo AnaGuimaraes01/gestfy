@@ -179,6 +179,7 @@ public class CaixaService {
                         vendaRegistro.setSaldo(valorTotal);
                         vendaRegistro.setDescricao(String.format("Venda: %s (Qtd: %d)", produto.getNome(), venda.quantidade()));
                         vendaRegistro.setObservacoes(String.format("Preço unitário: R$ %.2f | Valor pago: R$ %.2f | Troco: R$ %.2f", produto.getPreco(), venda.valorRecebido(), troco));
+                        vendaRegistro.setOrigem("CAIXA"); // Rastreamento: Venda presencial
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 
@@ -311,6 +312,7 @@ public class CaixaService {
                         vendaRegistro.setSaldo(valorTotal);
                         vendaRegistro.setDescricao(descricaoBuilder.toString());
                         vendaRegistro.setObservacoes(observacoesBuilder.toString());
+                        vendaRegistro.setOrigem("CAIXA"); // Rastreamento: Venda presencial
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 

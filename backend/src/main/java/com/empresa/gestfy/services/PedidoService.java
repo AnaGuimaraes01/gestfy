@@ -296,6 +296,26 @@ public class PedidoService {
     }
 
     /**
+     * Listar pedidos por status
+     * Útil para o admin controlar o workflow dos pedidos
+     */
+    @Transactional(readOnly = true)
+    public List<PedidoDTO> listarPorStatus(String status) {
+        System.out.println("\n[listarPorStatus] Buscando pedidos com status: " + status);
+        try {
+            List<Pedido> pedidos = pedidoRepository.findByStatusWithRelationships(status);
+            System.out.println("✓ " + pedidos.size() + " pedidos encontrados com status: " + status);
+            return pedidos.stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.out.println("✗ ERRO ao listar pedidos por status: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao listar pedidos por status: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Registrar pedido no caixa como entrada financeira
      * Regras:
      * - Somente quando pedido é FINALIZADO
@@ -431,6 +451,9 @@ public class PedidoService {
                     pedido.getStatus(),
                     pedido.getTotal(), // Agora seguro, pois itens estão carregados
                     pedido.getData(),
+                    pedido.getPrecisaTroco(),
+                    pedido.getValorTroco(),
+                    pedido.getCaixaRegistroId(),
                     itensDTO);
         } catch (Exception e) {
             System.out.println("\n  ✗ [toDTO] ERRO GERAL NA CONVERSÃO:");

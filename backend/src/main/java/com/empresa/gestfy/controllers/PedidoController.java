@@ -168,4 +168,24 @@ public class PedidoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    /**
+     * Listar pedidos por status
+     * GET /api/pedidos/status/{status}
+     * Exemplo: GET /api/pedidos/status/RECEBIDO
+     */
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> listarPorStatus(@PathVariable String status) {
+        try {
+            System.out.println("\n>>> PedidoController.listarPorStatus() - Status: " + status);
+            List<PedidoDTO> pedidos = pedidoService.listarPorStatus(status);
+            System.out.println(">>> PedidoController.listarPorStatus() - " + pedidos.size() + " pedidos encontrados");
+            return ResponseEntity.ok(pedidos);
+        } catch (Exception e) {
+            System.out.println("\n>>> PedidoController.listarPorStatus() - ERRO:");
+            System.out.println("    Mensagem: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ErrorResponse(500, "Erro ao listar pedidos por status: " + e.getMessage()));
+        }
+    }
 }

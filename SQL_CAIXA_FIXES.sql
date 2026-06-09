@@ -19,21 +19,26 @@ ADD COLUMN IF NOT EXISTS horario_abertura TIMESTAMP;
 ALTER TABLE caixa
 ADD COLUMN IF NOT EXISTS horario_fechamento TIMESTAMP;
 
--- 6. GARANTIR que status é NOT NULL (se não for)
+-- 6. ADICIONAR COLUNA origem (se não existir) - Rastreamento: CAIXA ou PEDIDO_ONLINE
+ALTER TABLE caixa
+ADD COLUMN IF NOT EXISTS origem VARCHAR(50) DEFAULT 'CAIXA';
+
+-- 7. GARANTIR que status é NOT NULL (se não for)
 ALTER TABLE caixa
 ALTER COLUMN status SET NOT NULL;
 
--- 7. GARANTIR que valor_inicial é NOT NULL DEFAULT 0
+-- 8. GARANTIR que valor_inicial é NOT NULL DEFAULT 0
 ALTER TABLE caixa
 ALTER COLUMN valor_inicial SET NOT NULL,
 ALTER COLUMN valor_inicial SET DEFAULT 0;
 
--- 8. CRIAR ÍNDICES para melhor performance
+-- 9. CRIAR ÍNDICES para melhor performance
 CREATE INDEX IF NOT EXISTS idx_caixa_data ON caixa(data);
 CREATE INDEX IF NOT EXISTS idx_caixa_status ON caixa(status);
 CREATE INDEX IF NOT EXISTS idx_caixa_data_status ON caixa(data, status);
 CREATE INDEX IF NOT EXISTS idx_caixa_data_tipo ON caixa(data, tipo);
 CREATE INDEX IF NOT EXISTS idx_caixa_data_tipo_status ON caixa(data, tipo, status);
+CREATE INDEX IF NOT EXISTS idx_caixa_origem ON caixa(origem);
 
 
 -- SELECT * FROM information_schema.columns WHERE table_name = 'caixa' ORDER BY ordinal_position;
@@ -52,4 +57,5 @@ CREATE INDEX IF NOT EXISTS idx_caixa_data_tipo_status ON caixa(data, tipo, statu
 -- descricao          | VARCHAR        | NULL
 -- observacoes        | VARCHAR        | NULL
 -- tipo               | VARCHAR        | NULL
+-- origem             | VARCHAR        | DEFAULT 'CAIXA'
 -- ========================================

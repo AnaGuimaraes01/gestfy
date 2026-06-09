@@ -12,8 +12,9 @@ public record PedidoDTO(
                 String formaRecebimento,
                 String status,
                 Double total,
+                LocalDateTime data,
                 Boolean precisaTroco,
                 Double valorTroco,
-                LocalDateTime data,
+                Long caixaRegistroId,
                 List<PedidoItemDTO> itens) {
 }
