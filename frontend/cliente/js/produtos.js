@@ -25,13 +25,9 @@ const categoriasNav = document.getElementById("categoriasNav"); // Pode ser null
 // Mapa de categorias para nome
 let categoriasMap = {};
 
-// Containers de destaque
+// Container de promoção
 const promotoesContainer = document.getElementById("promotoesContainer");
-const vendidosContainer = document.getElementById("vendidosContainer");
-const popularesContainer = document.getElementById("popularesContainer");
 const secaoPromocoes = document.getElementById("secaoPromocoes");
-const secaoVendidos = document.getElementById("secaoVendidos");
-const secaoPopulares = document.getElementById("secaoPopulares");
 
 let todosProdutos = [];
 let categoriaAtiva = 0; // 0 = todas as categorias
@@ -85,44 +81,6 @@ async function carregarPromocoes() {
         }
     } catch (error) {
         console.error("Erro ao carregar promoções:", error);
-    }
-}
-
-// Carregar mais vendidos
-async function carregarMaisVendidos() {
-    try {
-        const response = await fetch(`${API_URL}/destaque/vendidos`);
-        if (!response.ok) throw new Error("Erro ao buscar mais vendidos");
-        
-        const vendidos = await response.json();
-        if (vendidos.length > 0) {
-            vendidosContainer.innerHTML = "";
-            vendidos.forEach(produto => {
-                vendidosContainer.appendChild(criarCardDestaque(produto));
-            });
-            secaoVendidos.style.display = "block";
-        }
-    } catch (error) {
-        console.error("Erro ao carregar mais vendidos:", error);
-    }
-}
-
-// Carregar mais populares
-async function carregarMaisPopulares() {
-    try {
-        const response = await fetch(`${API_URL}/destaque/populares`);
-        if (!response.ok) throw new Error("Erro ao buscar populares");
-        
-        const populares = await response.json();
-        if (populares.length > 0) {
-            popularesContainer.innerHTML = "";
-            populares.forEach(produto => {
-                popularesContainer.appendChild(criarCardDestaque(produto));
-            });
-            secaoPopulares.style.display = "block";
-        }
-    } catch (error) {
-        console.error("Erro ao carregar populares:", error);
     }
 }
 
@@ -290,6 +248,4 @@ function adicionarCarrinho(id, nome, preco) {
     await carregarCategorias();
     carregarProdutos();
     carregarPromocoes();
-    carregarMaisVendidos();
-    carregarMaisPopulares();
 })();
