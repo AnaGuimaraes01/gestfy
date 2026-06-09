@@ -286,8 +286,10 @@ function adicionarCarrinho(id, nome, preco) {
 }
 
 // Carregar dados na página
-carregarCategorias();
-carregarProdutos();
-carregarPromocoes();
-carregarMaisVendidos();
-carregarMaisPopulares();
+(async function() {
+    await carregarCategorias();
+    carregarProdutos();
+    carregarPromocoes();
+    carregarMaisVendidos();
+    carregarMaisPopulares();
+})();
