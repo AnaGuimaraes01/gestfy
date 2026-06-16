@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Produtos - Gestfy</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="admin-header">
@@ -14,20 +14,34 @@
 
     <main>
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <!-- Search e Carrinho -->
+            <div class="catalogo-top">
                 <input 
                     type="text" 
                     id="buscaInput" 
                     class="barra-busca" 
-                    placeholder="Buscar produtos por nome..." 
-                    style="flex: 1; margin-right: 20px; margin-bottom: 0;">
-                <a href="carrinho.html" class="btn" style="white-space: nowrap;"> Ver Carrinho</a>
+                    placeholder="Buscar produtos..." 
+                >
+                <a href="carrinho.html" class="btn btn-carrinho">
+                    <span>Carrinho</span>
+                </a>
             </div>
 
             <div id="mensagem" class="msg" style="display: none;"></div>
 
-            <div id="produtosContainer" class="catalogo-grid">
-                <!-- Produtos serão carregados aqui -->
+            <!-- Seção: Em Promoção -->
+            <section id="secaoPromocoes" class="destaque-section" style="display: none;">
+                <div class="destaque-header">
+                    <h2>Em Promoção</h2>
+                </div>
+                <div id="promotoesContainer" class="catalogo-grid-categoria">
+                    <!-- Produtos em promoção carregados aqui -->
+                </div>
+            </section>
+
+            <!-- Produtos Agrupados por Categoria -->
+            <div id="produtosContainer">
+                <!-- Produtos agrupados por categoria serão carregados aqui -->
             </div>
         </div>
     </main>

@@ -6,19 +6,21 @@ import jakarta.validation.constraints.Positive;
 
 public record ProdutoRequest(
 
-        @NotBlank(message = "O nome é obrigatório")
-        String nome,
+                @NotBlank(message = "O nome é obrigatório") String nome,
 
-        @NotBlank(message = "A descrição é obrigatória")
-        String descricao,
+                @NotBlank(message = "A descrição é obrigatória") String descricao,
 
-        @NotNull(message = "O preço é obrigatório")
-        @Positive(message = "O preço deve ser maior que zero")
-        Double preco,
+                @NotNull(message = "O preço é obrigatório") @Positive(message = "O preço deve ser maior que zero") Double preco,
 
-        String urlFoto,
+                String urlFoto,
 
-        @NotNull(message = "A quantidade é obrigatória")
-        @Positive(message = "A quantidade deve ser maior que zero")
-        Integer quantidade
-) {}
+                @NotNull(message = "A quantidade é obrigatória") @Positive(message = "A quantidade deve ser maior que zero") Integer quantidade,
+
+                @NotNull(message = "A categoria é obrigatória") Long categoriaId,
+
+                Boolean emPromo,
+
+                Double precoPromo
+
+) {
+}

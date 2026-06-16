@@ -61,6 +61,46 @@ public class ProdutoController {
     }
 
     /**
+     * Listar produtos por categoria
+     * GET /api/produtos/categoria/{categoriaId}
+     */
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<ProdutoDTO>> listarPorCategoria(@PathVariable Long categoriaId) {
+        List<ProdutoDTO> produtos = produtoService.listarPorCategoria(categoriaId);
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
+     * Produtos em promoção
+     * GET /api/produtos/destaque/promocoes
+     */
+    @GetMapping("/destaque/promocoes")
+    public ResponseEntity<List<ProdutoDTO>> listarPromocoes() {
+        List<ProdutoDTO> produtos = produtoService.listarPromocoes();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
+     * Produtos mais vendidos
+     * GET /api/produtos/destaque/vendidos
+     */
+    @GetMapping("/destaque/vendidos")
+    public ResponseEntity<List<ProdutoDTO>> listarMaisVendidos() {
+        List<ProdutoDTO> produtos = produtoService.listarMaisVendidos();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
+     * Produtos mais populares (visualizados)
+     * GET /api/produtos/destaque/populares
+     */
+    @GetMapping("/destaque/populares")
+    public ResponseEntity<List<ProdutoDTO>> listarMaisPopulares() {
+        List<ProdutoDTO> produtos = produtoService.listarMaisPopulares();
+        return ResponseEntity.ok(produtos);
+    }
+
+    /**
      * Buscar produto por ID
      * GET /api/produtos/{id}
      */
@@ -96,6 +136,36 @@ public class ProdutoController {
         try {
             produtoService.remover(id);
             return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Incrementar visualizações do produto
+     * PUT /api/produtos/{id}/incrementar-visualizacoes
+     */
+    @PutMapping("/{id}/incrementar-visualizacoes")
+    public ResponseEntity<ProdutoDTO> incrementarVisualizacoes(@PathVariable Long id) {
+        try {
+            ProdutoDTO produto = produtoService.incrementarVisualizacoes(id);
+            return ResponseEntity.ok(produto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Incrementar vendas do produto
+     * PUT /api/produtos/{id}/incrementar-vendas/{quantidade}
+     */
+    @PutMapping("/{id}/incrementar-vendas/{quantidade}")
+    public ResponseEntity<ProdutoDTO> incrementarVendas(
+            @PathVariable Long id,
+            @PathVariable Integer quantidade) {
+        try {
+            ProdutoDTO produto = produtoService.incrementarVendas(id, quantidade);
+            return ResponseEntity.ok(produto);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

@@ -17,11 +17,12 @@ public class CaixaDTO {
     private LocalDateTime horarioFechamento;
     private String status;
     private String observacoes;
+    private String origem;
 
     public CaixaDTO(Long id, String tipo, Double valorInicial, Double valorFinal, Double saldo,
             String descricao, LocalDate data, LocalDateTime dataAbertura, LocalDateTime dataFechamento,
             LocalDateTime horarioAbertura, LocalDateTime horarioFechamento,
-            String status, String observacoes) {
+            String status, String observacoes, String origem) {
         this.id = id;
         this.tipo = tipo;
         this.valorInicial = valorInicial;
@@ -35,6 +36,7 @@ public class CaixaDTO {
         this.horarioFechamento = horarioFechamento;
         this.status = status;
         this.observacoes = observacoes;
+        this.origem = origem;
     }
 
     public Long getId() {
@@ -139,5 +141,13 @@ public class CaixaDTO {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public String getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
     }
 }

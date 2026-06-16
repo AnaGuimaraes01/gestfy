@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar Pedido - Gestfy</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="admin-header">
@@ -245,6 +245,12 @@
                 }
                 
                 const pedido = await resPedido.json();
+
+                // Incrementar vendas para cada produto
+                carrinho.forEach(item => {
+                    const endpoint = `${API_PEDIDOS.replace('/pedidos', '/produtos')}/${item.id}/incrementar-vendas/${item.quantidade}`;
+                    fetch(endpoint, { method: 'PUT' }).catch(() => {});
+                });
 
                 // Sucesso
                 localStorage.removeItem("carrinho");

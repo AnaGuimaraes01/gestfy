@@ -16,6 +16,9 @@
   --verde: #34a853;
   --vermelho: #ea4335;
   --amarelo: #fbbc04;
+  --btn-padding-mobile: 10px 14px;
+  --btn-padding-tablet: 12px 20px;
+  --btn-padding-desktop: 12px 28px;
 }
 
 /* =====================================================
@@ -199,8 +202,770 @@ footer span {
 }
 
 /* =====================================================
-   RESPONSIVO
+   RESPONSIVO - MOBILE FIRST
 ===================================================== */
+
+/* Mobile Extra Pequeno (320px - 374px) */
+@media (max-width: 374px) {
+  html {
+    font-size: 14px;
+  }
+
+  .admin-header {
+    padding: 12px 8px;
+  }
+
+  .admin-header h1 {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .admin-header p {
+    font-size: 10px;
+  }
+
+  .logo {
+    max-width: 100px;
+    margin-bottom: 8px;
+  }
+
+  .container {
+    margin: 16px auto;
+    padding: 0 8px;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+  }
+
+  .card p {
+    font-size: 11px;
+  }
+
+  .card .icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    margin: 20px 0 16px;
+    padding-left: 10px;
+  }
+
+  button,
+  .btn {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 44px;
+    min-width: auto;
+    width: 100%;
+  }
+
+  .btn-small {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-height: 36px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .form-group textarea {
+    min-height: 60px;
+  }
+
+  .tabela-pedidos,
+  .tabela-produtos,
+  .tabela-geral {
+    font-size: 11px;
+  }
+
+  .tabela-pedidos th,
+  .tabela-produtos th,
+  .tabela-geral th {
+    padding: 10px 6px;
+    font-size: 10px;
+  }
+
+  .tabela-pedidos td,
+  .tabela-produtos td,
+  .tabela-geral td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+
+  .msg,
+  .alert {
+    padding: 10px;
+    font-size: 12px;
+    margin: 12px 0;
+  }
+
+  .produto-item {
+    grid-template-columns: 50px 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .produto-thumb-container {
+    width: 50px;
+    height: 50px;
+  }
+
+  .produto-thumb-emoji {
+    font-size: 24px;
+  }
+
+  .produto-details strong {
+    font-size: 13px;
+  }
+
+  .descricao-small {
+    font-size: 11px;
+  }
+
+  .preco {
+    font-size: 14px;
+  }
+
+  .produto-actions {
+    grid-column: 1 / -1;
+    gap: 6px;
+  }
+
+  footer {
+    padding: 16px 8px;
+    font-size: 11px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .produto-imagem {
+    height: 120px;
+    font-size: 32px;
+  }
+
+  .produto-card {
+    border-radius: 8px;
+  }
+
+  .produto-info {
+    padding: 12px;
+  }
+
+  .produto-nome {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .produto-descricao {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .produto-preco {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .btn-carrinho {
+    padding: 8px;
+    font-size: 12px;
+    min-height: 40px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .carrinho-resumo {
+    position: static;
+    top: auto;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Mobile Pequeno (375px - 479px) */
+@media (min-width: 375px) and (max-width: 479px) {
+  html {
+    font-size: 14px;
+  }
+
+  .admin-header {
+    padding: 14px;
+  }
+
+  .admin-header h1 {
+    font-size: 18px;
+  }
+
+  .admin-header p {
+    font-size: 11px;
+  }
+
+  .logo {
+    max-width: 110px;
+  }
+
+  .container {
+    margin: 20px auto;
+    padding: 0 12px;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card h2 {
+    font-size: 17px;
+  }
+
+  .card p {
+    font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 17px;
+    margin: 24px 0 16px;
+  }
+
+  button,
+  .btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .btn-small {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 11px;
+    font-size: 14px;
+  }
+
+  .form-group textarea {
+    min-height: 70px;
+  }
+
+  .tabela-pedidos,
+  .tabela-produtos {
+    font-size: 12px;
+  }
+
+  .tabela-pedidos th,
+  .tabela-produtos th {
+    padding: 12px 8px;
+    font-size: 11px;
+  }
+
+  .tabela-pedidos td,
+  .tabela-produtos td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .status-badge {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .msg,
+  .alert {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .produto-item {
+    grid-template-columns: 60px 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .produto-thumb-container {
+    width: 60px;
+    height: 60px;
+  }
+
+  .produto-thumb-emoji {
+    font-size: 28px;
+  }
+
+  .produto-details strong {
+    font-size: 14px;
+  }
+
+  .descricao-small {
+    font-size: 12px;
+  }
+
+  .preco {
+    font-size: 15px;
+  }
+
+  .produto-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+  }
+
+  footer {
+    padding: 16px;
+    font-size: 12px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin: 16px 0;
+  }
+
+  .produto-imagem {
+    height: 130px;
+    font-size: 36px;
+  }
+
+  .produto-info {
+    padding: 14px;
+  }
+
+  .produto-nome {
+    font-size: 15px;
+  }
+
+  .produto-descricao {
+    font-size: 12px;
+  }
+
+  .produto-preco {
+    font-size: 17px;
+  }
+
+  .btn-carrinho {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .carrinho-resumo {
+    position: static;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Tablet Pequeno (480px - 768px) */
+@media (min-width: 480px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+
+  .admin-header {
+    padding: 16px;
+  }
+
+  .admin-header h1 {
+    font-size: 22px;
+  }
+
+  .admin-header p {
+    font-size: 12px;
+  }
+
+  .logo {
+    max-width: 120px;
+  }
+
+  .container {
+    margin: 30px auto;
+    padding: 0 16px;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .card h2 {
+    font-size: 18px;
+  }
+
+  .card p {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    margin: 28px 0 18px;
+  }
+
+  button,
+  .btn {
+    padding: 12px 24px;
+    font-size: 15px;
+    min-height: 45px;
+    width: auto;
+  }
+
+  .btn-small {
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+  }
+
+  .tabela-pedidos,
+  .tabela-produtos {
+    font-size: 13px;
+  }
+
+  .tabela-pedidos th,
+  .tabela-produtos th {
+    padding: 14px 10px;
+    font-size: 12px;
+  }
+
+  .tabela-pedidos td,
+  .tabela-produtos td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+
+  .msg,
+  .alert {
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  .produto-item {
+    grid-template-columns: 70px 1fr auto;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .produto-thumb-container {
+    width: 70px;
+    height: 70px;
+  }
+
+  .produto-thumb-emoji {
+    font-size: 32px;
+  }
+
+  .produto-details strong {
+    font-size: 15px;
+  }
+
+  .descricao-small {
+    font-size: 13px;
+  }
+
+  .preco {
+    font-size: 16px;
+  }
+
+  footer {
+    padding: 18px;
+    font-size: 13px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 18px 0;
+  }
+
+  .produto-imagem {
+    height: 140px;
+    font-size: 38px;
+  }
+
+  .produto-info {
+    padding: 15px;
+  }
+
+  .produto-nome {
+    font-size: 16px;
+  }
+
+  .produto-descricao {
+    font-size: 13px;
+  }
+
+  .produto-preco {
+    font-size: 18px;
+  }
+
+  .btn-carrinho {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Tablet Grande (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .admin-header {
+    padding: 18px;
+  }
+
+  .admin-header h1 {
+    font-size: 24px;
+  }
+
+  .logo {
+    max-width: 130px;
+  }
+
+  .container {
+    margin: 35px auto;
+    padding: 0 18px;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  .card {
+    padding: 22px;
+  }
+
+  .card h2 {
+    font-size: 19px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+}
+
+/* Desktop (1025px+) */
+@media (min-width: 1025px) {
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .carrinho-container {
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+  }
+
+  button[type="submit"] {
+    grid-column: 1 / -1;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+  }
+}
+
+/* Orientação Paisagem em Pequenos Devices */
+@media (max-height: 500px) and (orientation: landscape) {
+  .admin-header {
+    padding: 10px;
+  }
+
+  .admin-header h1 {
+    margin-bottom: 2px;
+  }
+
+  .container {
+    margin: 16px auto;
+  }
+
+  .dashboard {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  button,
+  .btn {
+    min-height: 40px;
+    padding: 10px 16px;
+  }
+}
+
+/* Toque-friendly (Touch Devices) */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .btn,
+  .btn-small {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .card,
+  .produto-card,
+  .stat-card {
+    transition: none;
+  }
+
+  .select-filter {
+    padding: 14px 12px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 14px 12px;
+    font-size: 16px;
+  }
+}
+
 @media (max-width: 768px) {
   .logo {
     max-width: 120px;
@@ -240,6 +1005,24 @@ footer span {
   .tabela-pedidos td,
   .tabela-produtos td {
     padding: 10px 8px;
+  }
+
+  .produto-item {
+    grid-template-columns: 60px 1fr;
+  }
+  
+  .produto-thumb-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .produto-thumb-emoji {
+    font-size: 28px;
+  }
+  
+  .produto-actions {
+    grid-column: 1 / -1;
+    margin-top: 8px;
   }
 }
 
@@ -316,6 +1099,7 @@ footer span {
   font-size: 14px;
   transition: all 0.3s ease;
   font-family: inherit;
+  width: 100%;
 }
 
 .form-group input::placeholder,
@@ -337,6 +1121,19 @@ footer span {
   min-height: 80px;
 }
 
+/* Seção Title Responsiva */
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--branco);
+  margin: 32px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--rosa);
+  letter-spacing: -0.5px;
+  position: relative;
+}
+}
+
 /* =====================================================
    BOTÕES
 ===================================================== */
@@ -345,7 +1142,7 @@ button,
   background: linear-gradient(135deg, var(--rosa), #d4436a);
   border: none;
   color: var(--branco);
-  padding: 14px 28px;
+  padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 16px;
@@ -356,6 +1153,8 @@ button,
   display: inline-block;
   min-height: 48px;
   min-width: 120px;
+  width: auto;
+  white-space: nowrap;
 }
 
 button:hover,
@@ -384,6 +1183,60 @@ button:active {
 
 .btn-danger:hover {
   background: #d23321;
+}
+
+/* Containers de Botões */
+.btn-container,
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.btn-container-center,
+.button-group-center {
+  justify-content: center;
+}
+
+.btn-container-end,
+.button-group-end {
+  justify-content: flex-end;
+}
+
+.btn-container-full {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-container-full button,
+.btn-container-full .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Botões expandidos para mobile */
+.btn-full,
+.btn-block {
+  width: 100% !important;
+  min-width: unset !important;
+  display: block;
+}
+
+/* Stack de botões em mobile */
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-stack button,
+.btn-stack .btn {
+  width: 100%;
+  min-width: unset;
 }
 
 .btn-success {
@@ -415,6 +1268,7 @@ button[type="submit"] {
   margin: 20px 0;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  -webkit-overflow-scrolling: touch;
 }
 
 .tabela-pedidos,
@@ -423,6 +1277,7 @@ button[type="submit"] {
   width: 100%;
   border-collapse: collapse;
   background: var(--cinza-card);
+  min-width: 600px;
 }
 
 .tabela-pedidos th,
@@ -437,6 +1292,10 @@ button[type="submit"] {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--rosa);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .tabela-pedidos td,
@@ -446,6 +1305,7 @@ button[type="submit"] {
   font-size: 14px;
   color: var(--cinza-texto);
   border-bottom: 1px solid #3a3a3a;
+  word-break: break-word;
 }
 
 .tabela-pedidos tr:hover,
@@ -461,6 +1321,7 @@ button[type="submit"] {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
 }
 
 .status-recebido {

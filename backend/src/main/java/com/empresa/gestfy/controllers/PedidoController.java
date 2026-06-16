@@ -33,13 +33,78 @@ public class PedidoController {
     }
 
     /**
+     * Classe interna para respostas de erro
+     */
+    public static class ErrorResponse {
+        private int status;
+        private String message;
+
+        public ErrorResponse(int status, String message) {
+            this.status = status;
+            this.message = message;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+
+    /**
      * Criar novo pedido
      * POST /api/pedidos
      */
     @PostMapping
-    public ResponseEntity<PedidoDTO> criarPedido(@Valid @RequestBody PedidoRequest request) {
-        PedidoDTO pedido = pedidoService.criar(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+    public ResponseEntity<?> criarPedido(@Valid @RequestBody PedidoRequest request) {
+        try {
+            System.out.println("\n>>> PedidoController.criarPedido() - Requisicao recebida");
+            System.out.println("    Cliente: " + request.nomeCliente());
+            System.out.println("    Telefone: " + request.telefoneCliente());
+            System.out.println("    Itens: " + (request.itens() != null ? request.itens().size() : "NULL"));
+
+            PedidoDTO pedido = pedidoService.criar(request);
+
+            System.out.println(">>> PedidoController.criarPedido() - Pedido criado com sucesso");
+            System.out.println("    ID: " + pedido.id());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+
+        } catch (RuntimeException e) {
+            System.out.println("\n>>> PedidoController.criarPedido() - ERRO RuntimeException:");
+            System.out.println("    Mensagem: " + e.getMessage());
+            System.out
+                    .println("    Causa: " + (e.getCause() != null ? e.getCause().getClass().getSimpleName() : "NULL"));
+            if (e.getCause() != null) {
+                System.out.println("    Causa Mensagem: " + e.getCause().getMessage());
+            }
+            e.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ErrorResponse(500, "Erro ao criar pedido: " + e.getMessage()));
+
+        } catch (Exception e) {
+            System.out.println("\n>>> PedidoController.criarPedido() - ERRO Exception geral:");
+            System.out.println("    Tipo: " + e.getClass().getSimpleName());
+            System.out.println("    Mensagem: " + e.getMessage());
+            System.out
+                    .println("    Causa: " + (e.getCause() != null ? e.getCause().getClass().getSimpleName() : "NULL"));
+            e.printStackTrace();
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ErrorResponse(500, "Erro inesperado ao criar pedido: " + e.getClass().getSimpleName() + " - "
+                            + e.getMessage()));
+        }
     }
 
     /**
@@ -47,8 +112,20 @@ public class PedidoController {
      * GET /api/pedidos
      */
     @GetMapping
-    public ResponseEntity<List<PedidoDTO>> listarPedidos() {
-        return ResponseEntity.ok(pedidoService.listar());
+    public ResponseEntity<?> listarPedidos() {
+        try {
+            System.out.println("\n>>> PedidoController.listarPedidos() - Requisicao recebida");
+            List<PedidoDTO> pedidos = pedidoService.listar();
+            System.out.println(">>> PedidoController.listarPedidos() - " + pedidos.size() + " pedidos encontrados");
+            return ResponseEntity.ok(pedidos);
+        } catch (Exception e) {
+            System.out.println("\n>>> PedidoController.listarPedidos() - ERRO:");
+            System.out.println("    Tipo: " + e.getClass().getSimpleName());
+            System.out.println("    Mensagem: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ErrorResponse(500, "Erro ao listar pedidos: " + e.getMessage()));
+        }
     }
 
     /**
@@ -89,6 +166,26 @@ public class PedidoController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Listar pedidos por status
+     * GET /api/pedidos/status/{status}
+     * Exemplo: GET /api/pedidos/status/RECEBIDO
+     */
+    @GetMapping("/status/{status}")
+    public ResponseEntity<?> listarPorStatus(@PathVariable String status) {
+        try {
+            System.out.println("\n>>> PedidoController.listarPorStatus() - Status: " + status);
+            List<PedidoDTO> pedidos = pedidoService.listarPorStatus(status);
+            System.out.println(">>> PedidoController.listarPorStatus() - " + pedidos.size() + " pedidos encontrados");
+            return ResponseEntity.ok(pedidos);
+        } catch (Exception e) {
+            System.out.println("\n>>> PedidoController.listarPorStatus() - ERRO:");
+            System.out.println("    Mensagem: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ErrorResponse(500, "Erro ao listar pedidos por status: " + e.getMessage()));
         }
     }
 }

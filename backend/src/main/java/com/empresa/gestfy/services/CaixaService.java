@@ -1,5 +1,6 @@
 package com.empresa.gestfy.services;
 
+import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.dto.caixa.ProdutoBuscaResponse;
 import com.empresa.gestfy.dto.caixa.VendaRequest;
 import com.empresa.gestfy.dto.caixa.VendaResponse;
@@ -61,8 +62,8 @@ public class CaixaService {
                 Caixa caixa = new Caixa();
                 caixa.setTipo("ABERTURA");
                 caixa.setData(hoje);
-                caixa.setDataAbertura(LocalDateTime.now());
-                caixa.setHorarioAbertura(LocalDateTime.now()); // Mantém por compatibilidade
+                caixa.setDataAbertura(DataHoraBrasil.agora());
+                caixa.setHorarioAbertura(DataHoraBrasil.agora()); // Mantém por compatibilidade
                 caixa.setStatus("ABERTO");
                 caixa.setValorInicial(0.0); // Garantir que nunca seja null
                 caixa.setSaldo(0.0);
@@ -157,13 +158,14 @@ public class CaixaService {
                         Caixa vendaRegistro = new Caixa();
                         vendaRegistro.setTipo("ENTRADA");
                         vendaRegistro.setData(LocalDate.now());
-                        vendaRegistro.setDataAbertura(LocalDateTime.now());
-                        vendaRegistro.setHorarioAbertura(LocalDateTime.now());
+                        vendaRegistro.setDataAbertura(DataHoraBrasil.agora());
+                        vendaRegistro.setHorarioAbertura(DataHoraBrasil.agora());
                         vendaRegistro.setStatus("CONCLUIDO");
                         vendaRegistro.setValorInicial(0.0);
                         vendaRegistro.setSaldo(valorTotal);
                         vendaRegistro.setDescricao(String.format("Venda: %s (Qtd: %d)", produto.getNome(), venda.quantidade()));
                         vendaRegistro.setObservacoes(String.format("Preço unitário: R$ %.2f | Valor pago: R$ %.2f | Troco: R$ %.2f", produto.getPreco(), venda.valorRecebido(), troco));
+                        vendaRegistro.setOrigem("CAIXA"); // Rastreamento: Venda presencial
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 
@@ -289,13 +291,14 @@ public class CaixaService {
                         Caixa vendaRegistro = new Caixa();
                         vendaRegistro.setTipo("ENTRADA");
                         vendaRegistro.setData(LocalDate.now());
-                        vendaRegistro.setDataAbertura(LocalDateTime.now());
-                        vendaRegistro.setHorarioAbertura(LocalDateTime.now());
+                        vendaRegistro.setDataAbertura(DataHoraBrasil.agora());
+                        vendaRegistro.setHorarioAbertura(DataHoraBrasil.agora());
                         vendaRegistro.setStatus("CONCLUIDO");
                         vendaRegistro.setValorInicial(0.0);
                         vendaRegistro.setSaldo(valorTotal);
                         vendaRegistro.setDescricao(descricaoBuilder.toString());
                         vendaRegistro.setObservacoes(observacoesBuilder.toString());
+                        vendaRegistro.setOrigem("CAIXA"); // Rastreamento: Venda presencial
 
                         Caixa vendaSalva = caixaRepository.save(vendaRegistro);
 
@@ -364,8 +367,8 @@ public class CaixaService {
                         Caixa fechamento = new Caixa();
                         fechamento.setTipo("FECHAMENTO");
                         fechamento.setData(hoje);
-                        fechamento.setDataFechamento(LocalDateTime.now());
-                        fechamento.setHorarioFechamento(LocalDateTime.now());
+                        fechamento.setDataFechamento(DataHoraBrasil.agora());
+                        fechamento.setHorarioFechamento(DataHoraBrasil.agora());
                         fechamento.setStatus("FECHADO");
                         fechamento.setValorInicial(0.0);
                         fechamento.setValorFinal(totalVendas);
@@ -378,8 +381,8 @@ public class CaixaService {
                         // Atualiza status do caixa aberto
                         Caixa caixa = caixaAberto.get();
                         caixa.setStatus("FECHADO");
-                        caixa.setDataFechamento(LocalDateTime.now());
-                        caixa.setHorarioFechamento(LocalDateTime.now());
+                        caixa.setDataFechamento(DataHoraBrasil.agora());
+                        caixa.setHorarioFechamento(DataHoraBrasil.agora());
                         caixa.setValorFinal(totalVendas);
                         caixaRepository.save(caixa);
 

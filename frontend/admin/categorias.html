@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestfy • Categorias</title>
+  <link rel="icon" href="../images/logo.png">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="admin-body">
+
+<header class="admin-header">
+  <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <button onclick="history.back()" class="btn-voltar" title="Voltar">←</button>
+    <div style="flex: 1; min-width: 200px;">
+      <h1>GESTÃO DE CATEGORIAS</h1>
+      <p class="subtitle">Criar e manter categorias de produtos</p>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- FORMULÁRIO -->
+  <div class="card form-card">
+    <h2 class="section-title">Adicionar Categoria</h2>
+
+    <form id="categoriaForm" class="form-grid">
+      <div class="form-group">
+        <input id="nomeCat" placeholder="Nome da categoria" required>
+      </div>
+      <div style="grid-column: 1 / -1; display: flex; gap: 12px; flex-wrap: wrap;">
+        <button type="submit" id="btnSalvarCat" class="btn-full-mobile">Salvar Categoria</button>
+        <button type="button" id="btnCancelarCat" onclick="cancelarEdicaoCat()" style="display: none; background: #666; flex: 1;" class="btn-full-mobile">Cancelar Edição</button>
+      </div>
+    </form>
+
+    <p id="msgCat" class="msg"></p>
+  </div>
+
+  <!-- LISTA -->
+  <div class="card card-full">
+    <h2 class="section-title">Categorias Cadastradas</h2>
+    <ul id="categoriasList" class="lista-produtos"></ul>
+  </div>
+
+</main>
+
+<footer>
+  <p>© 2025 <span>Gestfy</span> • Módulo de Categorias</p>
+</footer>
+
+<script src="../js/admin-menu.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/categorias.js"></script>
+<style>
+  .btn-voltar { 
+    background: none; 
+    border: none; 
+    font-size: 24px; 
+    color: var(--rosa); 
+    cursor: pointer; 
+    padding: 8px;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-voltar:hover { 
+    opacity: 0.8; 
+  }
+  
+  .btn-full-mobile {
+    flex: 1 !important;
+    min-width: 120px;
+  }
+  
+  @media (max-width: 768px) {
+    .btn-full-mobile {
+      width: 100% !important;
+    }
+    
+    header .admin-header {
+      padding: 12px;
+    }
+  }
+</style>
+</body>
+</html>

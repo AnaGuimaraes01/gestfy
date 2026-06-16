@@ -1,6 +1,7 @@
 package com.empresa.gestfy.models;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.empresa.gestfy.config.DataHoraBrasil;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -25,26 +26,32 @@ public class Pedido {
     private String endereco;
     private String status;
 
-    @Column(nullable = false)
-    private Double total = 0.0;
-
     // AVISO: NÃO inicializar aqui para evitar falha no DDL
     @Column(nullable = false)
     private LocalDateTime data;
 
+    // Campo para compatibilidade com setTotal() em PedidoService.criar()
+    private Double total = 0.0;
+
+    // Campos para troco (pedido online)
+    @Column(name = "precisa_troco")
+    private Boolean precisaTroco = false;
+
+    @Column(name = "valor_troco")
+    private Double valorTroco;
+
+    // Rastreamento de registro no caixa (evita duplicidade)
+    @Column(name = "caixa_registro_id")
+    private Long caixaRegistroId;
+
     // Itens do pedido
-    @OneToMany(
-            mappedBy = "pedido",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<PedidoItem> itens = new ArrayList<>();
 
     // Construtor padrão
     public Pedido() {
-        this.data = LocalDateTime.now();
+        this.data = DataHoraBrasil.agora();
     }
 
     // ======================
@@ -84,7 +91,7 @@ public class Pedido {
     }
 
     public String getEndereco() {
- return endereco;
+        return endereco;
     }
 
     public void setEndereco(String endereco) {
@@ -100,15 +107,12 @@ public class Pedido {
     }
 
     public Double getTotal() {
+        if (itens == null || itens.isEmpty()) {
+            return 0.0;
+        }
         return itens.stream()
-                .mapToDouble(item ->
-                        item.getPrecoUnitario() * item.getQuantidade()
-                )
+                .mapToDouble(item -> item.getPrecoUnitario() * item.getQuantidade())
                 .sum();
-    }
-
-    public void setTotal(Double total) {
-        this.total = total;
     }
 
     public LocalDateTime getData() {
@@ -117,6 +121,10 @@ public class Pedido {
 
     public void setData(LocalDateTime data) {
         this.data = data;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
     }
 
     public List<PedidoItem> getItens() {
@@ -130,5 +138,37 @@ public class Pedido {
     public void addItem(PedidoItem item) {
         itens.add(item);
         item.setPedido(this);
+    }
+
+    // ======================
+    // GETTERS E SETTERS - TROCO
+    // ======================
+
+    public Boolean getPrecisaTroco() {
+        return precisaTroco;
+    }
+
+    public void setPrecisaTroco(Boolean precisaTroco) {
+        this.precisaTroco = precisaTroco;
+    }
+
+    public Double getValorTroco() {
+        return valorTroco;
+    }
+
+    public void setValorTroco(Double valorTroco) {
+        this.valorTroco = valorTroco;
+    }
+
+    // ======================
+    // GETTERS E SETTERS - RASTREAMENTO
+    // ======================
+
+    public Long getCaixaRegistroId() {
+        return caixaRegistroId;
+    }
+
+    public void setCaixaRegistroId(Long caixaRegistroId) {
+        this.caixaRegistroId = caixaRegistroId;
     }
 }
