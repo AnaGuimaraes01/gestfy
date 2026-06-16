@@ -123,8 +123,8 @@
         return;
       }
 
-      // Carregar vendas por dia
-      await carregarVendasPorDia(dataInicio);
+      // Carregar vendas por período
+      await carregarVendasPorPeriodo(dataInicio, dataFim);
       
       // Carregar estoque
       await carregarStatusEstoque();
@@ -139,38 +139,46 @@
     }
   }
 
-  async function carregarVendasPorDia(data) {
+  async function carregarVendasPorPeriodo(dataInicio, dataFim) {
     try {
-      const response = await fetch(`${API_RELATORIOS}/vendas-por-dia?data=${data}`);
+      const response = await fetch(`${API_RELATORIOS}/vendas-por-periodo?dataInicio=${dataInicio}&dataFim=${dataFim}`);
       
       if (!response.ok) {
         document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda encontrada</td></tr>';
-        atualizarEstatisticas([]);
+        atualizarEstatisticas({});
         return;
       }
 
-      const venda = await response.json();
+      const periodo = await response.json();
       
       document.getElementById("relatorioList").innerHTML = "";
       
-      // Exibir dados do relatório
-      const row = document.createElement("tr");
-      const total = venda.totalVendas || 0;
-      const qtd = venda.quantidadePedidos || 0;
-      const ticketMedio = qtd > 0 ? total / qtd : 0;
+      // Atualizar estatísticas gerais do período
+      const totalVendido = periodo.totalVendas || 0;
+      const qtdVendas = periodo.quantidadePedidos || 0;
+      const ticketMedio = periodo.ticketMedio || 0;
 
-      row.innerHTML = `
-        <td>${new Date(venda.data).toLocaleDateString("pt-BR")}</td>
-        <td>${qtd}</td>
-        <td>R$ ${total.toFixed(2)}</td>
-        <td>R$ ${ticketMedio.toFixed(2)}</td>
-      `;
-      document.getElementById("relatorioList").appendChild(row);
-
-      // Atualizar estatísticas
-      document.getElementById("totalVendido").textContent = "R$ " + total.toFixed(2);
-      document.getElementById("qtdVendas").textContent = qtd;
+      document.getElementById("totalVendido").textContent = "R$ " + totalVendido.toFixed(2);
+      document.getElementById("qtdVendas").textContent = qtdVendas;
       document.getElementById("ticketMedio").textContent = "R$ " + ticketMedio.toFixed(2);
+
+      // Exibir vendas por dia
+      const vendedorPorDia = periodo.vendedorPorDia || [];
+      if (vendedorPorDia.length === 0) {
+        document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhuma venda no período</td></tr>';
+      } else {
+        vendedorPorDia.forEach(dia => {
+          const row = document.createElement("tr");
+          const dataFormatada = new Date(dia.data).toLocaleDateString("pt-BR");
+          row.innerHTML = `
+            <td>${dataFormatada}</td>
+            <td>${dia.quantidadePedidos}</td>
+            <td>R$ ${(dia.totalVendas || 0).toFixed(2)}</td>
+            <td>R$ ${(dia.ticketMedio || 0).toFixed(2)}</td>
+          `;
+          document.getElementById("relatorioList").appendChild(row);
+        });
+      }
 
     } catch (error) {
       console.error(error);
@@ -180,7 +188,7 @@
 
   async function carregarStatusEstoque() {
     try {
-      const response = await fetch(API_RELATORIOS + "/produtos");
+      const response = await fetch(API_RELATORIOS + "/status-produtos");
       
       if (!response.ok) {
         document.getElementById("estoqueList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #bbb;">Nenhum produto encontrado</td></tr>';
@@ -197,7 +205,7 @@
       document.getElementById("estoqueList").innerHTML = "";
       produtos.forEach(produto => {
         const row = document.createElement("tr");
-        const status = produto.quantidade <= 0 ? "Em Falta" : produto.quantidade <= 5 ? "Baixo" : "Disponível";
+        const status = produto.status;
         const statusColor = produto.quantidade <= 0 ? "#f44" : produto.quantidade <= 5 ? "#ffa500" : "#4caf50";
         
         row.innerHTML = `

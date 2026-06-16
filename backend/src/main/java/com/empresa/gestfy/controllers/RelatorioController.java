@@ -30,6 +30,11 @@ public class RelatorioController {
         return ResponseEntity.ok(relatorioService.vendedorPorDia(data));
     }
 
+    @GetMapping("/vendas-por-periodo")
+    public ResponseEntity<Map<String, Object>> vendedorPorPeriodo(@RequestParam String dataInicio, @RequestParam String dataFim) {
+        return ResponseEntity.ok(relatorioService.vendedorPorPeriodo(dataInicio, dataFim));
+    }
+
     @GetMapping("/produtos-mais-vendidos")
     public ResponseEntity<List<Map<String, Object>>> produtosMaisVendidos(@RequestParam(defaultValue = "7") Integer periodo) {
         return ResponseEntity.ok(relatorioService.produtosMaisVendidos());
@@ -48,5 +53,10 @@ public class RelatorioController {
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> dashboard() {
         return ResponseEntity.ok(relatorioService.dashboard());
+    }
+
+    @GetMapping("/status-produtos")
+    public ResponseEntity<List<Map<String, Object>>> statusProdutos() {
+        return ResponseEntity.ok(relatorioService.statusProdutos());
     }
 }

@@ -163,6 +163,55 @@ public class RelatorioService {
     }
 
     /**
+     * Vendas por período (múltiplos dias)
+     */
+    public Map<String, Object> vendedorPorPeriodo(String dataInicio, String dataFim) {
+        LocalDate inicio = LocalDate.parse(dataInicio);
+        LocalDate fim = LocalDate.parse(dataFim);
+
+        List<Pedido> pedidosPeriodo = pedidoRepository.findAll()
+                .stream()
+                .filter(p -> {
+                    LocalDate dataPedido = p.getData().toLocalDate();
+                    return !dataPedido.isBefore(inicio) && !dataPedido.isAfter(fim) && "FINALIZADO".equals(p.getStatus());
+                })
+                .collect(Collectors.toList());
+
+        Double totalVendas = pedidosPeriodo.stream()
+                .mapToDouble(Pedido::getTotal)
+                .sum();
+
+        List<Map<String, Object>> vendedorPorDia = pedidosPeriodo.stream()
+                .collect(Collectors.groupingBy(p -> p.getData().toLocalDate()))
+                .entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    LocalDate data = entry.getKey();
+                    List<Pedido> pedidosDia = entry.getValue();
+                    Double totalDia = pedidosDia.stream().mapToDouble(Pedido::getTotal).sum();
+                    Integer qtdDia = pedidosDia.size();
+
+                    Map<String, Object> dia = new HashMap<>();
+                    dia.put("data", data);
+                    dia.put("quantidadePedidos", qtdDia);
+                    dia.put("totalVendas", totalDia);
+                    dia.put("ticketMedio", qtdDia > 0 ? totalDia / qtdDia : 0.0);
+                    return dia;
+                })
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("dataInicio", inicio);
+        response.put("dataFim", fim);
+        response.put("totalVendas", totalVendas);
+        response.put("quantidadePedidos", pedidosPeriodo.size());
+        response.put("ticketMedio", pedidosPeriodo.size() > 0 ? totalVendas / pedidosPeriodo.size() : 0.0);
+        response.put("vendedorPorDia", vendedorPorDia);
+
+        return response;
+    }
+
+    /**
      * Total de pedidos por período
      */
     public Map<String, Object> totalPedidosPorPeriodo(Integer dias) {
@@ -194,5 +243,26 @@ public class RelatorioService {
         response.put("receitaTotal", receitaTotal);
 
         return response;
+    }
+
+    /**
+     * Status de produtos com informações de estoque
+     */
+    public List<Map<String, Object>> statusProdutos() {
+        return produtoRepository.findAll().stream()
+                .map(p -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("id", p.getId());
+                    item.put("nome", p.getNome());
+                    item.put("quantidade", p.getQuantidade() != null ? p.getQuantidade() : 0);
+                    item.put("preco", p.getPreco());
+                    
+                    Integer qtd = p.getQuantidade() != null ? p.getQuantidade() : 0;
+                    String status = qtd <= 0 ? "Em Falta" : qtd <= 5 ? "Baixo" : "Disponível";
+                    item.put("status", status);
+                    
+                    return item;
+                })
+                .collect(Collectors.toList());
     }
 }

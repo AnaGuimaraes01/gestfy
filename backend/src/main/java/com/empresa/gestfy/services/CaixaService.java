@@ -19,15 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+// CaixaService: Responsável pela lógica completa do caixa: abertura e fechamento; registros de venda; cálculos de troco; consultas de status
 
-/**
- * CaixaService
- * Responsável pela lógica completa do caixa:
- * - Abertura e fechamento
- * - Registros de venda
- * - Cálculos de troco
- * - Consultas de status
- */
 @Service
 public class CaixaService {
 
@@ -43,16 +36,9 @@ public class CaixaService {
                 this.estoqueService = estoqueService;
         }
 
-        // ========================================
         // 1. ABERTURA DO CAIXA
-        // ========================================
-
-        /**
-         * Abre o caixa do dia.
-         * Verifica se já existe um caixa aberto.
-         * 
-         * @return Map contendo status e detalhes da abertura
-         */
+// Abre o caixa do dia e verifica se já existe um caixa aberto
+       
         public Map<String, Object> abrirCaixa() {
                 LocalDate hoje = LocalDate.now();
 
