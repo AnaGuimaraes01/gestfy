@@ -16,7 +16,7 @@ public class Estoque {
     @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
-    private String tipoMovimento; // ENTRADA / SAIDA
+    private String tipoMovimento; 
     private LocalDateTime dataMovimento;
     private Integer quantidade;
 

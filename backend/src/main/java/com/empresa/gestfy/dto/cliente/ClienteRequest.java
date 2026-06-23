@@ -17,5 +17,5 @@ public record ClienteRequest(
     @Email(message = "E-mail inválido")
     String email,
 
-    String endereco // ALTERAÇÃO: Endereço pode ser informado depois no pedido
+    String endereco 
 ) {}

@@ -27,7 +27,6 @@ public class VendaResponse {
         this.mensagem = "Venda registrada com sucesso!";
     }
 
-    // Getters e Setters
     public Long getVendaId() {
         return vendaId;
     }

@@ -17,7 +17,7 @@ public class Usuario {
 
     private String senha;
 
-    private String perfil; // Ex: ADMIN, DONO, FUNCIONARIO
+    private String perfil; 
 
     public Usuario() {}
 

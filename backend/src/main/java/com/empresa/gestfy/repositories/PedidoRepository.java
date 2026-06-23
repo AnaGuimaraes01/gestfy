@@ -9,11 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
-
-       // ========================================
-       // JOIN FETCH - Carrega Cliente e Itens
-       // ========================================
-
        @Query("SELECT DISTINCT p FROM Pedido p " +
                      "LEFT JOIN FETCH p.cliente " +
                      "LEFT JOIN FETCH p.itens i " +
@@ -30,10 +25,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
                      "WHERE p.id = :id")
        Optional<Pedido> findByIdWithRelationships(@Param("id") Long id);
 
-       // ========================================
-       // Buscas por Status (sem relacionamentos)
-       // ========================================
-
        @Query("SELECT DISTINCT p FROM Pedido p " +
                      "LEFT JOIN FETCH p.cliente " +
                      "LEFT JOIN FETCH p.itens i " +
@@ -43,10 +34,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
                      "ORDER BY p.data DESC")
        List<Pedido> findByStatusWithRelationships(@Param("status") String status);
 
-       // ========================================
-       // Buscas por Data
-       // ========================================
-
        @Query("SELECT DISTINCT p FROM Pedido p " +
                      "LEFT JOIN FETCH p.cliente " +
                      "LEFT JOIN FETCH p.itens i " +
@@ -54,16 +41,13 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
                      "LEFT JOIN FETCH prod.categoria " +
                      "WHERE p.data BETWEEN :dataInicio AND :dataFim " +
                      "ORDER BY p.data DESC")
+                     
        List<Pedido> findByDataBetweenWithRelationships(
                      @Param("dataInicio") LocalDateTime dataInicio,
                      @Param("dataFim") LocalDateTime dataFim);
 
-       // Métodos originais mantidos para compatibilidade
        List<Pedido> findByStatus(String status);
-
        List<Pedido> findByDataBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
-
        List<Pedido> findByCliente_Id(Long clienteId);
-
        List<Pedido> findByStatusAndDataBetween(String status, LocalDateTime dataInicio, LocalDateTime dataFim);
 }

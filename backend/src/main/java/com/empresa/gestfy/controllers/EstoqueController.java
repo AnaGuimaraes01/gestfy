@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * EstoqueController
- * Responsável apenas por:
+/* EstoqueController responsável por:
  * - Receber requisições HTTP
  * - Delegar para EstoqueService
  * - Retornar respostas HTTP
@@ -30,29 +28,17 @@ public class EstoqueController {
         this.estoqueService = estoqueService;
     }
 
-    /**
-     * Criar movimentação de estoque
-     * POST /api/estoque
-     */
     @PostMapping
     public ResponseEntity<EstoqueDTO> criar(@Valid @RequestBody EstoqueRequest request) {
         EstoqueDTO estoque = estoqueService.criar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(estoque);
     }
 
-    /**
-     * Listar todas as movimentações
-     * GET /api/estoque
-     */
     @GetMapping
     public ResponseEntity<List<EstoqueDTO>> listar() {
         return ResponseEntity.ok(estoqueService.listar());
     }
 
-    /**
-     * Buscar movimentação por ID
-     * GET /api/estoque/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<EstoqueDTO> buscarPorId(@PathVariable Long id) {
         return estoqueService.buscarPorId(id)
@@ -60,37 +46,21 @@ public class EstoqueController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Filtrar por tipo (ENTRADA ou SAIDA)
-     * GET /api/estoque/filtro/tipo?tipo=ENTRADA
-     */
     @GetMapping("/filtro/tipo")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorTipo(@RequestParam String tipo) {
         return ResponseEntity.ok(estoqueService.filtrarPorTipo(tipo));
     }
 
-    /**
-     * Filtrar por data
-     * GET /api/estoque/filtro/data?data=2024-01-15
-     */
     @GetMapping("/filtro/data")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorData(@RequestParam String data) {
         return ResponseEntity.ok(estoqueService.filtrarPorData(data));
     }
 
-    /**
-     * Filtrar por produto
-     * GET /api/estoque/filtro/produto?produtoId=1
-     */
     @GetMapping("/filtro/produto")
     public ResponseEntity<List<EstoqueDTO>> filtrarPorProduto(@RequestParam Long produtoId) {
         return ResponseEntity.ok(estoqueService.listarPorProduto(produtoId));
     }
 
-    /**
-     * Atualizar movimentação
-     * PUT /api/estoque/{id}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<EstoqueDTO> atualizar(
             @PathVariable Long id,
@@ -103,10 +73,6 @@ public class EstoqueController {
         }
     }
 
-    /**
-     * Remover movimentação
-     * DELETE /api/estoque/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         try {
@@ -117,10 +83,6 @@ public class EstoqueController {
         }
     }
 
-    /**
-     * Obter resumo de estoque
-     * GET /api/estoque/resumo
-     */
     @GetMapping("/resumo")
     public ResponseEntity<Map<String, Object>> resumoEstoque() {
         return ResponseEntity.ok(estoqueService.obterResumo());

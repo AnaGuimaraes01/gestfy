@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * RelatorioController
- * Responsável apenas por:
+/* RelatorioController responsável por:
  * - Receber requisições HTTP
  * - Delegar para RelatorioService
  * - Retornar respostas HTTP

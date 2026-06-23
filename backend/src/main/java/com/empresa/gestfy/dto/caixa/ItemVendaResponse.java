@@ -1,8 +1,5 @@
 package com.empresa.gestfy.dto.caixa;
 
-/**
- * Response DTO para um item individual da venda agrupada
- */
 public class ItemVendaResponse {
     private Long produtoId;
     private String nomeProduto;
@@ -19,7 +16,6 @@ public class ItemVendaResponse {
         this.subtotal = subtotal;
     }
 
-    // Getters
     public Long getProdutoId() {
         return produtoId;
     }

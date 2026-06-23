@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * CategoriaController
- * Responsável apenas por:
+/* CategoriaController responsável por:
  * - Receber requisições HTTP
  * - Delegar para CategoriaService
  * - Retornar respostas HTTP
@@ -29,29 +27,17 @@ public class CategoriaController {
         this.categoriaService = categoriaService;
     }
 
-    /**
-     * Criar nova categoria
-     * POST /api/categorias
-     */
     @PostMapping
     public ResponseEntity<CategoriaDTO> criar(@Valid @RequestBody CategoriaRequest request) {
         CategoriaDTO categoria = categoriaService.criar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(categoria);
     }
 
-    /**
-     * Listar todas as categorias
-     * GET /api/categorias
-     */
     @GetMapping
     public ResponseEntity<List<CategoriaDTO>> listar() {
         return ResponseEntity.ok(categoriaService.listar());
     }
 
-    /**
-     * Buscar categoria por ID
-     * GET /api/categorias/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<CategoriaDTO> buscarPorId(@PathVariable Long id) {
         return categoriaService.buscarPorId(id)
@@ -59,10 +45,6 @@ public class CategoriaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Atualizar categoria
-     * PUT /api/categorias/{id}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<CategoriaDTO> atualizar(
             @PathVariable Long id,
@@ -75,10 +57,6 @@ public class CategoriaController {
         }
     }
 
-    /**
-     * Remover categoria
-     * DELETE /api/categorias/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
         try {

@@ -16,47 +16,36 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relacionamento com Cliente
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
     private String formaPagamento;
-    private String formaRecebimento; // RETIRADA ou ENTREGA
+    private String formaRecebimento; 
     private String endereco;
     private String status;
 
-    // AVISO: NÃO inicializar aqui para evitar falha no DDL
     @Column(nullable = false)
     private LocalDateTime data;
 
-    // Campo para compatibilidade com setTotal() em PedidoService.criar()
     private Double total = 0.0;
 
-    // Campos para troco (pedido online)
     @Column(name = "precisa_troco")
     private Boolean precisaTroco = false;
 
     @Column(name = "valor_troco")
     private Double valorTroco;
 
-    // Rastreamento de registro no caixa (evita duplicidade)
     @Column(name = "caixa_registro_id")
     private Long caixaRegistroId;
 
-    // Itens do pedido
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<PedidoItem> itens = new ArrayList<>();
 
-    // Construtor padrão
     public Pedido() {
         this.data = DataHoraBrasil.agora();
     }
-
-    // ======================
-    // GETTERS E SETTERS
-    // ======================
 
     public Long getId() {
         return id;
@@ -131,18 +120,10 @@ public class Pedido {
         return itens;
     }
 
-    // ======================
-    // MÉTODO AUXILIAR
-    // ======================
-
     public void addItem(PedidoItem item) {
         itens.add(item);
         item.setPedido(this);
     }
-
-    // ======================
-    // GETTERS E SETTERS - TROCO
-    // ======================
 
     public Boolean getPrecisaTroco() {
         return precisaTroco;
@@ -159,10 +140,6 @@ public class Pedido {
     public void setValorTroco(Double valorTroco) {
         this.valorTroco = valorTroco;
     }
-
-    // ======================
-    // GETTERS E SETTERS - RASTREAMENTO
-    // ======================
 
     public Long getCaixaRegistroId() {
         return caixaRegistroId;

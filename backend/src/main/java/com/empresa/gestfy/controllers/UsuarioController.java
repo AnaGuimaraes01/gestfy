@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * UsuarioController
- * Responsável apenas por:
+/* UsuarioController responsável por:
  * - Receber requisições HTTP
  * - Delegar para UsuarioService
  * - Retornar respostas HTTP
@@ -28,10 +26,6 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    /**
-     * Criar novo usuário
-     * POST /api/usuarios
-     */
     @PostMapping
     public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody @Valid UsuarioRequest request) {
         try {
@@ -42,19 +36,11 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Listar todos os usuários
-     * GET /api/usuarios
-     */
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         return ResponseEntity.ok(usuarioService.listar());
     }
 
-    /**
-     * Buscar usuário por ID
-     * GET /api/usuarios/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
         return usuarioService.buscarPorId(id)
@@ -62,10 +48,6 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Atualizar usuário
-     * PUT /api/usuarios/{id}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> atualizarUsuario(
             @PathVariable Long id,
@@ -78,10 +60,6 @@ public class UsuarioController {
         }
     }
 
-    /**
-     * Remover usuário
-     * DELETE /api/usuarios/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removerUsuario(@PathVariable Long id) {
         try {

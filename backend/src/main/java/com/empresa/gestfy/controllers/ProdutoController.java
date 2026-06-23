@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.empresa.gestfy.dto.caixa.ProdutoBuscaResponse;
 
-/**
- * ProdutoController
- * Responsável apenas por:
+/* ProdutoController responsável por:
  * - Receber requisições HTTP
  * - Delegar para ProdutoService
  * - Retornar respostas HTTP
@@ -30,80 +28,47 @@ public class ProdutoController {
         this.produtoService = produtoService;
     }
 
-    /**
-     * Criar novo produto
-     * POST /api/produtos
-     */
     @PostMapping
     public ResponseEntity<ProdutoDTO> criar(@Valid @RequestBody ProdutoRequest request) {
         ProdutoDTO produto = produtoService.criar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(produto);
     }
 
-    /**
-     * Listar todos os produtos
-     * GET /api/produtos
-     */
     @GetMapping
     public ResponseEntity<List<ProdutoDTO>> listar() {
         return ResponseEntity.ok(produtoService.listar());
     }
 
-    /**
-     * Buscar produtos pelo nome
-     * GET /api/produtos/buscar?nome=sorvete
-     */
     @GetMapping("/buscar")
     public ResponseEntity<List<ProdutoBuscaResponse>> buscarPorNome(@RequestParam String nome) {
-        // Delegar a busca ao service (busca parcial, case-insensitive)
         List<ProdutoBuscaResponse> resultados = produtoService.buscarPorNome(nome);
         return ResponseEntity.ok(resultados);
     }
 
-    /**
-     * Listar produtos por categoria
-     * GET /api/produtos/categoria/{categoriaId}
-     */
     @GetMapping("/categoria/{categoriaId}")
     public ResponseEntity<List<ProdutoDTO>> listarPorCategoria(@PathVariable Long categoriaId) {
         List<ProdutoDTO> produtos = produtoService.listarPorCategoria(categoriaId);
         return ResponseEntity.ok(produtos);
     }
 
-    /**
-     * Produtos em promoção
-     * GET /api/produtos/destaque/promocoes
-     */
     @GetMapping("/destaque/promocoes")
     public ResponseEntity<List<ProdutoDTO>> listarPromocoes() {
         List<ProdutoDTO> produtos = produtoService.listarPromocoes();
         return ResponseEntity.ok(produtos);
     }
 
-    /**
-     * Produtos mais vendidos
-     * GET /api/produtos/destaque/vendidos
-     */
     @GetMapping("/destaque/vendidos")
     public ResponseEntity<List<ProdutoDTO>> listarMaisVendidos() {
         List<ProdutoDTO> produtos = produtoService.listarMaisVendidos();
         return ResponseEntity.ok(produtos);
     }
 
-    /**
-     * Produtos mais populares (visualizados)
-     * GET /api/produtos/destaque/populares
-     */
     @GetMapping("/destaque/populares")
     public ResponseEntity<List<ProdutoDTO>> listarMaisPopulares() {
         List<ProdutoDTO> produtos = produtoService.listarMaisPopulares();
         return ResponseEntity.ok(produtos);
     }
 
-    /**
-     * Buscar produto por ID
-     * GET /api/produtos/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
         return produtoService.buscarPorId(id)
@@ -111,10 +76,6 @@ public class ProdutoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Atualizar produto
-     * PUT /api/produtos/{id}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoDTO> atualizar(
             @PathVariable Long id,
@@ -127,10 +88,6 @@ public class ProdutoController {
         }
     }
 
-    /**
-     * Remover produto
-     * DELETE /api/produtos/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(@PathVariable Long id) {
         try {
@@ -141,10 +98,6 @@ public class ProdutoController {
         }
     }
 
-    /**
-     * Incrementar visualizações do produto
-     * PUT /api/produtos/{id}/incrementar-visualizacoes
-     */
     @PutMapping("/{id}/incrementar-visualizacoes")
     public ResponseEntity<ProdutoDTO> incrementarVisualizacoes(@PathVariable Long id) {
         try {
@@ -155,10 +108,6 @@ public class ProdutoController {
         }
     }
 
-    /**
-     * Incrementar vendas do produto
-     * PUT /api/produtos/{id}/incrementar-vendas/{quantidade}
-     */
     @PutMapping("/{id}/incrementar-vendas/{quantidade}")
     public ResponseEntity<ProdutoDTO> incrementarVendas(
             @PathVariable Long id,

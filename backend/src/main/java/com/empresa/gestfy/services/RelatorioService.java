@@ -66,7 +66,7 @@ public class RelatorioService {
     }
 
     /**
-     * Produtos mais vendidos
+     * Produtos mais vendidos (top 5 com valor total)
      */
     public List<Map<String, Object>> produtosMaisVendidos() {
         List<Pedido> todosOsPedidos = pedidoRepository.findAll();
@@ -74,15 +74,33 @@ public class RelatorioService {
         return todosOsPedidos.stream()
                 .flatMap(p -> p.getItens().stream())
                 .collect(Collectors.groupingBy(
-                        item -> item.getProduto().getNome(),
-                        Collectors.summingInt(item -> item.getQuantidade())))
+                        item -> item.getProduto(),
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                items -> {
+                                    Integer qtd = items.stream()
+                                            .mapToInt(item -> item.getQuantidade())
+                                            .sum();
+                                    Double valor = items.stream()
+                                            .mapToDouble(item -> item.getQuantidade() * (item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0))
+                                            .sum();
+                                    return new HashMap<Object, Object>() {{
+                                        put("quantidade", qtd);
+                                        put("valor", valor);
+                                    }};
+                                })))
                 .entrySet().stream()
-                .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
-                .limit(10)
+                .sorted((a, b) -> {
+                    Integer qtdA = (Integer) a.getValue().get("quantidade");
+                    Integer qtdB = (Integer) b.getValue().get("quantidade");
+                    return qtdB.compareTo(qtdA);
+                })
+                .limit(5)
                 .map(entry -> {
                     Map<String, Object> item = new HashMap<>();
-                    item.put("produto", entry.getKey());
-                    item.put("quantidadeVendida", entry.getValue());
+                    item.put("nome", entry.getKey().getNome());
+                    item.put("quantidadeVendida", entry.getValue().get("quantidade"));
+                    item.put("valorTotal", entry.getValue().get("valor"));
                     return item;
                 })
                 .collect(Collectors.toList());

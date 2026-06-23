@@ -26,7 +26,6 @@ public class VendaAgrupadaResponse {
         this.mensagem = "Venda agrupada registrada com sucesso!";
     }
 
-    // Getters
     public Long getPedidoId() {
         return pedidoId;
     }

@@ -37,13 +37,8 @@ public class CaixaService {
                 this.estoqueService = estoqueService;
         }
 
-        // 1. ABERTURA DO CAIXA
-// Abre o caixa do dia e verifica se já existe um caixa aberto
-       
         public Map<String, Object> abrirCaixa() {
                 LocalDate hoje = LocalDate.now();
-
-                // Verifica se já existe um caixa aberto para hoje
                 Optional<Caixa> caixaExistente = caixaRepository.findByDataAndTipoAndStatus(hoje, "ABERTURA", "ABERTO");
                 if (caixaExistente.isPresent()) {
                         Caixa caixa = caixaExistente.get();

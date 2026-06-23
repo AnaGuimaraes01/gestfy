@@ -69,21 +69,20 @@
     </div>
   </div>
 
-  <!-- RELATÓRIO DE ESTOQUE -->
+  <!-- PRODUTOS MAIS VENDIDOS -->
   <div class="card card-full">
-    <h2 class="section-title">Status de Produtos</h2>
+    <h2 class="section-title">Produtos Mais Vendidos</h2>
     <div style="overflow-x: auto;">
       <table class="tabela">
         <thead>
           <tr>
             <th>Produto</th>
-            <th>Quantidade</th>
-            <th>Preço Unitário</th>
-            <th>Status</th>
+            <th>Quantidade Vendida</th>
+            <th>Valor Total Faturado</th>
           </tr>
         </thead>
-        <tbody id="estoqueList">
-          <tr><td colspan="4" style="text-align: center; color: #999;">Carregando...</td></tr>
+        <tbody id="produtosMaisVendidosList">
+          <tr><td colspan="3" style="text-align: center; color: #999;">Carregando...</td></tr>
         </tbody>
       </table>
     </div>
@@ -127,8 +126,8 @@
       // Carregar vendas por período
       await carregarVendasPorPeriodo(dataInicio, dataFim);
       
-      // Carregar estoque
-      await carregarStatusEstoque();
+      // Carregar produtos mais vendidos
+      await carregarProdutosMaisVendidos();
 
       msg.textContent = "Relatório gerado com sucesso";
       msg.style.display = "block";
@@ -184,6 +183,39 @@
     } catch (error) {
       console.error(error);
       document.getElementById("relatorioList").innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f44;">Erro ao carregar vendas</td></tr>';
+    }
+  }
+
+  async function carregarProdutosMaisVendidos() {
+    try {
+      const response = await fetch(API_RELATORIOS + "/produtos-mais-vendidos");
+      
+      if (!response.ok) {
+        document.getElementById("produtosMaisVendidosList").innerHTML = '<tr><td colspan="3" style="text-align: center; color: #bbb;">Nenhum produto encontrado</td></tr>';
+        return;
+      }
+
+      const produtos = await response.json();
+      
+      if (!Array.isArray(produtos) || produtos.length === 0) {
+        document.getElementById("produtosMaisVendidosList").innerHTML = '<tr><td colspan="3" style="text-align: center; color: #bbb;">Nenhum produto encontrado</td></tr>';
+        return;
+      }
+
+      document.getElementById("produtosMaisVendidosList").innerHTML = "";
+      produtos.forEach((produto, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${produto.nome}</td>
+          <td>${produto.quantidadeVendida} un.</td>
+          <td>R$ ${(produto.valorTotal || 0).toFixed(2)}</td>
+        `;
+        document.getElementById("produtosMaisVendidosList").appendChild(row);
+      });
+
+    } catch (error) {
+      console.error(error);
+      document.getElementById("produtosMaisVendidosList").innerHTML = '<tr><td colspan="3" style="text-align: center; color: #f44;">Erro ao carregar produtos</td></tr>';
     }
   }
 

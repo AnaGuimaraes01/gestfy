@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * PedidoController
- * Responsável apenas por:
+/* PedidoController responsável por:
  * - Receber requisições HTTP
  * - Validar dados de entrada
  * - Delegar para PedidoService
@@ -32,9 +30,6 @@ public class PedidoController {
         this.pedidoService = pedidoService;
     }
 
-    /**
-     * Classe interna para respostas de erro
-     */
     public static class ErrorResponse {
         private int status;
         private String message;
@@ -61,10 +56,6 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Criar novo pedido
-     * POST /api/pedidos
-     */
     @PostMapping
     public ResponseEntity<?> criarPedido(@Valid @RequestBody PedidoRequest request) {
         try {
@@ -107,10 +98,6 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Listar todos os pedidos
-     * GET /api/pedidos
-     */
     @GetMapping
     public ResponseEntity<?> listarPedidos() {
         try {
@@ -128,10 +115,6 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Buscar pedido por ID
-     * GET /api/pedidos/{id}
-     */
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDTO> buscarPorId(@PathVariable Long id) {
         return pedidoService.buscarPorId(id)
@@ -139,10 +122,6 @@ public class PedidoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Atualizar status do pedido
-     * PUT /api/pedidos/{id}/status?status=EM_PREPARO
-     */
     @PutMapping("/{id}/status")
     public ResponseEntity<PedidoDTO> atualizarStatus(
             @PathVariable Long id,
@@ -155,10 +134,6 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Remover pedido
-     * DELETE /api/pedidos/{id}
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removerPedido(@PathVariable Long id) {
         try {
@@ -169,11 +144,6 @@ public class PedidoController {
         }
     }
 
-    /**
-     * Listar pedidos por status
-     * GET /api/pedidos/status/{status}
-     * Exemplo: GET /api/pedidos/status/RECEBIDO
-     */
     @GetMapping("/status/{status}")
     public ResponseEntity<?> listarPorStatus(@PathVariable String status) {
         try {

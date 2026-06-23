@@ -17,7 +17,6 @@ public class ProdutoBuscaResponse {
         this.estoque = estoque;
     }
 
-    // Getters
     public Long getId() {
         return id;
     }

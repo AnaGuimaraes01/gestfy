@@ -11,15 +11,11 @@ import jakarta.validation.Valid;
 
 import java.util.Map;
 
-/**
- * CaixaController
- * Responsável apenas por:
+/* CaixaController responsável por:
  * - Receber requisições HTTP
  * - Validar dados de entrada
  * - Delegar para CaixaService
  * - Retornar respostas HTTP
- * 
- * Toda lógica de negócio está em CaixaService
  */
 @CrossOrigin(origins = "*")
 @RestController
@@ -32,11 +28,6 @@ public class CaixaController {
                 this.caixaService = caixaService;
         }
 
-        // 1. ABERTURA DO CAIXA
-        /**
-         * Abre o caixa do dia.
-         * POST /api/caixa/abrir
-         */
         @PostMapping("/abrir")
         public ResponseEntity<Map<String, Object>> abrirCaixa() {
                 Map<String, Object> resultado = caixaService.abrirCaixa();
@@ -46,12 +37,6 @@ public class CaixaController {
                 return ResponseEntity.ok(resultado);
         }
 
-        // 2. BUSCAR PRODUTOS POR NOME (PARCIAL)
-
-        /**
-         * Busca produtos pelo nome (busca parcial, case-insensitive).
-         * GET /api/caixa/buscar-produto?nome=sorvete
-         */
         @GetMapping("/buscar-produto")
         public ResponseEntity<Map<String, Object>> buscarProduto(
                         @RequestParam(required = true) String nome) {
@@ -63,7 +48,6 @@ public class CaixaController {
                                 return ResponseEntity.badRequest().body(erro);
                         }
 
-                        // Busca produtos via service
                         var produtos = caixaService.buscarProdutos(nome);
 
                         if (produtos.isEmpty()) {
@@ -85,12 +69,6 @@ public class CaixaController {
                 }
         }
 
-        // 3. REGISTRAR VENDA
-        /**
-         * Registra uma venda no caixa.
-         * POST /api/caixa/vender
-         * Body: { produtoId, quantidade, valorRecebido }
-         */
         @PostMapping("/vender")
         public ResponseEntity<Map<String, Object>> registrarVenda(@Valid @RequestBody VendaRequest venda) {
                 Map<String, Object> resultado = caixaService.registrarVenda(venda);
@@ -102,12 +80,6 @@ public class CaixaController {
                 }
         }
 
-        // 3.1 REGISTRAR VENDA AGRUPADA (múltiplos itens)
-        /**
-         * Registra uma venda agrupada com múltiplos itens no caixa.
-         * POST /api/caixa/vender-agrupada
-         * Body: { itens: [{produtoId, quantidade}, ...], valorRecebido }
-         */
         @PostMapping("/vender-agrupada")
         public ResponseEntity<Map<String, Object>> registrarVendaAgrupada(@Valid @RequestBody VendaAgrupadaRequest venda) {
                 Map<String, Object> resultado = caixaService.registrarVendaAgrupada(venda);
@@ -119,11 +91,6 @@ public class CaixaController {
                 }
         }
 
-        // 4. FECHAR CAIXA DO DIA
-        /**
-         * Fecha o caixa do dia.
-         * POST /api/caixa/fechar
-         */
         @PostMapping("/fechar")
         public ResponseEntity<Map<String, Object>> fecharCaixa() {
                 Map<String, Object> resultado = caixaService.fecharCaixa();
@@ -135,21 +102,11 @@ public class CaixaController {
                 }
         }
 
-        // 5. LISTAR VENDAS DO DIA
-        /**
-         * Lista todas as vendas registradas no dia.
-         * GET /api/caixa/vendas-do-dia ***
-         */
         @GetMapping("/vendas-do-dia")
         public ResponseEntity<Map<String, Object>> listarVendasDoDia() {
                 return ResponseEntity.ok(caixaService.listarVendasDoDia());
         }
 
-        // 6. OBTER STATUS DO CAIXA
-        /**
-         * Verifica o status atual do caixa.
-         * GET /api/caixa/status
-         */
         @GetMapping("/status")
         public ResponseEntity<Map<String, Object>> obterStatus() {
                 return ResponseEntity.ok(caixaService.obterStatus());

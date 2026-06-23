@@ -16,15 +16,12 @@ public class Caixa {
     @Column(name = "tipo")
     private String tipo;
 
-    // Valor inicial do caixa (nunca pode ser null)
     @Column(name = "valor_inicial", nullable = false, columnDefinition = "DOUBLE PRECISION DEFAULT 0")
     private Double valorInicial;
 
-    // Valor final (apenas preenchido no fechamento)
     @Column(name = "valor_final")
     private Double valorFinal;
 
-    // Saldo ou total de vendas
     @Column(name = "saldo")
     private Double saldo;
 
@@ -34,31 +31,24 @@ public class Caixa {
     @Column(name = "data")
     private LocalDate data;
 
-    // Data/hora de abertura do caixa
     @Column(name = "data_abertura", nullable = false)
     private LocalDateTime dataAbertura;
 
-    // Data/hora de fechamento do caixa
     @Column(name = "data_fechamento")
     private LocalDateTime dataFechamento;
 
-    // Timestamps mantidos por compatibilidade (caso estejam sendo usados no
-    // frontend)
     @Column(name = "horario_abertura")
     private LocalDateTime horarioAbertura;
 
     @Column(name = "horario_fechamento")
     private LocalDateTime horarioFechamento;
 
-    // Status: "ABERTO", "FECHADO"
     @Column(name = "status", nullable = false)
     private String status;
 
-    // Observações adicionais
     @Column(name = "observacoes")
     private String observacoes;
 
-    // Origem do registro: CAIXA (venda presencial) ou PEDIDO_ONLINE
     @Column(name = "origem")
     private String origem;
 
@@ -190,7 +180,7 @@ public class Caixa {
             this.status = "ABERTO";
         }
         if (this.origem == null) {
-            this.origem = "CAIXA"; // Padrão para venda presencial
+            this.origem = "CAIXA"; 
         }
     }
 }

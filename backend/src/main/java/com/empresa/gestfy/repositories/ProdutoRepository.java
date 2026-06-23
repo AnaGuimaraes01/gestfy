@@ -5,6 +5,5 @@ import com.empresa.gestfy.models.Produto;
 import java.util.List;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
-    // Busca parcial por nome do produto (case-insensitive)
     List<Produto> findByNomeContainingIgnoreCase(String nome);
 }
