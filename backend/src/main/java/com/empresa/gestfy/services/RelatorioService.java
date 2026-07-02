@@ -2,12 +2,13 @@ package com.empresa.gestfy.services;
 
 import com.empresa.gestfy.config.DataHoraBrasil;
 import com.empresa.gestfy.models.Pedido;
+import com.empresa.gestfy.models.PedidoItem;
 import com.empresa.gestfy.models.Produto;
 import com.empresa.gestfy.repositories.CaixaRepository;
 import com.empresa.gestfy.repositories.PedidoRepository;
 import com.empresa.gestfy.repositories.ProdutoRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -68,26 +69,28 @@ public class RelatorioService {
     /**
      * Produtos mais vendidos (top 5 com valor total)
      */
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> produtosMaisVendidos() {
-        List<Pedido> todosOsPedidos = pedidoRepository.findAll();
+        List<Pedido> todosOsPedidos = pedidoRepository.findAllWithRelationships();
 
         return todosOsPedidos.stream()
                 .flatMap(p -> p.getItens().stream())
+                .filter(item -> item.getProduto() != null)
                 .collect(Collectors.groupingBy(
-                        item -> item.getProduto(),
+                        PedidoItem::getProduto,
                         Collectors.collectingAndThen(
                                 Collectors.toList(),
                                 items -> {
                                     Integer qtd = items.stream()
-                                            .mapToInt(item -> item.getQuantidade())
+                                            .mapToInt(PedidoItem::getQuantidade)
                                             .sum();
                                     Double valor = items.stream()
                                             .mapToDouble(item -> item.getQuantidade() * (item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0))
                                             .sum();
-                                    return new HashMap<Object, Object>() {{
-                                        put("quantidade", qtd);
-                                        put("valor", valor);
-                                    }};
+                                    Map<String, Object> aggregate = new HashMap<>();
+                                    aggregate.put("quantidade", qtd);
+                                    aggregate.put("valor", valor);
+                                    return aggregate;
                                 })))
                 .entrySet().stream()
                 .sorted((a, b) -> {
