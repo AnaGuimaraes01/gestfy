@@ -29,12 +29,13 @@ public class RelatorioController {
     }
 
     @GetMapping("/vendas-por-periodo")
-    public ResponseEntity<Map<String, Object>> vendedorPorPeriodo(@RequestParam String dataInicio, @RequestParam String dataFim) {
+    public ResponseEntity<Map<String, Object>> vendedorPorPeriodo(@RequestParam String dataInicio,
+            @RequestParam String dataFim) {
         return ResponseEntity.ok(relatorioService.vendedorPorPeriodo(dataInicio, dataFim));
     }
 
     @GetMapping("/produtos-mais-vendidos")
-    public ResponseEntity<List<Map<String, Object>>> produtosMaisVendidos(@RequestParam(defaultValue = "7") Integer periodo) {
+    public ResponseEntity<?> produtosMaisVendidos(@RequestParam(defaultValue = "7") Integer periodo) {
         return ResponseEntity.ok(relatorioService.produtosMaisVendidos());
     }
 
