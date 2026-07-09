@@ -3,12 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestfy Admin</title>
+    <title>Gestfy Admin - Acesso</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #1f2937; }
+        main { max-width: 480px; margin: 60px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+        h1, h2 { margin-bottom: 12px; }
+        form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        input, button { padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; }
+        button { background: #2563eb; color: #fff; border: none; cursor: pointer; }
+        button:disabled { opacity: .7; cursor: wait; }
+        .message { margin-top: 10px; color: #b91c1c; min-height: 20px; }
+        a { color: #2563eb; text-decoration: none; }
+    </style>
 </head>
 <body>
+    <main>
+        <h1>Acesso ao painel</h1>
+        <p>Entre com seu e-mail e senha para acessar o sistema Gestfy.</p>
+
+        <section>
+            <h2>Entrar</h2>
+            <form id="loginForm">
+                <label for="loginEmail">E-mail</label>
+                <input id="loginEmail" type="email" required>
+                <label for="loginSenha">Senha</label>
+                <input id="loginSenha" type="password" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Primeiro acesso</h2>
+            <form id="registerForm">
+                <label for="registerNome">Nome</label>
+                <input id="registerNome" type="text" required>
+                <label for="registerEmail">E-mail</label>
+                <input id="registerEmail" type="email" required>
+                <label for="registerSenha">Senha</label>
+                <input id="registerSenha" type="password" required>
+                <label for="registerTelefone">Telefone</label>
+                <input id="registerTelefone" type="text" required>
+                <label for="registerEndereco">Endereço</label>
+                <input id="registerEndereco" type="text">
+                <button type="submit">Cadastrar</button>
+            </form>
+        </section>
+
+        <p class="message" id="message"></p>
+        <p><a href="../cliente/login.html">Ir para a área do cliente</a></p>
+    </main>
+
     <script>
-        // Redirecionar direto para o painel principal
-        window.location.href = "index.html";
+        const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8080/api'
+            : 'https://gestfy-backend.onrender.com/api';
+        const messageEl = document.getElementById('message');
+
+        function showMessage(text) {
+            messageEl.textContent = text;
+        }
+
+        async function requestJson(url, options) {
+            const response = await fetch(url, options);
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : await response.text();
+            if (!response.ok) {
+                const message = typeof data === 'string' ? data : data?.message || 'Erro na operação';
+                throw new Error(message);
+            }
+            return data;
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const button = event.currentTarget.querySelector('button');
+            button.disabled = true;
+            showMessage('');
+
+            try {
+                const email = document.getElementById('loginEmail').value;
+                const senha = document.getElementById('loginSenha').value;
+                const data = await requestJson(`${apiBase}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                localStorage.setItem('gestfyToken', data.token);
+                localStorage.setItem('gestfyEmail', data.email || email);
+                window.location.href = 'index.html';
+            } catch (error) {
+                showMessage(error.message || 'Falha no login');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const button = event.currentTarget.querySelector('button');
+            button.disabled = true;
+            showMessage('');
+
+            try {
+                const nome = document.getElementById('registerNome').value;
+                const email = document.getElementById('registerEmail').value;
+                const senha = document.getElementById('registerSenha').value;
+                const telefone = document.getElementById('registerTelefone').value;
+                const endereco = document.getElementById('registerEndereco').value;
+                const data = await requestJson(`${apiBase}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha, telefone, endereco })
+                });
+
+                localStorage.setItem('gestfyToken', data.token);
+                localStorage.setItem('gestfyEmail', data.email || email);
+                window.location.href = 'index.html';
+            } catch (error) {
+                showMessage(error.message || 'Falha no cadastro');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('registerForm').addEventListener('submit', handleRegister);
     </script>
 </body>
 </html>

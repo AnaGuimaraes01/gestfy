@@ -12,9 +12,9 @@
         <section>
             <h2>Já tenho conta</h2>
             <form id="loginForm">
-                <label>Email</label>
+                <label for="loginEmail">Email</label>
                 <input type="email" id="loginEmail" required>
-                <label>Senha</label>
+                <label for="loginSenha">Senha</label>
                 <input type="password" id="loginSenha" required>
                 <button type="submit">Entrar</button>
             </form>
@@ -22,15 +22,15 @@
         <section>
             <h2>Primeiro acesso</h2>
             <form id="registerForm">
-                <label>Nome</label>
+                <label for="registerNome">Nome</label>
                 <input type="text" id="registerNome" required>
-                <label>Email</label>
+                <label for="registerEmail">Email</label>
                 <input type="email" id="registerEmail" required>
-                <label>Senha</label>
+                <label for="registerSenha">Senha</label>
                 <input type="password" id="registerSenha" required>
-                <label>Telefone</label>
+                <label for="registerTelefone">Telefone</label>
                 <input type="text" id="registerTelefone" required>
-                <label>Endereço</label>
+                <label for="registerEndereco">Endereço</label>
                 <input type="text" id="registerEndereco">
                 <button type="submit">Cadastrar</button>
             </form>
@@ -39,51 +39,76 @@
     </main>
 
     <script>
-        const apiBase = "http://localhost:8080/api";
+        const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:8080/api'
+            : 'https://gestfy-backend.onrender.com/api';
         const messageEl = document.getElementById('message');
+
+        function showMessage(text) {
+            messageEl.textContent = text;
+        }
+
+        async function requestJson(url, options) {
+            const response = await fetch(url, options);
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : await response.text();
+            if (!response.ok) {
+                const message = typeof data === 'string' ? data : data?.message || 'Erro na operação';
+                throw new Error(message);
+            }
+            return data;
+        }
 
         async function handleLogin(event) {
             event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const senha = document.getElementById('loginSenha').value;
+            const button = event.currentTarget.querySelector('button');
+            button.disabled = true;
+            showMessage('');
 
-            const response = await fetch(`${apiBase}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, senha })
-            });
+            try {
+                const email = document.getElementById('loginEmail').value;
+                const senha = document.getElementById('loginSenha').value;
+                const data = await requestJson(`${apiBase}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
 
-            const data = await response.json();
-            if (response.ok) {
                 localStorage.setItem('gestfyToken', data.token);
-                localStorage.setItem('gestfyEmail', data.email);
+                localStorage.setItem('gestfyEmail', data.email || email);
                 window.location.href = 'catalogo.html';
-            } else {
-                messageEl.textContent = data.message || 'Falha no login';
+            } catch (error) {
+                showMessage(error.message || 'Falha no login');
+            } finally {
+                button.disabled = false;
             }
         }
 
         async function handleRegister(event) {
             event.preventDefault();
-            const nome = document.getElementById('registerNome').value;
-            const email = document.getElementById('registerEmail').value;
-            const senha = document.getElementById('registerSenha').value;
-            const telefone = document.getElementById('registerTelefone').value;
-            const endereco = document.getElementById('registerEndereco').value;
+            const button = event.currentTarget.querySelector('button');
+            button.disabled = true;
+            showMessage('');
 
-            const response = await fetch(`${apiBase}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nome, email, senha, telefone, endereco })
-            });
+            try {
+                const nome = document.getElementById('registerNome').value;
+                const email = document.getElementById('registerEmail').value;
+                const senha = document.getElementById('registerSenha').value;
+                const telefone = document.getElementById('registerTelefone').value;
+                const endereco = document.getElementById('registerEndereco').value;
+                const data = await requestJson(`${apiBase}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senha, telefone, endereco })
+                });
 
-            const data = await response.json();
-            if (response.ok) {
                 localStorage.setItem('gestfyToken', data.token);
-                localStorage.setItem('gestfyEmail', data.email);
+                localStorage.setItem('gestfyEmail', data.email || email);
                 window.location.href = 'catalogo.html';
-            } else {
-                messageEl.textContent = data.message || 'Falha no cadastro';
+            } catch (error) {
+                showMessage(error.message || 'Falha no cadastro');
+            } finally {
+                button.disabled = false;
             }
         }
 
