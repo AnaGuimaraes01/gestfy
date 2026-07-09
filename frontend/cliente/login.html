@@ -8,18 +8,15 @@
 </head>
 <body>
     <main>
-        <h1>Login / Cadastro</h1>
-        <section>
-            <h2>Já tenho conta</h2>
-            <form id="loginForm">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required>
-                <label for="loginSenha">Senha</label>
-                <input type="password" id="loginSenha" required>
-                <button type="submit">Entrar</button>
-            </form>
-        </section>
-        <section>
+        <h1>Gestfy</h1>
+        <p id="introText">Crie sua conta para continuar.</p>
+
+        <div style="display:flex; gap:10px; margin: 16px 0; flex-wrap:wrap;">
+            <button type="button" id="showRegisterBtn">Criar conta</button>
+            <button type="button" id="showLoginBtn">Já tenho conta</button>
+        </div>
+
+        <section id="registerPanel">
             <h2>Primeiro acesso</h2>
             <form id="registerForm">
                 <label for="registerNome">Nome</label>
@@ -35,6 +32,18 @@
                 <button type="submit">Cadastrar</button>
             </form>
         </section>
+
+        <section id="loginPanel" hidden>
+            <h2>Entrar</h2>
+            <form id="loginForm">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" required>
+                <label for="loginSenha">Senha</label>
+                <input type="password" id="loginSenha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+
         <p id="message"></p>
     </main>
 
@@ -43,9 +52,25 @@
             ? 'http://localhost:8080/api'
             : 'https://gestfy-backend.onrender.com/api';
         const messageEl = document.getElementById('message');
+        const registerPanel = document.getElementById('registerPanel');
+        const loginPanel = document.getElementById('loginPanel');
+        const introText = document.getElementById('introText');
+        const showRegisterBtn = document.getElementById('showRegisterBtn');
+        const showLoginBtn = document.getElementById('showLoginBtn');
 
         function showMessage(text) {
             messageEl.textContent = text;
+        }
+
+        function setView(mode) {
+            const isRegister = mode === 'register';
+            registerPanel.hidden = !isRegister;
+            loginPanel.hidden = isRegister;
+            introText.textContent = isRegister
+                ? 'Crie sua conta para continuar.'
+                : 'Entre com seu e-mail e senha.';
+            showRegisterBtn.disabled = isRegister;
+            showLoginBtn.disabled = !isRegister;
         }
 
         async function requestJson(url, options) {
@@ -76,6 +101,7 @@
 
                 localStorage.setItem('gestfyToken', data.token);
                 localStorage.setItem('gestfyEmail', data.email || email);
+                localStorage.setItem('gestfyHasAccount', 'true');
                 window.location.href = 'catalogo.html';
             } catch (error) {
                 showMessage(error.message || 'Falha no login');
@@ -104,6 +130,7 @@
 
                 localStorage.setItem('gestfyToken', data.token);
                 localStorage.setItem('gestfyEmail', data.email || email);
+                localStorage.setItem('gestfyHasAccount', 'true');
                 window.location.href = 'catalogo.html';
             } catch (error) {
                 showMessage(error.message || 'Falha no cadastro');
@@ -114,6 +141,11 @@
 
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
         document.getElementById('registerForm').addEventListener('submit', handleRegister);
+        showRegisterBtn.addEventListener('click', () => setView('register'));
+        showLoginBtn.addEventListener('click', () => setView('login'));
+
+        const hasAccount = localStorage.getItem('gestfyHasAccount') === 'true';
+        setView(hasAccount ? 'login' : 'register');
     </script>
 </body>
 </html>
