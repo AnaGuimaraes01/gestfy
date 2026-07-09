@@ -3,12 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecionando...</title>
+    <title>Login / Cadastro - Gestfy</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <main>
+        <h1>Login / Cadastro</h1>
+        <section>
+            <h2>Já tenho conta</h2>
+            <form id="loginForm">
+                <label>Email</label>
+                <input type="email" id="loginEmail" required>
+                <label>Senha</label>
+                <input type="password" id="loginSenha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </section>
+        <section>
+            <h2>Primeiro acesso</h2>
+            <form id="registerForm">
+                <label>Nome</label>
+                <input type="text" id="registerNome" required>
+                <label>Email</label>
+                <input type="email" id="registerEmail" required>
+                <label>Senha</label>
+                <input type="password" id="registerSenha" required>
+                <label>Telefone</label>
+                <input type="text" id="registerTelefone" required>
+                <label>Endereço</label>
+                <input type="text" id="registerEndereco">
+                <button type="submit">Cadastrar</button>
+            </form>
+        </section>
+        <p id="message"></p>
+    </main>
+
     <script>
-        // Login de cliente removido - redirecionando para catálogo
-        window.location.href = "catalogo.html";
+        const apiBase = "http://localhost:8080/api";
+        const messageEl = document.getElementById('message');
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginSenha').value;
+
+            const response = await fetch(`${apiBase}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('gestfyToken', data.token);
+                localStorage.setItem('gestfyEmail', data.email);
+                window.location.href = 'catalogo.html';
+            } else {
+                messageEl.textContent = data.message || 'Falha no login';
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const nome = document.getElementById('registerNome').value;
+            const email = document.getElementById('registerEmail').value;
+            const senha = document.getElementById('registerSenha').value;
+            const telefone = document.getElementById('registerTelefone').value;
+            const endereco = document.getElementById('registerEndereco').value;
+
+            const response = await fetch(`${apiBase}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, senha, telefone, endereco })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem('gestfyToken', data.token);
+                localStorage.setItem('gestfyEmail', data.email);
+                window.location.href = 'catalogo.html';
+            } else {
+                messageEl.textContent = data.message || 'Falha no cadastro';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('registerForm').addEventListener('submit', handleRegister);
     </script>
 </body>
 </html>

@@ -57,14 +57,15 @@ public class PedidoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criarPedido(@Valid @RequestBody PedidoRequest request) {
+    public ResponseEntity<?> criarPedido(@Valid @RequestBody PedidoRequest request, org.springframework.security.core.Authentication authentication) {
         try {
             System.out.println("\n>>> PedidoController.criarPedido() - Requisicao recebida");
             System.out.println("    Cliente: " + request.nomeCliente());
             System.out.println("    Telefone: " + request.telefoneCliente());
             System.out.println("    Itens: " + (request.itens() != null ? request.itens().size() : "NULL"));
+            String usuarioLogado = authentication != null ? authentication.getName() : null;
 
-            PedidoDTO pedido = pedidoService.criar(request);
+            PedidoDTO pedido = pedidoService.criar(request, usuarioLogado);
 
             System.out.println(">>> PedidoController.criarPedido() - Pedido criado com sucesso");
             System.out.println("    ID: " + pedido.id());

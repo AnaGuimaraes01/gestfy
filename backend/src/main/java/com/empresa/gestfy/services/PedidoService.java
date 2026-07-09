@@ -59,33 +59,40 @@ public class PedidoService {
      * Criar novo pedido
      */
     @Transactional
-    public PedidoDTO criar(PedidoRequest request) {
+    public PedidoDTO criar(PedidoRequest request, String emailUsuarioLogado) {
         try {
             System.out.println("\n=== INICIANDO CRIAÇÃO DE PEDIDO ===");
             System.out.println("Cliente: " + request.nomeCliente());
             System.out.println("Telefone: " + request.telefoneCliente());
             System.out.println("Itens: " + (request.itens() != null ? request.itens().size() : 0));
+            System.out.println("Usuário logado: " + emailUsuarioLogado);
 
             // 1. Buscar ou criar cliente
             System.out.println("\n[PASSO 1] Buscando ou criando cliente...");
             Cliente cliente = null;
             try {
-                cliente = clienteRepository.findAll().stream()
-                        .filter(c -> c.getTelefone() != null && c.getTelefone().equals(request.telefoneCliente()))
-                        .findFirst()
-                        .orElseGet(() -> {
-                            System.out.println("  → Cliente não encontrado, criando novo...");
-                            Cliente novoCliente = new Cliente();
-                            novoCliente.setNome(request.nomeCliente());
-                            novoCliente.setTelefone(request.telefoneCliente());
-                            // Gerar email único baseado no telefone para evitar constraint violations
-                            String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
-                            novoCliente.setEmail(emailUnico);
-                            novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
-                            Cliente salvo = clienteRepository.save(novoCliente);
-                            System.out.println("  → Cliente criado com ID: " + salvo.getId());
-                            return salvo;
-                        });
+                if (emailUsuarioLogado != null) {
+                    cliente = clienteRepository.findByEmail(emailUsuarioLogado)
+                            .orElse(null);
+                }
+
+                if (cliente == null) {
+                    cliente = clienteRepository.findAll().stream()
+                            .filter(c -> c.getTelefone() != null && c.getTelefone().equals(request.telefoneCliente()))
+                            .findFirst()
+                            .orElseGet(() -> {
+                                System.out.println("  → Cliente não encontrado, criando novo...");
+                                Cliente novoCliente = new Cliente();
+                                novoCliente.setNome(request.nomeCliente());
+                                novoCliente.setTelefone(request.telefoneCliente());
+                                String emailUnico = request.telefoneCliente().replaceAll("[^0-9]", "") + "@cliente.gestfy";
+                                novoCliente.setEmail(emailUnico);
+                                novoCliente.setEndereco(request.endereco() != null ? request.endereco() : "");
+                                Cliente salvo = clienteRepository.save(novoCliente);
+                                System.out.println("  → Cliente criado com ID: " + salvo.getId());
+                                return salvo;
+                            });
+                }
                 System.out.println("✓ Cliente obtido: ID=" + cliente.getId() + ", Nome=" + cliente.getNome());
             } catch (Exception e) {
                 System.out.println(

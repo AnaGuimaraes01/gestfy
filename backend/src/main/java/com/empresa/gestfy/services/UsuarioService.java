@@ -2,6 +2,7 @@ package com.empresa.gestfy.services;
 
 import com.empresa.gestfy.models.Usuario;
 import com.empresa.gestfy.repositories.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -34,7 +37,7 @@ public class UsuarioService {
         Usuario usuario = new Usuario(
                 request.nome(),
                 request.email(),
-                request.senha(),
+                passwordEncoder.encode(request.senha()),
                 request.perfil());
 
         Usuario salvo = usuarioRepository.save(usuario);
@@ -68,7 +71,7 @@ public class UsuarioService {
 
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());
-        usuario.setSenha(request.senha());
+        usuario.setSenha(passwordEncoder.encode(request.senha()));
         usuario.setPerfil(request.perfil());
 
         Usuario atualizado = usuarioRepository.save(usuario);
