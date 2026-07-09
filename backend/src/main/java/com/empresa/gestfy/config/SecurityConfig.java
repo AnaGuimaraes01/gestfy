@@ -3,6 +3,7 @@ package com.empresa.gestfy.config;
 import com.empresa.gestfy.repositories.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -49,8 +50,18 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/**", "/api/clientes/**", "/api/produtos/**", "/api/pedidos/**", "/api/estoque/**", "/api/caixa/**", "/api/categorias/**", "/api/relatorios/**").permitAll()
-                .requestMatchers("/api/usuarios/**").authenticated()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/produtos/**", "/api/categorias/**", "/api/pedidos/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/produtos/*/incrementar-visualizacoes", "/api/produtos/*/incrementar-vendas/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/pedidos").permitAll()
+                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/api/clientes/**").hasRole("ADMIN")
+                .requestMatchers("/api/relatorios/**").hasRole("ADMIN")
+                .requestMatchers("/api/caixa/**").hasRole("ADMIN")
+                .requestMatchers("/api/estoque/**").hasRole("ADMIN")
+                .requestMatchers("/api/produtos/**").hasRole("ADMIN")
+                .requestMatchers("/api/categorias/**").hasRole("ADMIN")
+                .requestMatchers("/api/pedidos/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
