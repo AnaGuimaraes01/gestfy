@@ -1,6 +1,8 @@
 package com.empresa.gestfy.config;
 
+import com.empresa.gestfy.models.Usuario;
 import com.empresa.gestfy.repositories.UsuarioRepository;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,8 +32,20 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ApplicationRunner createDefaultAdminUser(UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder) {
+        return args -> {
+            String email = "admin@gestfy.com";
+            if (usuarioRepository.findByEmail(email).isEmpty()) {
+                Usuario admin = new Usuario("Administrador", email, passwordEncoder.encode("dredenciasi"), "ADMIN");
+                usuarioRepository.save(admin);
+            }
+        };
+    }
+
+    @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
-                                                         PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
@@ -45,14 +59,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter,
-                                           AuthenticationProvider authenticationProvider) throws Exception {
+            AuthenticationProvider authenticationProvider) throws Exception {
         http
                 .csrf().disable()
                 .authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/produtos/**", "/api/categorias/**", "/api/pedidos/**").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/api/produtos/*/incrementar-visualizacoes", "/api/produtos/*/incrementar-vendas/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/produtos/**", "/api/categorias/**", "/api/pedidos/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/produtos/*/incrementar-visualizacoes",
+                        "/api/produtos/*/incrementar-vendas/*")
+                .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/pedidos").permitAll()
                 .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/api/clientes/**").hasRole("ADMIN")

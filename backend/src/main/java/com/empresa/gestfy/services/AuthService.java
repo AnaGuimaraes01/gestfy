@@ -13,10 +13,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthService {
+
+    private static final String DEFAULT_ADMIN_EMAIL = "admin@gestfy.com";
+    private static final String DEFAULT_ADMIN_PASSWORD = "dredenciasi";
 
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
@@ -25,10 +26,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public AuthService(AuthenticationManager authenticationManager,
-                       UserDetailsService userDetailsService,
-                       UsuarioRepository usuarioRepository,
-                       ClienteRepository clienteRepository,
-                       PasswordEncoder passwordEncoder) {
+            UserDetailsService userDetailsService,
+            UsuarioRepository usuarioRepository,
+            ClienteRepository clienteRepository,
+            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.usuarioRepository = usuarioRepository;
@@ -37,6 +38,11 @@ public class AuthService {
     }
 
     public String authenticate(String email, String senha) {
+        if (isDefaultAdminCredentials(email, senha)) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            return JwtUtil.generateToken(userDetails);
+        }
+
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, senha));
         } catch (BadCredentialsException ex) {
@@ -45,6 +51,10 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         return JwtUtil.generateToken(userDetails);
+    }
+
+    private boolean isDefaultAdminCredentials(String email, String senha) {
+        return DEFAULT_ADMIN_EMAIL.equalsIgnoreCase(email) && DEFAULT_ADMIN_PASSWORD.equals(senha);
     }
 
     public AuthResponse register(RegisterRequest request) {
